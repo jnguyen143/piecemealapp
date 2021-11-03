@@ -2,3 +2,6 @@ Flask
 flask_login
 Flask-SQLAlchemy
 dotenv
+requests
+requests_oauthlib
+pyOpenSSL
