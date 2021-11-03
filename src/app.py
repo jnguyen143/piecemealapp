@@ -2,19 +2,13 @@ import flask
 import dotenv
 import os
 from flask_login.utils import login_required
-from flask_sqlalchemy import SQLAlchemy
+from database import database
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, template_folder=os.path.abspath("../templates"))
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql" + os.getenv("DATABASE_URL")[8:]
-
-# Gets rid of a warning
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
+database.init(app)
 
 
 @app.route("/login")
@@ -35,7 +29,7 @@ def signup():
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    db.session.close()
+    database.finalize()
 
 
 if __name__ == "__main__":

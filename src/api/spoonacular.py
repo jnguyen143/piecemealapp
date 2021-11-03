@@ -42,6 +42,10 @@ class Intolerance(Enum):
     TreeNut = "Tree Nut"
     Wheat = "Wheat"
 
+    @classmethod
+    def has(cls, value):
+        return value in cls._value2member_map_
+
 
 class Cuisine(Enum):
     """
