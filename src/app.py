@@ -31,19 +31,23 @@ def init_app():
     # Create the application
     app = flask.Flask(__name__, static_folder=routes.util.get_static_folder())
     app.secret_key = os.getenv("FLASK_SECRET_KEY")
+    db = None
 
     # Initialize the database
     try:
-        database.init(app)
+        db = database.Database(app)
     except database.DatabaseException as e:
         raise Exception(f"Failed to initialize database ({str(e)})")
 
     # Register the blueprints
-    from routes import index, login, signup
+    from routes import index, login, signup, userdata
+
+    userdata.set_db_obj(db)
 
     app.register_blueprint(index.get_blueprint())
     app.register_blueprint(login.get_blueprint())
     app.register_blueprint(signup.get_blueprint())
+    app.register_blueprint(userdata.get_blueprint())
 
 
 def start_app():
