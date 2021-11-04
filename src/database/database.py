@@ -98,7 +98,7 @@ def get_user(id: str):
     Raises:
         DatabaseException: If the database was not initialized or if there was a problem querying the user.
     """
-    from models import User
+    from database.models import User
 
     session = int__Session()
     user = None
@@ -106,7 +106,7 @@ def get_user(id: str):
         user = session.query(User).filter_by(id=id).first()
     except:
         session.rollback()
-        raise DatabaseException("Failed to get perform query")
+        raise DatabaseException("Failed to perform query")
     finally:
         session.close()
     return user
@@ -141,7 +141,7 @@ def get_recipe(id: int):
     Raises:
         DatabaseException: If the database was not initialized or if there was a problem querying the recipe.
     """
-    from models import Recipe
+    from database.models import Recipe
 
     session = int__Session()
     recipe = None
@@ -149,7 +149,7 @@ def get_recipe(id: int):
         recipe = session.query(Recipe).filter_by(id=id).first()
     except:
         session.rollback()
-        raise DatabaseException("Failed to get perform query")
+        raise DatabaseException("Failed to perform query")
     finally:
         session.close()
     return recipe
@@ -168,7 +168,7 @@ def get_ingredient(id: int):
     Raises:
         DatabaseException: If the database was not initialized or if there was a problem querying the ingredient.
     """
-    from models import Ingredient
+    from database.models import Ingredient
 
     session = int__Session()
     ingredient = None
@@ -176,7 +176,7 @@ def get_ingredient(id: int):
         ingredient = session.query(Ingredient).filter_by(id=id).first()
     except:
         session.rollback()
-        raise DatabaseException("Failed to get perform query")
+        raise DatabaseException("Failed to perform query")
     finally:
         session.close()
     return ingredient
@@ -197,7 +197,7 @@ def get_saved_recipes(user_id: str) -> list[int]:
         DatabaseException: If the database was not initialized, if the specified user does not exist,
         or if there was a problem querying the recipes.
     """
-    from models import SavedRecipe
+    from database.models import SavedRecipe
 
     if not user_exists(user_id):
         raise DatabaseException("User does not exist")
@@ -208,7 +208,7 @@ def get_saved_recipes(user_id: str) -> list[int]:
         recipes = session.query(SavedRecipe).filter_by(user_id=user_id).all()
     except:
         session.rollback()
-        raise DatabaseException("Failed to get perform query")
+        raise DatabaseException("Failed to perform query")
     finally:
         session.close()
 
@@ -230,7 +230,7 @@ def get_saved_ingredients(user_id: str) -> list[int]:
         DatabaseException: If the database was not initialized, if the specified user does not exist,
         or if there was a problem querying the ingredients.
     """
-    from models import SavedIngredient
+    from database.models import SavedIngredient
 
     if not user_exists(user_id):
         raise DatabaseException("User does not exist")
@@ -241,7 +241,7 @@ def get_saved_ingredients(user_id: str) -> list[int]:
         ingredients = session.query(SavedIngredient).filter_by(user_id=user_id).all()
     except:
         session.rollback()
-        raise DatabaseException("Failed to get perform query")
+        raise DatabaseException("Failed to perform query")
     finally:
         session.close()
 
@@ -263,7 +263,7 @@ def get_intolerances(user_id: str) -> list[str]:
         DatabaseException: If the database was not initialized, if the specified user does not exist,
         or if there was a problem querying the intolerances.
     """
-    from models import Intolerance
+    from database.models import Intolerance
 
     if not user_exists(user_id):
         raise DatabaseException("User does not exist")
@@ -274,7 +274,7 @@ def get_intolerances(user_id: str) -> list[str]:
         intolerances = session.query(Intolerance).filter_by(user_id=user_id).all()
     except:
         session.rollback()
-        raise DatabaseException("Failed to get perform query")
+        raise DatabaseException("Failed to perform query")
     finally:
         session.close()
 
@@ -297,7 +297,7 @@ def add_user(id: str, email: str, name: str = ""):
         DatabaseException: If the database was not initialized, if a user with the specified ID already exists,
         or if there was a problem adding the user.
     """
-    from models import User
+    from database.models import User
 
     if user_exists(id):
         raise DatabaseException("User already exists")
@@ -333,7 +333,7 @@ def add_recipe(id: int, name: str, image: str):
         DatabaseException: If the database was not initialized, if a recipe with the specified ID already exists,
         or if there was a problem adding the recipe.
     """
-    from models import Recipe
+    from database.models import Recipe
 
     if get_recipe(id) != None:
         raise DatabaseException("Recipe already exists")
@@ -369,7 +369,7 @@ def add_ingredient(id: int, name: str, image: str):
         DatabaseException: If the database was not initialized, if a ingredient with the specified ID already exists,
         or if there was a problem adding the ingredient.
     """
-    from models import Ingredient
+    from database.models import Ingredient
 
     if get_ingredient(id) != None:
         raise DatabaseException("Ingredient already exists")
@@ -408,7 +408,7 @@ def add_saved_recipe(user_id: str, recipe_id: int):
     if get_recipe(recipe_id) == None:
         raise DatabaseException("Recipe does not exist")
 
-    from models import SavedRecipe
+    from database.models import SavedRecipe
 
     recipe = SavedRecipe(user_id=user_id, recipe_id=recipe_id)
 
@@ -442,7 +442,7 @@ def add_saved_ingredient(user_id: str, ingredient_id: int):
     if get_ingredient(ingredient_id) == None:
         raise DatabaseException("Ingredient does not exist")
 
-    from models import SavedIngredient
+    from database.models import SavedIngredient
 
     ingredient = SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
 
@@ -478,7 +478,7 @@ def add_intolerance(user_id: str, intolerance: str):
     if not spoonacular.Intolerance.has(intolerance):
         raise DatabaseException("Invalid intolerance string")
 
-    from models import Intolerance
+    from database.models import Intolerance
 
     session = int__Session()
     try:
@@ -505,7 +505,7 @@ def delete_user(id: str):
     if not user_exists(id):
         raise DatabaseException("User does not exist")
 
-    from models import User
+    from database.models import User
 
     session = int__Session()
     try:
@@ -533,7 +533,7 @@ def delete_recipe(id: int):
     if get_recipe(id) == None:
         raise DatabaseException("Recipe does not exist")
 
-    from models import Recipe
+    from database.models import Recipe
 
     session = int__Session()
     try:
@@ -561,7 +561,7 @@ def delete_ingredient(id: int):
     if get_ingredient(id) == None:
         raise DatabaseException("Ingredient does not exist")
 
-    from models import Ingredient
+    from database.models import Ingredient
 
     session = int__Session()
     try:
@@ -590,7 +590,7 @@ def delete_saved_recipe(user_id: str, recipe_id: int):
     if not user_exists(user_id):
         raise DatabaseException("User does not exist")
 
-    from models import SavedRecipe
+    from database.models import SavedRecipe
 
     session = int__Session()
     try:
@@ -621,7 +621,7 @@ def delete_saved_ingredient(user_id: str, ingredient_id: int):
     if not user_exists(user_id):
         raise DatabaseException("User does not exist")
 
-    from models import SavedIngredient
+    from database.models import SavedIngredient
 
     session = int__Session()
     try:
@@ -652,7 +652,7 @@ def delete_intolerance(user_id: str, intolerance: str):
     if not user_exists(user_id):
         raise DatabaseException("User does not exist")
 
-    from models import Intolerance
+    from database.models import Intolerance
 
     session = int__Session()
     try:
