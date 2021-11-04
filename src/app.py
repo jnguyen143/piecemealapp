@@ -1,37 +1,71 @@
 import flask
 import dotenv
 import os
-from flask_login.utils import login_required
 from database import database
+import routes.util
 
-dotenv.load_dotenv(dotenv.find_dotenv())
-
-app = flask.Flask(__name__, template_folder=os.path.abspath("../templates"))
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
-database.init(app)
+app = None
 
 
-@app.route("/login")
-def login():
-    return flask.render_template("login.html")
+def init_app():
+    """
+    Initializes the application.
+
+    This function performs the following operations:
+    - Finds and loads the environment file
+    - Creates the application context
+    - Initializes the database
+    - Registers the application blueprints
+
+    Raises:
+        Exception: If there was a problem initializing the application or any of its related components.
+    """
+    global app
+
+    # Load the environment file
+    env_path = dotenv.find_dotenv()
+    if env_path == "":
+        raise Exception("Failed to load environment file")
+    dotenv.load_dotenv(env_path)
+
+    # Create the application
+    app = flask.Flask(__name__, static_folder=routes.util.get_static_folder())
+    app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
+    # Initialize the database
+    try:
+        database.init(app)
+    except database.DatabaseException as e:
+        raise Exception(f"Failed to initialize database ({str(e)})")
+
+    # Register the blueprints
+    from routes import index, login, signup
+
+    app.register_blueprint(index.get_blueprint())
+    app.register_blueprint(login.get_blueprint())
+    app.register_blueprint(signup.get_blueprint())
 
 
-@app.route("/")
-@login_required
-def index():
-    return flask.render_template("index.html")
+def start_app():
+    """
+    Starts the application.
 
+    `init_app()` must be called prior to calling this function.
 
-@app.route("/signup")
-def signup():
-    return flask.render_template("signup.html")
+    Raises:
+        Exception: If the application was not initialized.
+    """
+    if app == None:
+        raise Exception("Application not initialized")
 
-
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    database.finalize()
+    app.run(debug=True)
 
 
 if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(host=os.getenv("IP", "0.0.0.0"), port=os.getenv("PORT", 8080))
+    init_app()
+
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        database.finalize()
+
+    start_app()
