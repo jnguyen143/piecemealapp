@@ -2,11 +2,40 @@
 <html>
 
 <head>
-    <title>PieceMeal - Sign Up</title>
+  <title>PieceMeal - Sign Up</title>
+  <link rel="stylesheet" type="text/css" href='../static/style.css'>
+  <link rel="stylesheet" type="text/css" href='../static/signup.css'>
 </head>
 
 <body>
+  <div class="container">
+    <img class="logo" src="../static/logo.png" alt="PieceMeal" />
+    <div class="G-Login">
+      <input id="google-button" type="button" class="google-img" href="/google_auth" />
+      <img class="googlelog" />
+    </div>
 
+    <form class="credentials" action="/new_account" method="POST">
+      <p>or</p>
+      <p>Sign up</p>
+      <input type="text" placeholder="Enter your email..." />
+      <input type="password" placeholder="Enter your password..." />
+      <button type="submit">Signup</button>
+    </form>
+  </div>
 </body>
+<script>
+  // Template code to link google button to authorization process
+  // $('#google-button').on('click', function () {
+  //   // Initialize with your OAuth.io app public key
+  //   OAuth.initialize('YOUR_OAUTH_KEY');
+  //   // Use popup for OAuth
+  //   OAuth.popup('google').then(google => {
+  //     console.log(google);
+  //     // Retrieves user data from oauth provider
+  //     console.log(google.me());
+  //   });
+  // })
+</script>
 
 </html>

@@ -1,0 +1,146 @@
+/*Body styling*/
+body {
+  background-image: url("../static/img3.jpg");
+  background-color: rgb(48, 44, 44);
+  height: 1000px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  font-family: Arial;
+  display: flex;
+  flex-flow: row wrap;
+}
+/*Center container styling for login/or signup*/
+.container {
+  background-color: #ffe6d3f1;
+  width: 600px;
+  height: 600px;
+  margin: auto;
+  position: absolute;
+  top:0;bottom:0;
+  left:0;right:0;
+  max-width:100%;
+  max-height:100%;
+  overflow:auto;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column wrap;
+  text-align: center;
+}
+/*Side container for search and login in index.html*/
+.left-container {
+  background-color: #ffe6d3f1;
+  height: 100%;
+  width: 400px;
+  text-align: center;
+  border-radius: 10px;
+  margin-right: 20px;
+}
+/*Right side container for search results formatting*/
+.right-container {
+  background-color: #ffe6d3f1;
+  font-weight: bold;
+  height: 100%;
+  width: 60%;
+  margin: 0 auto;
+  text-align: center;
+  border-radius: 10px;
+}
+.logo {
+  margin-top: 20px;
+  margin-bottom:50px;
+}
+/*All forms styling*/
+form {
+  /* margin-top: 50px; */
+  margin-bottom: 70px;
+}
+/*Searchbox styling*/
+input[type=text] {
+  padding: 8px 10px;
+  margin: 5px 100px 5px 100px;
+  /* margin-left: 100px;
+  margin-right: 100px; */
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+/*Searchbox styling*/
+input[type=password] {
+  padding: 8px 10px;
+  margin-left: 100px;
+  margin-right: 100px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+/*Div containing filter options*/
+.filters {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+/*Filter button styling*/
+.filter-button {
+  margin: 10px;
+  padding: 4px 6px;
+  background: #FFB659;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.filter-button:hover {
+  background: #c46d04;
+}
+/*Search button styling*/
+button {
+  padding: 6px 10px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 100px;
+  margin-right: 100px;
+  background: #FB8C00;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+}
+button:hover {
+  background: #c46d04;
+}
+/*account container styling*/
+.account {
+  margin-top: 150px;
+}
+/*padding between login and signup*/
+.account a {
+  margin: 30px;
+}
+/*Click styling for hyperlink*/
+.account a:link {
+  color: rgb(88, 86, 86);
+}
+.account a:visited {
+  color: black;
+}
+/*Google login button styling*/
+.google-img {
+  background-image: url("../static/btn_google_signin_light_normal_web.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-top: 30px;
+  height:50px;
+  width: 204px;
+}
+.google-img:hover {
+  background-image: url("../static/btn_google_signin_light_focus_web.png");
+  box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+}
+.google-img:visited {
+  background-image: url("../static/btn_google_signin_light_pressed_web.png");
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>PieceMeal - User Profile</title>
+  <link rel="stylesheet" type="text/css" href='../static/style.css'>
+
+</head>
+
+<body>
+
+  <div class="left-container">
+
+    <img class="logo" src="../static/logo.png" />
+
+    <form class="ingredients" action="/search_ingredients" method="POST">
+      <p>Search for Ingredients</p>
+      <input type="text" placeholder="Peanut Butter, Jelly..." />
+      <div class="filters">
+        <p>Filter by:</p>
+        <input type="button" class="filter-button" value="Cuisine" />
+        <input type="button" class="filter-button" value="Alergies" />
+      </div>
+      <button type="submit">Search</button>
+    </form>
+
+    <form class="recipes" action="/search_recipes" method="POST">
+      <p>Search for Recipes</p>
+      <input type="text" placeholder="Filet mignon..." />
+      <button type="submit">Search</button>
+    </form>
+
+    <div class="account">
+      <a href="/logout">Login</a>
+      <a href="/signup">Signup</a>
+    </div>
+  </div>
+
+  <div class="right-container">
+    <h1>Welcome</h1>
+    <p>Rediscover your appetite by signing up and exploring our more than 1,000,000+ recipes</p>
+    <p>Here go the search results or dummy data for main page</p>
+  </div>
+
+</body>
+
+</html>
