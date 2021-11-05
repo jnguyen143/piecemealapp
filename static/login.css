@@ -1,0 +1,12 @@
+/*Body styling*/
+body {
+  background-image: url("../static/img1.jpg");
+  background-color: rgb(48, 44, 44);
+  height: 100vh;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  font-family: Arial;
+  display: flex;
+  flex-flow: row wrap;
+}

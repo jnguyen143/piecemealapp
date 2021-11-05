@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>PieceMeal - Search</title>
+  <link rel="stylesheet" type="text/css" href='../static/style.css'>
+
+</head>
+
+<body>
+
+  <div class="left-container">
+
+    <img class="logo" src="../static/logo.png" />
+
+    <form class="ingredients" action="/search_ingredients" method="POST">
+      <p>Search for Ingredients</p>
+      <input type="text" placeholder="Peanut Butter, Jelly..." />
+      <div class="filters">
+        <p>Filter by:</p>
+        <input type="button" class="filter-button" value="Cuisine" />
+        <input type="button" class="filter-button" value="Alergies" />
+      </div>
+      <button type="submit">Search</button>
+    </form>
+
+    <form class="recipes" action="/search_recipes" method="POST">
+      <p>Search for Recipes</p>
+      <input type="text" placeholder="Filet mignon..." />
+      <button type="submit">Search</button>
+    </form>
+
+    <div class="account">
+      <a href="/login">Login</a>
+      <a href="/signup">Signup</a>
+    </div>
+  </div>
+
+  <div class="right-container">
+    <h1>Search results for "keyword(s)"</h1>
+    <p>Here goes the search results</p>
+    <h2>By Ingredient</h2>
+    <div class="recipe">
+      <div class="image">
+        <img src="../static/temp_ingredient.jpg" style="width: 100px; height: 100px;" />
+      </div>
+      <div class="description">
+        <h2>Butter</h2>
+        <p>Small recipe description goes here</p>
+      </div>
+    </div>
+
+    <h2>By Recipe</h2>
+    <div class="recipe">
+      <div class="image">
+        <img src="../static/temp_recipe.jpg" style="width: 100px; height: 100px;" />
+      </div>
+      <div class="description">
+        <h2>Sushi</h2>
+        <p>Small recipe description goes here</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>

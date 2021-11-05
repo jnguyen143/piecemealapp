@@ -39,11 +39,13 @@ def init_app():
         raise Exception(f"Failed to initialize database ({str(e)})")
 
     # Register the blueprints
-    from routes import index, login, signup
+    from routes import index, login, signup, profile, search
 
     app.register_blueprint(index.get_blueprint())
     app.register_blueprint(login.get_blueprint())
     app.register_blueprint(signup.get_blueprint())
+    app.register_blueprint(profile.get_blueprint())
+    app.register_blueprint(search.get_blueprint())
 
 
 def start_app():
