@@ -48,13 +48,50 @@ body {
   text-align: center;
   border-radius: 10px;
 }
+/*Ingredients container*/
+.fav-ingredients {
+  color: rgb(39, 39, 39);
+  background-color: white;
+  width: 95%;
+  margin: 0 auto;
+  border-radius: 4px;
+  text-align: left;
+}
+/*Recipes container*/
+.fav-recipes {
+  color: rgb(39, 39, 39);
+  background-color: white;
+  width: 95%;
+  margin: 0 auto;
+  border-radius: 4px;
+  text-align: left;
+}
+/*Individual recipe/ingredient container*/
+.recipe {
+  background-color: white;
+  color: rgb(75, 74, 74);
+  margin: 5px;
+  padding: 5px;
+  border-style: solid;
+  border-color: rgb(194, 191, 191);
+  border-width: 1px;
+  border-radius: 5px;
+  display: flex;
+  flex-flow: row wrap;
+  text-align: left;
+}
+/*Inner description div for recipe/ingredient container*/
+.description {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+/*logo formatting*/
 .logo {
   margin-top: 20px;
   margin-bottom:50px;
 }
 /*All forms styling*/
 form {
-  /* margin-top: 50px; */
   margin-bottom: 70px;
 }
 /*Searchbox styling*/
