@@ -2,7 +2,7 @@
 body {
   background-image: url("../static/img3.jpg");
   background-color: rgb(48, 44, 44);
-  height: 1000px;
+  height: 100vh;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -13,8 +13,8 @@ body {
 /*Center container styling for login/or signup*/
 .container {
   background-color: #ffe6d3f1;
-  width: 600px;
-  height: 600px;
+  width: 40%;
+  height: 75%;
   margin: auto;
   position: absolute;
   top:0;bottom:0;
@@ -33,7 +33,7 @@ body {
 .left-container {
   background-color: #ffe6d3f1;
   height: 100%;
-  width: 400px;
+  width: 30%;
   text-align: center;
   border-radius: 10px;
   margin-right: 20px;

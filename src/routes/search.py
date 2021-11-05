@@ -1,4 +1,3 @@
-from os import stat
 from flask import Blueprint, render_template
 import routes.util as util
 
@@ -23,5 +22,5 @@ def get_blueprint():
 
 
 @search_blueprint.route("/search")
-def login():
+def search():
     return render_template("search.html")

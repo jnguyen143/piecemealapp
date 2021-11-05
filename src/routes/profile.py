@@ -1,4 +1,3 @@
-from os import stat
 from flask import Blueprint, render_template
 import routes.util as util
 

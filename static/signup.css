@@ -2,7 +2,7 @@
 body {
   background-image: url("../static/img3.jpg");
   background-color: rgb(48, 44, 44);
-  height: 1000px;
+  height: 100vh;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
