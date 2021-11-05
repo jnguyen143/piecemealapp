@@ -4,6 +4,16 @@ import os
 from database import database
 import routes.util
 
+# Before anything else, make sure we have 3.9 or greater
+import sys
+
+MIN_PYTHON_VERSION = (3, 9)
+if sys.version_info < MIN_PYTHON_VERSION:
+    sys.exit(
+        "Python %s.%s or greater is required to run this application.\n"
+        % MIN_PYTHON_VERSION
+    )
+
 app = None
 
 
