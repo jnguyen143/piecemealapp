@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-import routes.util as util
+import util
 
 login_blueprint = Blueprint(
     "bp_login",
