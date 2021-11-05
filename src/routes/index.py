@@ -1,6 +1,5 @@
-from os import stat
 from flask import Blueprint, render_template
-import routes.util as util
+from . import util
 
 index_blueprint = Blueprint(
     "bp_index",

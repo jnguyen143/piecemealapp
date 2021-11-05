@@ -4,7 +4,18 @@ import os
 from database import database
 import routes.util
 
+# Before anything else, make sure we have 3.9 or greater
+import sys
+
+MIN_PYTHON_VERSION = (3, 9)
+if sys.version_info < MIN_PYTHON_VERSION:
+    sys.exit(
+        "Python %s.%s or greater is required to run this application.\n"
+        % MIN_PYTHON_VERSION
+    )
+
 app = None
+db: database.Database = None
 
 
 def init_app():
@@ -21,6 +32,7 @@ def init_app():
         Exception: If there was a problem initializing the application or any of its related components.
     """
     global app
+    global db
 
     # Load the environment file
     env_path = dotenv.find_dotenv()
@@ -34,16 +46,18 @@ def init_app():
 
     # Initialize the database
     try:
-        database.init(app)
+        db = database.Database(app)
     except database.DatabaseException as e:
         raise Exception(f"Failed to initialize database ({str(e)})")
 
     # Register the blueprints
-    from routes import index, login, signup, profile, search
+    from routes import index, login, signup, profile, search, userdata
+    userdata.set_db_obj(db)
 
     app.register_blueprint(index.get_blueprint())
     app.register_blueprint(login.get_blueprint())
     app.register_blueprint(signup.get_blueprint())
+    app.register_blueprint(userdata.get_blueprint())
     app.register_blueprint(profile.get_blueprint())
     app.register_blueprint(search.get_blueprint())
 
@@ -68,6 +82,6 @@ if __name__ == "__main__":
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        database.finalize()
+        db.finalize()
 
     start_app()

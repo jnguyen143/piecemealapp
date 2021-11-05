@@ -4,10 +4,14 @@ This file defines the models for all of the tables in the database.
 Prior to importing this file anywhere in the application, `database.init()` must have already been called.
 """
 
-from database.database import get_database_obj
+from database.database import DatabaseException
 from datetime import datetime
+import builtins
 
-db = get_database_obj()
+db = builtins.piecemeal_db_obj
+
+if db == None:
+    raise DatabaseException("Database has not been initialized")
 
 
 class User(db.Model):
