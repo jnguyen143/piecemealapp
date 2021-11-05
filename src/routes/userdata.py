@@ -6,7 +6,7 @@ All of the endpoints defined in this file are API endpoints (i.e. they should no
 
 from flask import Blueprint, request
 from flask.json import jsonify
-import util as util
+from . import util
 from flask_login import login_required
 from database.database import Database, DatabaseException
 

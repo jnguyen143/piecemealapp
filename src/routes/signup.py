@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-import util
+from . import util
 
 signup_blueprint = Blueprint(
     "bp_signup",
