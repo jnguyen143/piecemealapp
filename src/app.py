@@ -15,6 +15,7 @@ if sys.version_info < MIN_PYTHON_VERSION:
     )
 
 app = None
+db: database.Database = None
 
 
 def init_app():
@@ -31,6 +32,7 @@ def init_app():
         Exception: If there was a problem initializing the application or any of its related components.
     """
     global app
+    global db
 
     # Load the environment file
     env_path = dotenv.find_dotenv()
@@ -41,7 +43,6 @@ def init_app():
     # Create the application
     app = flask.Flask(__name__, static_folder=routes.util.get_static_folder())
     app.secret_key = os.getenv("FLASK_SECRET_KEY")
-    db = None
 
     # Initialize the database
     try:
@@ -80,6 +81,6 @@ if __name__ == "__main__":
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        database.finalize()
+        db.finalize()
 
     start_app()
