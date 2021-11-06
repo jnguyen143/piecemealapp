@@ -1,11 +1,19 @@
-from app import app, db
-from models import User, AppUser
-import os
-
-
+from app import GOOGLE_ID, GOOGLE_SECRET, GOOGLE_URL, app, db
+from models import User
 import flask
-from flask_login import login_user, current_user, LoginManager
-from flask_login.utils import login_required
+import json
+import os
+import requests
+import oauthlib
+import OpenSSL
+from oauthlib.oauth2 import WebApplicationClient
+from flask_login import (
+    LoginManager,
+    login_user,
+    logout_user,
+    login_required,
+    current_user,
+)
 
 
 login_manager = LoginManager()
@@ -18,50 +26,81 @@ def load_user(user_name):
     return User.query.get(user_name)
 
 
-@app.route("/signup")
-def signup():
-    return flask.render_template("signup.html")
+client = WebApplicationClient(GOOGLE_ID)
 
 
-@app.route("/signup", methods=["POST"])
-def signup_post():
-    username = flask.request.form.get("username")
-    user = User.query.filter_by(username=username).first()
-    if user:
-        pass
-    else:
-        user = User(username=username)
-        db.session.add(user)
-        db.session.commit()
-
-    return flask.redirect(flask.url_for("login"))
+def get_google_provider_cfg():
+    return requests.get(GOOGLE_URL).json()
 
 
 @app.route("/login")
 def login():
-    return flask.render_template("login.html")
+    google_provider = get_google_provider_cfg()
+    authorization_endpoint = google_provider["authorization_endpoint"]
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=flask.request.base_url + "/callback",
+        scope=["openid", "email", "profile"],
+    )
+    return flask.redirect(request_uri)
 
 
-@app.route("/login", methods=["POST"])
-def login_post():
-    username = flask.request.form.get("username")
-    user = User.query.filter_by(username=username).first()
-    if user:
-        login_user(user)
-        return flask.redirect(flask.url_for("index"))
+@app.route("/login/callback")
+def callback():
+    code = flask.request.args.get("code")
+    google_provider = get_google_provider_cfg()
+    token_endpoint = google_provider["token_endpoint"]
 
-    else:
-        return flask.jsonify({"status": 401, "reason": "Username or Password Error"})
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=flask.request.url,
+        redirect_url=flask.request.base_url,
+        code=code,
+    )
+
+    token_response = requests.post(
+        token_url, headers=headers, data=body, auth=(GOOGLE_ID, GOOGLE_SECRET)
+    )
+    client.parse_request_body_response(json.dumps(token_response.json()))
+
+    userinfo_endpoint = google_provider["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    if userinfo_response.json().get("email_verified"):
+        user_id = userinfo_response.json()["sub"]
+        user_email = userinfo_response.json()["email"]
+        user_pfp = userinfo_response.json()["picture"]
+        user_name = userinfo_response.json()["given_name"]
+
+    user = User(
+        userID=user_id, username=user_name, email=user_email, profile_pic=user_pfp
+    )
+    db.session.add(user)
+    db.session.commit()
+
+    login_user(user)
+    return flask.redirect(flask.url_for("main"))
 
 
 @app.route("/")
 def main():
     if current_user.is_authenticated:
-        return flask.redirect(flask.url_for("index"))
-    return flask.redirect(flask.url_for("login"))
+        return flask.render_template("index.html")
+    return flask.render_template("login.html")
+
+
+@app.route("/index")
+def index():
+    return flask.render_template("index.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return flask.redirect(flask.url_for("index"))
 
 
 if __name__ == "__main__":
-    app.run(
-        host=os.getenv("IP", "0.0.0.0"), port=int(os.getenv("PORT", 8080)), debug=True
-    )
+    app.run(debug=True)

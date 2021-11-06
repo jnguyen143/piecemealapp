@@ -10,6 +10,7 @@ app = flask.Flask(__name__)
 app.config["SQLALCHEMY_DATABASEURL"] = os.getenv("DATABASE_URL")
 app.config["SQULALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = os.getenv("LOGIN_KEY")
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 GOOGLE_ID = os.getenv("CLIENT_ID")
 GOOGLE_SECRET = os.getenv("CLIENT_SECRET")
