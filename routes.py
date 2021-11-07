@@ -17,30 +17,20 @@ from flask_login import (
     UserMixin,
 )
 
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 app = flask.Flask(__name__)
 app.config["SQLALCHEMY_DATABASEURL"] = os.getenv("DATABASE_URL")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = os.getenv("LOGIN_KEY")
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
 GOOGLE_ID = os.getenv("CLIENT_ID")
 GOOGLE_SECRET = os.getenv("CLIENT_SECRET")
 GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 db = SQLAlchemy(app)
-
-
-login_manager = LoginManager()
-login_manager.login_view = "login"
-login_manager.init_app(app)
-
-
-@login_manager.user_loader
-def load_user(user_name):
-    return User.query.get(user_name)
-
-
-client = WebApplicationClient(GOOGLE_ID)
 
 
 class User(UserMixin, db.Model):
@@ -52,6 +42,18 @@ class User(UserMixin, db.Model):
 
 
 db.create_all()
+
+login_manager = LoginManager()
+login_manager.login_view = "login"
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(username):
+    return User.query.get(username)
+
+
+client = WebApplicationClient(GOOGLE_ID)
 
 
 def get_google_provider_cfg():
