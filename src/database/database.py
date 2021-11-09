@@ -153,7 +153,6 @@ class Database:
         try:
             user = session.query(User).filter_by(id=id).first()
         except Exception as e:
-            print(f"dberr: {str(e)}")
             session.rollback()
             raise DatabaseException("Failed to perform query")
         finally:
@@ -227,7 +226,7 @@ class Database:
             session.close()
         return ingredient
 
-    def get_saved_recipes(self, user_id: str) -> list[int]:
+    def get_saved_recipes(self, user_id: str) -> list:
         """
         Returns the list of saved recipes for the user with the specified ID.
 
@@ -235,7 +234,7 @@ class Database:
             user_id (str): The ID of the target user.
 
         Returns:
-            A list of recipe IDs associated with the specified user.
+            A list of recipe objects associated with the specified user.
             If the specified user has no saved recipes, this function will return an empty list.
 
         Raises:
@@ -257,7 +256,7 @@ class Database:
         finally:
             session.close()
 
-        return [x.id for x in recipes]
+        return [x.recipe for x in recipes]
 
     def get_saved_ingredients(self, user_id: str) -> list[int]:
         """
@@ -267,7 +266,7 @@ class Database:
             user_id (str): The ID of the target user.
 
         Returns:
-            A list of ingredient IDs associated with the specified user.
+            A list of ingredient objects associated with the specified user.
             If the specified user has no saved ingredients, this function will return an empty list.
 
         Raises:
@@ -291,7 +290,7 @@ class Database:
         finally:
             session.close()
 
-        return [x.id for x in ingredients]
+        return [x.ingredient for x in ingredients]
 
     def get_intolerances(self, user_id: str) -> list[str]:
         """

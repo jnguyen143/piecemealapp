@@ -143,7 +143,6 @@ class Intolerance(db.Model):
 
 
 class Relationship(db.Model):
-    __tablename__ = "friends"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     user1 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
     user2 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
