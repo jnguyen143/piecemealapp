@@ -118,6 +118,12 @@ class Database:
 
         builtins.piecemeal_db_obj = self
 
+    def get_db_obj(self) -> SQLAlchemy:
+        """
+        Returns the `SQLAlchemy` object associated with this database.
+        """
+        return self.int__db_obj
+
     def finalize(self):
         """
         Finalizes the database by closing all currently open sessions.
@@ -144,7 +150,8 @@ class Database:
         user = None
         try:
             user = session.query(User).filter_by(id=id).first()
-        except:
+        except Exception as e:
+            print(f"dberr: {str(e)}")
             session.rollback()
             raise DatabaseException("Failed to perform query")
         finally:
@@ -316,7 +323,7 @@ class Database:
 
         return [x.intolerance for x in intolerances]
 
-    def add_user(self, id: str, email: str, name: str = ""):
+    def add_user(self, id: str, email: str, name: str = "", profile_image: str = ""):
         """
         Creates a new user with the specified information and adds it to the database, then returns the created user.
 
@@ -324,6 +331,7 @@ class Database:
             id (str): The ID of the user. This value must be unique across all users.
             email (str): The user's email. This field is not checked for validity.
             name (str): The user's name. This value is optional.
+            profile_image (str): The URL for the user's profile picture. This value is optional.
 
         Returns:
             The newly created `User` object.
@@ -337,7 +345,7 @@ class Database:
         if self.user_exists(id):
             raise DuplicateUserException(id)
 
-        user = User(id=id, email=email, name=name)
+        user = User(id=id, email=email, name=name, profile_image=profile_image)
 
         session = self.int__Session()
         try:
@@ -349,7 +357,8 @@ class Database:
         finally:
             session.close()
 
-        return user
+        # return user
+        return self.get_user(id)
 
     def add_recipe(self, id: int, name: str, image: str):
         """

@@ -4,11 +4,22 @@ This file defines all of the endpoints relating to user data, such as saving rec
 All of the endpoints defined in this file are API endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
 
-from flask import Blueprint, request
+from flask import Blueprint, request, redirect, url_for
 from flask.json import jsonify
+from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
 from . import util
-from flask_login import login_required
+from flask_login import login_required, current_user, login_user, logout_user
 from database.database import Database, DatabaseException
+import os
+import requests
+import json
+
+GOOGLE_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
+# Used during the Google login flow
+login_handler_client = WebApplicationClient(GOOGLE_ID)
 
 userdata_blueprint = Blueprint(
     "bp_userdata",
@@ -51,6 +62,16 @@ def set_db_obj(db: Database):
     """
     global int__db
     int__db = db
+
+
+def get_current_user():
+    """
+    Returns the current user for the application.
+
+    Returns:
+        The current user for the application, or `None` if there is no currently logged-in user.
+    """
+    return current_user
 
 
 @userdata_blueprint.route("/api/save-recipe", methods=["POST"])
@@ -249,6 +270,25 @@ def delete_ingredient():
     return jsonify({"result": RESPONSE_OK})
 
 
+def get_google_provider_cfg():
+    """
+    Returns the configuration for the Google login provider.
+
+    Returns:
+        The configuration JSON for the Google login flow.
+
+    Raises:
+        Exception: If the response was invalid.
+    """
+    response = requests.get(GOOGLE_URL)
+    if not response.ok:
+        raise Exception("Invalid response")
+    json_value = response.json()
+    if json_value == None:
+        raise Exception("Invalid response")
+    return json_value
+
+
 @userdata_blueprint.route("/api/delete-user", methods=["POST"])
 @login_required
 def delete_user():
@@ -278,6 +318,142 @@ def delete_user():
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_DELETE_FAIL})
 
-    # TODO: Force a logout
+    logout_user()
 
     return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/start-login", methods=["POST"])
+def start_login():
+    """
+    Initiates the login flow. The value returned by this function will be a redirect to Google's login handler URL.
+    """
+    google_provider = get_google_provider_cfg()
+    authorization_endpoint = google_provider["authorization_endpoint"]
+    dest_uri = request.url_root + "login/callback"
+    request_uri = login_handler_client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=dest_uri,
+        scope=["openid", "email", "profile"],
+    )
+    return redirect(request_uri)
+
+
+def validate_with_google(google_provider, code):
+    """
+    Ensures the code received by the /api/validate-login endpoint is valid and actually from Google.
+    """
+    token_endpoint = google_provider["token_endpoint"]
+
+    token_url, headers, body = login_handler_client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request.url,
+        redirect_url=request.base_url,
+        code=code,
+    )
+
+    response = requests.post(
+        token_url, headers=headers, data=body, auth=(GOOGLE_ID, GOOGLE_SECRET)
+    )
+
+    if not response.ok:
+        raise Exception("Invalid response")
+    response_json = response.json()
+    if response_json == None:
+        raise Exception("Invalid response")
+    return response_json
+
+
+def get_google_user_info(google_provider):
+    """
+    Returns the user information for the user associated with the client object.
+    """
+    userinfo_endpoint = google_provider["userinfo_endpoint"]
+    uri, headers, body = login_handler_client.add_token(userinfo_endpoint)
+    response = requests.get(uri, headers=headers, data=body)
+
+    if not response.ok:
+        raise Exception("Invalid response")
+    response_json = response.json()
+    if response_json == None:
+        raise Exception("Invalid response")
+
+    if not response_json.get("email_verified"):
+        raise Exception("Email not verified with Google")
+
+    user_id = response_json["sub"]
+    user_email = response_json["email"]
+    user_pfp = response_json["picture"]
+    user_name = response_json["given_name"]
+    return {"id": user_id, "email": user_email, "name": user_name, "image": user_pfp}
+
+
+@userdata_blueprint.route("/login/callback")
+def validate_login():
+    """
+    Validates that the attempted login was successful.
+
+    Do not use this endpoint directly; it's only intended for use as a redirect destination from the Google login flow.
+    """
+    userinfo = None
+    try:
+        code = request.args.get("code")
+        google_provider = get_google_provider_cfg()
+        response = validate_with_google(google_provider, code)
+        login_handler_client.parse_request_body_response(json.dumps(response))
+        userinfo = get_google_user_info(google_provider)
+    except Exception:
+        return redirect("/login")
+
+    user = int__db.get_user(userinfo["id"])
+
+    if user == None:
+        return redirect("/login")
+
+    login_user(user)
+    return redirect("/")
+
+
+@userdata_blueprint.route("/api/start-signup", methods=["POST"])
+def start_signup():
+    """
+    Initiates the signup flow. The value returned by this function will be a redirect to Google's login handler URL.
+    """
+    google_provider = get_google_provider_cfg()
+    authorization_endpoint = google_provider["authorization_endpoint"]
+    dest_uri = request.url_root + "signup/callback"
+    request_uri = login_handler_client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=dest_uri,
+        scope=["openid", "email", "profile"],
+    )
+    return redirect(request_uri)
+
+
+@userdata_blueprint.route("/signup/callback")
+def validate_signup():
+    """
+    Validates that the attempted signup was successful.
+
+    Do not use this endpoint directly; it's only intended for use as a redirect destination from the Google login flow.
+    """
+    userinfo = None
+    try:
+        code = request.args.get("code")
+        google_provider = get_google_provider_cfg()
+        response = validate_with_google(google_provider, code)
+        login_handler_client.parse_request_body_response(json.dumps(response))
+        userinfo = get_google_user_info(google_provider)
+    except Exception:
+        return redirect("/signup")
+
+    user = None
+    try:
+        user = int__db.add_user(
+            userinfo["id"], userinfo["email"], userinfo["name"], userinfo["image"]
+        )
+    except DatabaseException:
+        return redirect("/signup")
+
+    login_user(user)
+    return redirect("/")
