@@ -60,7 +60,7 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_URL).json()
 
 
-@app.route("/login")
+@app.route("/api/validate-signup")
 def login():
     google_provider = get_google_provider_cfg()
     authorization_endpoint = google_provider["authorization_endpoint"]
@@ -72,7 +72,7 @@ def login():
     return flask.redirect(request_uri)
 
 
-@app.route("/login/callback")
+@app.route("/api/validate-signup/callback")
 def callback():
     code = flask.request.args.get("code")
     google_provider = get_google_provider_cfg()
