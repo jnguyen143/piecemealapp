@@ -9,6 +9,7 @@ from os import getenv
 import sqlalchemy.orm as orm
 from sqlalchemy import or_, and_
 import builtins
+from random import randrange
 
 
 class DatabaseException(Exception):
@@ -896,3 +897,230 @@ class Database:
             session.close()
 
         return users
+
+    def get_recommended_recipes_from_user(self, user: str, limit: int = 5):
+        """
+        Returns a list of recipe objects based on the specified user's saved recipes.
+
+        The algorithm will look at only the most recently liked recipes and will only retrieve up to
+        the specified limit of recipes.
+
+        Args:
+            user (str): The ID of the target user.
+            limit (int): The limit of the number of recipes to retrieve.
+
+        Returns:
+            A list of recipe objects, or an empty list if the user has no saved recipes.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If the recipes could not be retrieved.
+        """
+        recipes = self.get_saved_recipes(user)
+
+        result = {}
+
+        recipes_len = len(recipes)
+
+        recipe_count = min(limit, recipes_len)
+
+        # The max number of tries the algorithm will do to find a new recipe before it gives up on the current iteration
+        MAX_TRIES = 10
+
+        for _ in range(0, recipe_count):
+            # The algorithm starts trying to sample from the first recipe_count number of recipes and incrementally increases its search range until it equals the length of the original list.
+            current_range = recipe_count
+            index = randrange(
+                recipes_len - current_range, recipes_len
+            )  # We sample from the end of the list because that's where the most recent recipes are
+            tries = 0
+            while recipes[index].id in result and tries <= MAX_TRIES:
+                # Increase the search range if it's still less than the length of the actual list
+                if current_range < recipes_len:
+                    current_range += 1
+                index = randrange(recipes_len - current_range, recipes_len)
+                tries += 1
+            if recipes[index].id in result:
+                continue
+            result[recipes[index].id] = recipes[index]
+
+        return list(result.values())
+
+    def get_recommended_recipes_from_relationships(
+        self, user: str, limit_friends: int = 5, limit_per_relationship: int = 5
+    ):
+        """
+        Returns a JSON object containing lists of recipes generated based off of the liked recipes of the specified user's friends.
+
+        The algorithm will look at only the most recently liked recipes and will only retrieve up to
+        the specified limit of recipes per friend.
+
+        Args:
+            user (str): The ID of the target user.
+            limit_friends (int): The limit of the number of friends to sample.
+            limit_per_relationship (int): The limit of the number of recipes to retrieve per friend.
+
+        Returns:
+            A JSON object containing lists of recommended recipes, whose format is the following:
+            {
+                "id1": {
+                    "userdata": <user_obj>,
+                    "recipes": [<recipe_obj>]
+                },
+                "id2": {
+                    "userdata": <user_obj>,
+                    "recipes": [<recipe_obj>]
+                },
+                ...
+            }
+
+            The returned object is a dictionary of user IDs to values containing two fields.
+
+            `userdata` maps to the JSON representation of the associated user object.
+            `recipes` maps to a list containing JSON representations of the selected recipe objects.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If the recipes could not be retrieved.
+        """
+        if not self.user_exists(user):
+            raise NoUserException(user)
+
+        friends = self.get_relationships_for_user(user)
+
+        result = {}
+
+        friend_count = min(len(friends), limit_friends)
+
+        # The max number of tries the algorithm will do to find a new friend before it gives up on the current iteration
+        MAX_TRIES = 10
+
+        for _ in range(0, friend_count):
+            index = randrange(len(friends))
+            tries = 0
+            while friends[index].id in result and tries <= MAX_TRIES:
+                index = randrange(len(friends))
+                tries += 1
+            if friends[index].id in result:
+                continue
+            recipes = self.get_recommended_recipes_from_user(
+                friends[index], limit_per_relationship
+            )
+            result[friends[index].id] = {"userdata": friends[index], "recipes": recipes}
+
+        return result
+
+    def get_recommended_ingredients_from_user(self, user: str, limit: int = 5):
+        """
+        Returns a list of ingredient objects based on the specified user's saved ingredients.
+
+        The algorithm will look at only the most recently liked ingredients and will only retrieve up to
+        the specified limit of ingredients.
+
+        Args:
+            user (str): The ID of the target user.
+            limit (int): The limit of the number of ingredients to retrieve.
+
+        Returns:
+            A list of ingredient objects, or an empty list if the user has no saved ingredients.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If the ingredients could not be retrieved.
+        """
+        ingredients = self.get_saved_ingredients(user)
+
+        result = {}
+
+        ingredients_len = len(ingredients)
+
+        ingredient_count = min(limit, ingredients_len)
+
+        # The max number of tries the algorithm will do to find a new ingredient before it gives up on the current iteration
+        MAX_TRIES = 10
+
+        for _ in range(0, ingredient_count):
+            # The algorithm starts trying to sample from the first ingredient_count number of ingredients and incrementally increases its search range until it equals the length of the original list.
+            current_range = ingredient_count
+            index = randrange(
+                ingredients_len - current_range, ingredients_len
+            )  # We sample from the end of the list because that's where the most recent ingredients are
+            tries = 0
+            while ingredients[index].id in result and tries <= MAX_TRIES:
+                # Increase the search range if it's still less than the length of the actual list
+                if current_range < ingredients_len:
+                    current_range += 1
+                index = randrange(ingredients_len - current_range, ingredients_len)
+                tries += 1
+            if ingredients[index].id in result:
+                continue
+            result[ingredients[index].id] = ingredients[index]
+
+        return list(result.values())
+
+    def get_recommended_ingredients_from_relationships(
+        self, user: str, limit_friends: int = 5, limit_per_relationship: int = 5
+    ):
+        """
+        Returns a JSON object containing lists of ingredients generated based off of the liked ingredients of the specified user's friends.
+
+        The algorithm will look at only the most recently liked ingredients and will only retrieve up to
+        the specified limit of ingredients per friend.
+
+        Args:
+            user (str): The ID of the target user.
+            limit_friends (int): The limit of the number of friends to sample.
+            limit_per_relationship (int): The limit of the number of ingredients to retrieve per friend.
+
+        Returns:
+            A JSON object containing lists of recommended ingredients, whose format is the following:
+            {
+                "id1": {
+                    "userdata": <user_obj>,
+                    "ingredients": [<ingredient_obj>]
+                },
+                "id2": {
+                    "userdata": <user_obj>,
+                    "ingredients": [<ingredient_obj>]
+                },
+                ...
+            }
+
+            The returned object is a dictionary of user IDs to values containing two fields.
+
+            `userdata` maps to the JSON representation of the associated user object.
+            `ingredients` maps to a list containing JSON representations of the selected ingredient objects.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If the ingredients could not be retrieved.
+        """
+        if not self.user_exists(user):
+            raise NoUserException(user)
+
+        friends = self.get_relationships_for_user(user)
+
+        result = {}
+
+        friend_count = min(len(friends), limit_friends)
+
+        # The max number of tries the algorithm will do to find a new friend before it gives up on the current iteration
+        MAX_TRIES = 10
+
+        for _ in range(0, friend_count):
+            index = randrange(len(friends))
+            tries = 0
+            while friends[index].id in result and tries <= MAX_TRIES:
+                index = randrange(len(friends))
+                tries += 1
+            if friends[index].id in result:
+                continue
+            ingredients = self.get_recommended_ingredients_from_user(
+                friends[index], limit_per_relationship
+            )
+            result[friends[index].id] = {
+                "userdata": friends[index],
+                "ingredients": ingredients,
+            }
+
+        return result
