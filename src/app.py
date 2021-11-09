@@ -58,10 +58,11 @@ def init_app():
         raise Exception(f"Failed to initialize database ({str(e)})")
 
     # Register the blueprints
-    import routes.index, routes.login, routes.signup, routes.profile, routes.search, routes.userdata
+    import routes.index, routes.login, routes.signup, routes.profile, routes.search, routes.userdata, routes.account
 
-    routes.userdata.set_db_obj(db)
+    routes.userdata.init(db)
     routes.login.init(app, db)
+    routes.account.init(db)
 
     app.register_blueprint(routes.index.get_blueprint())
     app.register_blueprint(routes.login.get_blueprint())
@@ -69,6 +70,7 @@ def init_app():
     app.register_blueprint(routes.userdata.get_blueprint())
     app.register_blueprint(routes.profile.get_blueprint())
     app.register_blueprint(routes.search.get_blueprint())
+    app.register_blueprint(routes.account.get_blueprint())
 
     # Register the teardown context
     app.teardown_appcontext(shutdown_session)

@@ -4,6 +4,7 @@ This file defines the models for all of the tables in the database.
 Prior to importing this file anywhere in the application, `database.init()` must have already been called.
 """
 
+from sqlalchemy.orm import relationship
 from database.database import DatabaseException
 from datetime import datetime
 import builtins
@@ -25,7 +26,7 @@ class User(db.Model, UserMixin):
 
     def to_json(self):
         """
-        Returns this table as a JSON object, where each key corresponds to a column
+        Returns this row as a JSON object, where each key corresponds to a column
         in the table and the values correspond to the entries in the current row.
 
         Returns:
@@ -48,7 +49,7 @@ class Recipe(db.Model):
 
     def to_json(self):
         """
-        Returns this table as a JSON object, where each key corresponds to a column
+        Returns this row as a JSON object, where each key corresponds to a column
         in the table and the values correspond to the entries in the current row.
 
         Returns:
@@ -65,7 +66,7 @@ class Ingredient(db.Model):
 
     def to_json(self):
         """
-        Returns this table as a JSON object, where each key corresponds to a column
+        Returns this row as a JSON object, where each key corresponds to a column
         in the table and the values correspond to the entries in the current row.
 
         Returns:
@@ -79,16 +80,23 @@ class SavedRecipe(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False)
+    recipe = relationship(Recipe, foreign_keys=[recipe_id])
 
-    def to_json(self):
+    def to_json(self, shallow: bool = True):
         """
-        Returns this table as a JSON object, where each key corresponds to a column
+        Returns this row as a JSON object, where each key corresponds to a column
         in the table and the values correspond to the entries in the current row.
+
+        Args:
+            shallow (bool): If set to false, the `recipe_id` key will be replaced with a `recipe` key
+            which will map to the actual target object.
 
         Returns:
             This row instance as a JSON object.
         """
-        return {"id": self.id, "user_id": self.user_id, "recipe_id": self.recipe_id}
+        if shallow:
+            return {"user_id": self.user_id, "recipe_id": self.recipe_id}
+        return {"user_id": self.user_id, "recipe": self.recipe.to_json()}
 
 
 class SavedIngredient(db.Model):
@@ -98,20 +106,23 @@ class SavedIngredient(db.Model):
     ingredient_id = db.Column(
         db.Integer, db.ForeignKey("ingredients.id"), nullable=False
     )
+    ingredient = relationship(Ingredient, foreign_keys=[ingredient_id])
 
-    def to_json(self):
+    def to_json(self, shallow: bool = True):
         """
-        Returns this table as a JSON object, where each key corresponds to a column
+        Returns this row as a JSON object, where each key corresponds to a column
         in the table and the values correspond to the entries in the current row.
+
+        Args:
+            shallow (bool): If set to false, the `ingredient_id` key will be replaced with an `ingredient` key
+            which will map to the actual target object.
 
         Returns:
             This row instance as a JSON object.
         """
-        return {
-            "id": self.id,
-            "user_id": self.name,
-            "ingredient_id": self.ingredient_id,
-        }
+        if shallow:
+            return {"user_id": self.user_id, "ingredient_id": self.ingredient_id}
+        return {"user_id": self.user_id, "ingredient": self.ingredient.to_json()}
 
 
 class Intolerance(db.Model):
@@ -122,10 +133,35 @@ class Intolerance(db.Model):
 
     def to_json(self):
         """
-        Returns this table as a JSON object, where each key corresponds to a column
+        Returns this row as a JSON object, where each key corresponds to a column
         in the table and the values correspond to the entries in the current row.
 
         Returns:
             This row instance as a JSON object.
         """
-        return {"id": self.id, "user_id": self.user_id, "intolerance": self.intolerance}
+        return {"user_id": self.user_id, "intolerance": self.intolerance}
+
+
+class Relationship(db.Model):
+    __tablename__ = "friends"
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    user1 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user2 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user1_obj = relationship(User, foreign_keys=[user1])
+    user2_obj = relationship(User, foreign_keys=[user2])
+
+    def to_json(self, shallow: bool = True):
+        """
+        Returns this row as a JSON object, where each key corresponds to a column
+        in the table and the values correspond to the entries in the current row.
+
+        Args:
+            shallow (bool): If set to false, the `user1` and `user2` keys will map to actual user objects instead of just their IDs.
+
+        Returns:
+            This row instance as a JSON object.
+        """
+        if shallow:
+            return {"user1": self.user1, "user2": self.user2}
+
+        return {"user1": self.user1_obj.to_json(), "user2": self.user2_obj.to_json()}

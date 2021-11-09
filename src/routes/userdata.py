@@ -53,9 +53,9 @@ def ingredient_exists(id):
     return int__db.get_ingredient(id) != None
 
 
-def set_db_obj(db: Database):
+def init(db: Database):
     """
-    Sets this module's stored database object to the provided object.
+    Initializes this module using the provided arguments.
 
     Args:
         db (Database): The database object to use.
@@ -323,7 +323,8 @@ def delete_user():
     return jsonify({"result": RESPONSE_OK})
 
 
-@userdata_blueprint.route("/api/start-login", methods=["POST"])
+# TODO: Fix this
+@userdata_blueprint.route("/api2/start-login", methods=["POST"])
 def start_login():
     """
     Initiates the login flow. The value returned by this function will be a redirect to Google's login handler URL.
@@ -388,6 +389,7 @@ def get_google_user_info(google_provider):
     return {"id": user_id, "email": user_email, "name": user_name, "image": user_pfp}
 
 
+# TODO: Fix this
 @userdata_blueprint.route("/login/callback")
 def validate_login():
     """
@@ -414,14 +416,15 @@ def validate_login():
     return redirect("/")
 
 
-@userdata_blueprint.route("/api/start-signup", methods=["POST"])
+# TODO: Fix this
+@userdata_blueprint.route("/api2/start-signup", methods=["POST"])
 def start_signup():
     """
     Initiates the signup flow. The value returned by this function will be a redirect to Google's login handler URL.
     """
     google_provider = get_google_provider_cfg()
     authorization_endpoint = google_provider["authorization_endpoint"]
-    dest_uri = request.url_root + "signup/callback"
+    dest_uri = request.url_root + "api/validate-signup/callback"
     request_uri = login_handler_client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=dest_uri,
@@ -430,7 +433,8 @@ def start_signup():
     return redirect(request_uri)
 
 
-@userdata_blueprint.route("/signup/callback")
+# TODO: Fix this
+@userdata_blueprint.route("/api2/validate-signup/callback")
 def validate_signup():
     """
     Validates that the attempted signup was successful.
@@ -456,4 +460,28 @@ def validate_signup():
         return redirect("/signup")
 
     login_user(user)
+    return redirect("/")
+
+
+# XXX: This is temporary
+@userdata_blueprint.route("/api/start-login", methods=["POST"])
+def start_login2():
+    try:
+        user = int__db.get_user("12345")
+        if user == None:
+            return redirect("/login")
+        login_user(user)
+    except DatabaseException:
+        return redirect("/login")
+    return redirect("/")
+
+
+# XXX: This is temporary
+@userdata_blueprint.route("/api/start-signup", methods=["POST"])
+def start_signup2():
+    try:
+        user = int__db.add_user("12345", "wgarland@piecemeal.com", "William Garland")
+        login_user(user)
+    except DatabaseException:
+        return redirect("/signup")
     return redirect("/")

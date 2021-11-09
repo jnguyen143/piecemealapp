@@ -7,6 +7,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import getenv
 import sqlalchemy.orm as orm
+from sqlalchemy import or_, and_
 import builtins
 
 
@@ -707,3 +708,191 @@ class Database:
             raise DatabaseException("Failed to delete intolerance")
         finally:
             session.close()
+
+    def add_relationship(self, user1: str, user2: str) -> bool:
+        """
+        Adds a two-way relationship between the specified users.
+
+        If the relationship already exists, this function does nothing.
+
+        A relationship does not consider the position of the users to be significant when determining if a relationship exists.
+        This means that for users A and B, calling `add_relationship(A, B)`
+        is the same as calling `add_relationship(B, A)`.
+
+        Args:
+            user1 (str): The ID of the first user in the relationship.
+            user2 (str): The ID of the second user in the relationship.
+
+        Returns:
+            True if the relationship was added successfully and false if the relationship already exists.
+
+        Raises:
+            NoUserException: If either of the specified users do not exist.
+            DatabaseException: If there was a problem adding the relationship.
+        """
+
+        if not self.user_exists(user1):
+            raise NoUserException(user1)
+        if not self.user_exists(user2):
+            raise NoUserException(user2)
+
+        from database.models import Relationship
+
+        session = self.int__Session()
+        try:
+            # I didn't use has_relationship() here because it performs too many checks and setups that have already been performed.
+            has_relationship = (
+                session.query(Relationship)
+                .filter(
+                    or_(and_(user1=user1, user2=user2), and_(user1=user2, user2=user1))
+                )
+                .first()
+                is not None
+            )
+            if has_relationship:
+                return False
+
+            session.add(Relationship(user1=user1, user2=user2))
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add relationship")
+        finally:
+            session.close()
+
+        return True
+
+    def has_relationship(self, user1: str, user2: str) -> bool:
+        """
+        Returns true if a relationship between the specified users exists.
+
+        A relationship does not consider the position of the users to be significant when determining if a relationship exists.
+        This means that for users A and B, calling `has_relationship(A, B)`
+        is the same as calling `has_relationship(B, A)`.
+
+        Args:
+            user1 (str): The ID of the first user in the relationship.
+            user2 (str): The ID of the second user in the relationship.
+
+        Returns:
+            True if a relationship exists between the specified users and false otherwise.
+
+        Raises:
+            NoUserException: If either of the specified users do not exist.
+            DatabaseException: If there was a problem querying the relationship.
+        """
+        if not self.user_exists(user1):
+            raise NoUserException(user1)
+        if not self.user_exists(user2):
+            raise NoUserException(user2)
+
+        from database.models import Relationship
+
+        session = self.int__Session()
+        has_relationship = False
+        try:
+            has_relationship = (
+                session.query(Relationship)
+                .filter(
+                    or_(and_(user1=user1, user2=user2), and_(user1=user2, user2=user1))
+                )
+                .first()
+                is not None
+            )
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query relationship")
+        finally:
+            session.close()
+
+        return has_relationship
+
+    def delete_relationship(self, user1: str, user2: str) -> bool:
+        """
+        Deletes the relationship between the specified users.
+
+        If the relationship does not exist, this function does nothing.
+
+        Args:
+            user1 (str): The ID of the first user in the relationship.
+            user2 (str): The ID of the second user in the relationship.
+
+        Returns:
+            True if the relationship was deleted successfully and false otherwise.
+
+        Raises:
+            NoUserException: If either of the specified users do not exist.
+            DatabaseException: If there was a problem deleting the relationship.
+        """
+        if not self.user_exists(user1):
+            raise NoUserException(user1)
+        if not self.user_exists(user2):
+            raise NoUserException(user2)
+
+        from database.models import Relationship
+
+        session = self.int__Session()
+        try:
+            # I didn't use has_relationship() here because it performs too many checks and setups that have already been performed.
+            relationship = (
+                session.query(Relationship)
+                .filter(
+                    or_(and_(user1=user1, user2=user2), and_(user1=user2, user2=user1))
+                )
+                .first()
+            )
+            if relationship == None:
+                return False
+
+            session.delete(relationship)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to delete relationship")
+        finally:
+            session.close()
+
+        return True
+
+    def get_relationships_for_user(self, user: str):
+        """
+        Returns a list of user objects which have relationships with the specified user.
+
+        Args:
+            user (str): The ID of the target user.
+
+        Returns:
+            A list of user objects which have relationships with the specified user.
+            If the user has no relationships, this function will return an empty list.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If there was a problem querying the relationships.
+        """
+
+        if not self.user_exists(user):
+            raise NoUserException(user)
+
+        from database.models import Relationship
+
+        session = self.int__Session()
+        users = []
+        try:
+            user1_relationships = (
+                session.query(Relationship).filter_by(user1=user).all()
+            )
+            for relationship in user1_relationships:
+                users.append(relationship.user2_obj)
+            user2_relationships = (
+                session.query(Relationship).filter_by(user2=user).all()
+            )
+            for relationship in user2_relationships:
+                users.append(relationship.user1_obj)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query relationships")
+        finally:
+            session.close()
+
+        return users
