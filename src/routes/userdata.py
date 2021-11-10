@@ -376,6 +376,72 @@ def update_username():
     return jsonify({"result": RESPONSE_OK})
 
 
+@userdata_blueprint.route("/api/search-users", methods=["POST"])
+@login_required
+def search_users():
+    """
+    Searches the database for users which match the specified criteria.
+
+    Parameters:
+        criteria (str): The search criteria to use. This value must be one of the following:
+            `given_name`: Search for users by their given name.
+            `username`: Search for users by their username.
+        query (str): The query string to use.
+        offset (int): The offset into the search results to start at. This value is optional.
+        limit (int): The maximum number of users to return. This value is optional.
+
+    Response:
+        {
+            users (list): A list of user objects containing only their IDs, usernames, and given names.
+        }
+
+    If the search query failed, an empty JSON object will be returned and will not contain a `users` entry.
+    """
+
+    data = request.get_json()
+    criteria = ""
+    query = ""
+    offset = 0
+    limit = 10
+
+    CRITERIA_GIVEN_NAME = "given_name"
+    CRITERIA_USERNAME = "username"
+
+    try:
+        criteria = data["criteria"]
+        query = data["query"]
+
+        if (
+            query == None
+            or criteria == None
+            or (criteria != CRITERIA_GIVEN_NAME and criteria != CRITERIA_USERNAME)
+        ):
+            return jsonify({})
+    except KeyError:
+        return jsonify({})
+
+    try:
+        offset = data["offset"]
+        limit = data["limit"]
+    except KeyError:
+        pass
+
+    users = []
+    try:
+        if criteria == CRITERIA_GIVEN_NAME:
+            users = int__db.search_users_by_given_name(query, limit, offset)
+        elif criteria == CRITERIA_USERNAME:
+            users = int__db.search_users_by_username(query, limit, offset)
+    except DatabaseException:
+        return jsonify({})
+
+    user_json = []
+    for x in users:
+        user_json.append({"id": x.id, "name": x.name, "username": x.username})
+
+    return jsonify({"users": user_json})
+
+
 # TODO: Fix this
 @userdata_blueprint.route("/api2/start-login", methods=["POST"])
 def start_login():

@@ -1290,3 +1290,85 @@ class Database:
             raise DatabaseException("Failed to set username")
         finally:
             session.close()
+
+    def search_users_by_given_name(
+        self, query: str, limit: int = 10, offset: int = 0
+    ) -> list:
+        """
+        Searches for users whose given names match or otherwise contain the given query string and returns a list of user objects.
+
+        Args:
+            query (str): The query string to use.
+            limit (int): The maximum number of users to return. This value is optional.
+            offset (int): The offset into the total list of users to start at. This value is optional.
+
+        Returns:
+            A list of `User` objects whose given names match the provided search criteria, or an empty list if no users match the given criteria.
+
+        Raises:
+            DatabaseException: If the query was unable to be performed.
+        """
+
+        from database.models import User
+
+        session = self.int__Session()
+        result = []
+        try:
+            users = (
+                session.query(User)
+                .filter(User.name.ilike(f"%{query}%"))
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
+
+            if users != None:
+                result = users
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query users")
+        finally:
+            session.close()
+
+        return result
+
+    def search_users_by_username(
+        self, query: str, limit: int = 10, offset: int = 0
+    ) -> list:
+        """
+        Searches for users whose usernames match or otherwise contain the given query string and returns a list of user objects.
+
+        Args:
+            query (str): The query string to use.
+            limit (int): The maximum number of users to return. This value is optional.
+            offset (int): The offset into the total list of users to start at. This value is optional.
+
+        Returns:
+            A list of `User` objects whose usernames match the provided search criteria, or an empty list if no users match the given criteria.
+
+        Raises:
+            DatabaseException: If the query was unable to be performed.
+        """
+
+        from database.models import User
+
+        session = self.int__Session()
+        result = []
+        try:
+            users = (
+                session.query(User)
+                .filter(User.username.ilike(f"%{query}%"))
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
+
+            if users != None:
+                result = users
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query users")
+        finally:
+            session.close()
+
+        return result

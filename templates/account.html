@@ -57,6 +57,80 @@
             </tr>
             {%endfor%}
         </table>
+
+        <form method="POST" onsubmit="return searchUsersByUsername();">
+            <input type="text" id="search_username_text_box" placeholder="Username">
+            <input type="submit" value="Search">
+        </form>
+
+        <script>
+            function searchUsersByUsername() {
+                let username = document.getElementById("search_username_text_box").value;
+                fetch("/api/search-users", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ criteria: "username", query: username })
+                }).then(response => {
+                    if (response.ok)
+                        return response.json();
+                    else {
+                        alert("Failed to search users");
+                    }
+                }).then(response => {
+                    if (!('users' in response))
+                        alert("Failed to search users");
+                    else {
+                        let results = "";
+                        for (const user of response.users) {
+                            results += "User: " + user.username + " -> " + user.name + "\n";
+                        }
+                        alert("Results:\n" + results);
+                    }
+                }).catch(e => {
+                    alert("Error searching users: " + e);
+                });
+                return false;
+            }
+        </script>
+
+        <form method="POST" onsubmit="return searchUsersByName();">
+            <input type="text" id="search_given_name_text_box" placeholder="Given Name">
+            <input type="submit" value="Search">
+        </form>
+
+        <script>
+            function searchUsersByName() {
+                let givenName = document.getElementById("search_given_name_text_box").value;
+                fetch("/api/search-users", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ criteria: "given_name", query: givenName })
+                }).then(response => {
+                    if (response.ok)
+                        return response.json();
+                    else {
+                        alert("Failed to search users");
+                    }
+                }).then(response => {
+                    if (!('users' in response))
+                        alert("Failed to search users");
+                    else {
+                        let results = "";
+                        for (const user of response.users) {
+                            results += "User: " + user.username + " -> " + user.name + "\n";
+                        }
+                        alert("Results:\n" + results);
+                    }
+                }).catch(e => {
+                    alert("Error searching users: " + e);
+                });
+                return false;
+            }
+        </script>
     </div>
 </body>
 
