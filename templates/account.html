@@ -10,6 +10,40 @@
         <a href="/">Back to Dashboard</a>
         <p>Name: {{userdata['name']}}</p>
         <p>Email: {{userdata['email']}}</p>
+        <span>
+            <p>Username: {{userdata['username']}}</p>
+            <form method="POST" onsubmit="return updateUsername();">
+                <input type="text" id="username_text_box" placeholder="New Username">
+                <input type="submit" value="Update">
+            </form>
+
+            <script>
+                function updateUsername() {
+                    let username = document.getElementById("username_text_box").value;
+                    fetch("/api/update-username", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ new_username: username })
+                    }).then(response => {
+                        if (response.ok)
+                            return response.json();
+                        else {
+                            alert("Failed to set username");
+                        }
+                    }).then(response => {
+                        if (response.result != 0)
+                            alert("Failed to set username (got response " + response.result + ")");
+                        else
+                            location.reload();
+                    }).catch(e => {
+                        alert("Error setting username: " + e);
+                    });
+                    return false;
+                }
+            </script>
+        </span>
         <p>Profile Picture:</p>
         <img src="{{userdata['profile_image']}}" alt="Profile Picture" />
 

@@ -23,6 +23,7 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(255))
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     profile_image = db.Column(db.Text, default="/static/default_user_profile_image.png")
+    username = db.Column(db.String(50), unique=True, nullable=False)
 
     def to_json(self):
         """
@@ -38,6 +39,7 @@ class User(db.Model, UserMixin):
             "name": self.name,
             "creation_date": self.creation_date,
             "profile_image": self.profile_image,
+            "username": self.username,
         }
 
 
@@ -143,6 +145,7 @@ class Intolerance(db.Model):
 
 
 class Relationship(db.Model):
+    __tablename__ = "friends"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     user1 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
     user2 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)

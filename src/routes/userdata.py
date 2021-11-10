@@ -7,6 +7,8 @@ All of the endpoints defined in this file are API endpoints (i.e. they should no
 from flask import Blueprint, request, redirect, url_for
 from flask.json import jsonify
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
+
+from database.database import DuplicateUserException
 from . import util
 from flask_login import login_required, current_user, login_user, logout_user
 from database.database import Database, DatabaseException
@@ -323,6 +325,57 @@ def delete_user():
     return jsonify({"result": RESPONSE_OK})
 
 
+@userdata_blueprint.route("/api/update-username", methods=["POST"])
+@login_required
+def update_username():
+    """
+    Sets the current user's username to the specified username.
+
+    Parameters:
+        new_username (str): The new username to use.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The username was updated successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: There was a problem updating the username.
+                3: The specified username was already taken.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+
+    RESPONSE_OK = 0
+    RESPONSE_ERR_CORRUPT_INPUT = 1
+    RESPONSE_ERR_SET_UNAME_FAIL = 2
+    RESPONSE_ERR_DUP_UNAME = 3
+    RESPONSE_ERR_NO_USER = 4
+
+    new_username = None
+
+    try:
+        new_username = request.get_json()["new_username"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
+
+    if new_username == None:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_ERR_NO_USER})
+
+    try:
+        int__db.set_username(user.id, new_username)
+    except DuplicateUserException:
+        return jsonify({"result": RESPONSE_ERR_DUP_UNAME})
+    except DatabaseException:
+        return jsonify({"result": RESPONSE_ERR_SET_UNAME_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
+
+
 # TODO: Fix this
 @userdata_blueprint.route("/api2/start-login", methods=["POST"])
 def start_login():
@@ -480,7 +533,9 @@ def start_login2():
 @userdata_blueprint.route("/api/start-signup", methods=["POST"])
 def start_signup2():
     try:
-        user = int__db.add_user("12345", "wgarland@piecemeal.com", "William Garland")
+        user = int__db.add_user(
+            "12345", "wgarland@piecemeal.com", name="William Garland"
+        )
         login_user(user)
     except DatabaseException:
         return redirect("/signup")
