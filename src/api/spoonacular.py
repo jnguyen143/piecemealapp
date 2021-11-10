@@ -5,7 +5,7 @@ Before any of the functions in this file can be called,
 you must ensure that the `SPOONACULAR_API_KEY` environment variable has been defined.
 """
 
-from common import (
+from api.common import (
     api_get_json,
     RequestException,
     MalformedResponseException,
@@ -310,15 +310,20 @@ def search_recipes(
     params["number"] = limit
 
     data = None
+
+    # combines ingredients param to properly search the website
+    #
+    URL = "recipes/complexSearch?query=" + ingredients
     try:
         data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT + "recipes/complexSearch",
+            SPOONACULAR_API_ROOT_ENDPOINT + URL,
             headers={"Content-Type": "application/json"},
             params=params,
         )
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make recipe search request: {str(e)}")
 
+    # recipes = data
     recipes = []
     for recipe in data["results"]:
         recipes.append(

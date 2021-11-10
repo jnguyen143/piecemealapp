@@ -81,7 +81,8 @@ body {
 }
 
 /*Individual recipe/ingredient container*/
-
+/* need to hide recipe div before searches */
+/*  */
 .recipe {
   background-color: white;
   color: rgb(75, 74, 74);
