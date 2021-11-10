@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template
+from flask_login import current_user
 from . import util
 
 index_blueprint = Blueprint(
@@ -22,5 +23,8 @@ def get_blueprint():
 
 
 @index_blueprint.route("/")
-def login():
-    return render_template("index.html")
+def index():
+    if current_user.is_authenticated:
+        return render_template("index2.html", userdata=current_user.to_json())
+    else:
+        return render_template("index.html")
