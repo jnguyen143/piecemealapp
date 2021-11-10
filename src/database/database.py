@@ -371,6 +371,9 @@ class Database:
             if char_count == 10:
                 break
 
+        if len(prefix) == 0:
+            prefix = "user"  # If there is no prefix, then just add a default one
+
         prefix += "-"
 
         from random import randint
