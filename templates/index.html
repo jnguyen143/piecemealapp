@@ -19,14 +19,14 @@
       <div class="filters">
         <p>Filter by:</p>
         <input type="button" class="filter-button" value="Cuisine" />
-        <input type="button" class="filter-button" value="Alergies" />
+        <input type="button" class="filter-button" value="Allergies" />
       </div>
       <button type="submit">Search</button>
     </form>
 
     <form class="recipes" action="/search_recipes" method="POST">
       <p>Search for Recipes</p>
-      <input type="text" placeholder="Filet mignon..." />
+      <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
       <button type="submit">Search</button>
     </form>
 
@@ -41,7 +41,7 @@
     <p>Rediscover your appetite by signing up and exploring our more than 1,000,000+ recipes</p>
     <p>Here goes the search results or dummy data for main page</p>
 
-    <div class="recipe">
+    <!-- <div class="recipe">
       <div class="image">
         <img src="../static/temp_ingredient.jpg" style="width: 100px; height: 100px;" />
       </div>
@@ -49,15 +49,23 @@
         <h2>Butter</h2>
         <p>Small recipe description goes here</p>
       </div>
-    </div>
+    </div> -->
 
     <div class="recipe">
-      <div class="image">
-        <img src="../static/temp_recipe.jpg" style="width: 100px; height: 100px;" />
-      </div>
+      <!-- need if statement to hide recipe div -->
+      <!--  -->
+      {%for recipe in recipes%}
+
       <div class="description">
-        <h2>Sushi</h2>
-        <p>Small recipe description goes here</p>
+        <div class="image">
+          <img src="{{recipe['image']}}" style="width: 100px; height: 100px;"
+            alt="No image available for this recipe" />
+        </div>
+        <h2>{{recipe['name']}}</h2>
+        <p>Recipe ID - {{recipe['id']}}</p>
+        <!-- <h2>Sushi</h2>
+        <p>Small recipe description goes here</p> -->
+        {%endfor%}
       </div>
     </div>
 
