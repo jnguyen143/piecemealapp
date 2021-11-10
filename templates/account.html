@@ -8,7 +8,7 @@
 <body>
     <div>
         <a href="/">Back to Dashboard</a>
-        <p>Name: {{userdata['name']}}</p>
+        <p>Name: {{userdata['given_name']}} {{userdata['family_name']}}</p>
         <p>Email: {{userdata['email']}}</p>
         <span>
             <p>Username: {{userdata['username']}}</p>
@@ -52,7 +52,7 @@
             {%for friend in userdata['friends']%}
             <tr>
                 <td>
-                    {{friend['name']}} - {{friend['email']}}
+                    {{friend['given_name']}} {{friend['family_name']}} - {{friend['email']}}
                 </td>
             </tr>
             {%endfor%}
@@ -84,7 +84,7 @@
                     else {
                         let results = "";
                         for (const user of response.users) {
-                            results += "User: " + user.username + " -> " + user.name + "\n";
+                            results += "User: " + user.username + " -> " + user.given_name + " " + user.family_name + "\n";
                         }
                         alert("Results:\n" + results);
                     }
@@ -96,19 +96,19 @@
         </script>
 
         <form method="POST" onsubmit="return searchUsersByName();">
-            <input type="text" id="search_given_name_text_box" placeholder="Given Name">
+            <input type="text" id="search_name_text_box" placeholder="Name">
             <input type="submit" value="Search">
         </form>
 
         <script>
             function searchUsersByName() {
-                let givenName = document.getElementById("search_given_name_text_box").value;
+                let name = document.getElementById("search_name_text_box").value;
                 fetch("/api/search-users", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ criteria: "given_name", query: givenName })
+                    body: JSON.stringify({ criteria: "name", query: name })
                 }).then(response => {
                     if (response.ok)
                         return response.json();
@@ -121,7 +121,7 @@
                     else {
                         let results = "";
                         for (const user of response.users) {
-                            results += "User: " + user.username + " -> " + user.name + "\n";
+                            results += "User: " + user.username + " -> " + user.given_name + " " + user.family_name + "\n";
                         }
                         alert("Results:\n" + results);
                     }
@@ -129,6 +129,22 @@
                     alert("Error searching users: " + e);
                 });
                 return false;
+            }
+        </script>
+
+        <button type="button" onclick="deleteAccount()">Delete Account</button>
+        <script>
+            function deleteAccount() {
+                fetch("/api/delete-user", { method: "POST" })
+                    .then(response => response.json()).then(value => {
+                        if (value.result == 0) {
+                            window.location.href = "/";
+                        } else {
+                            alert("Error deleting user");
+                        }
+                    }).catch(err => {
+                        alert("Error deleting user");
+                    });
             }
         </script>
     </div>

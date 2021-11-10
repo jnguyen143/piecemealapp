@@ -12,26 +12,11 @@
 
         <img class="logo" src="../static/logo.png" />
 
-        <div>Hi, {{userdata['name']}}</div>
-        <div>Email: {{userdata['email']}}</div>
-        <a href="/logout">Log Out</a>
-        <button type="button" onclick="deleteUser()">Delete Account</button>
+        <div>Hi, {{userdata['given_name']}}</div>
+        <br />
         <a href="/account">My Account</a>
-
-        <script>
-            function deleteUser() {
-                fetch("/api/delete-user", { method: "POST" })
-                    .then(response => response.json()).then(value => {
-                        if (value.result == 0) {
-                            window.location.href = "/";
-                        } else {
-                            alert("Error deleting user");
-                        }
-                    }).catch(err => {
-                        alert("Error deleting user");
-                    });
-            }
-        </script>
+        <br /><br />
+        <a href="/logout">Log Out</a>
 
         <form class="ingredients" action="/search_ingredients" method="POST">
             <p>Search for Ingredients</p>

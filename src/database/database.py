@@ -425,7 +425,8 @@ class Database:
         id: str,
         email: str,
         username: str = None,
-        name: str = "",
+        given_name: str = "",
+        family_name: str = "",
         profile_image: str = "",
     ):
         """
@@ -436,7 +437,8 @@ class Database:
             email (str): The user's email. This field is not checked for validity.
             username (str): The user's username. This value must be unique across all users and must be at least three characters.
                 If the username is not provided, then a new one will be randomly generated based on the user's given name.
-            name (str): The user's name. This value is optional.
+            given_name (str): The user's given name. This value is optional.
+            family_name (str): The user's family name. This value is optional.
             profile_image (str): The URL for the user's profile picture. This value is optional.
 
         Returns:
@@ -455,7 +457,7 @@ class Database:
 
         # If the username is None, generate a new one
         if username == None:
-            username = self.generate_username(name)
+            username = self.generate_username(given_name + " " + family_name)
 
         # If the username is too short, raise an exception
         if len(username) < 3:
@@ -470,7 +472,8 @@ class Database:
         user = User(
             id=id,
             email=email,
-            name=name,
+            given_name=given_name,
+            family_name=family_name,
             profile_image=profile_image,
             username=username,
         )
@@ -1294,11 +1297,11 @@ class Database:
         finally:
             session.close()
 
-    def search_users_by_given_name(
+    def search_users_by_name(
         self, query: str, limit: int = 10, offset: int = 0
     ) -> list:
         """
-        Searches for users whose given names match or otherwise contain the given query string and returns a list of user objects.
+        Searches for users whose names match or otherwise contain the given query string and returns a list of user objects.
 
         Args:
             query (str): The query string to use.
@@ -1306,7 +1309,7 @@ class Database:
             offset (int): The offset into the total list of users to start at. This value is optional.
 
         Returns:
-            A list of `User` objects whose given names match the provided search criteria, or an empty list if no users match the given criteria.
+            A list of `User` objects whose names match the provided search criteria, or an empty list if no users match the given criteria.
 
         Raises:
             DatabaseException: If the query was unable to be performed.
@@ -1314,16 +1317,37 @@ class Database:
 
         from database.models import User
 
+        parts = query.strip().split(" ")
+
         session = self.int__Session()
         result = []
         try:
-            users = (
-                session.query(User)
-                .filter(User.name.ilike(f"%{query}%"))
-                .offset(offset)
-                .limit(limit)
-                .all()
-            )
+            if len(parts) > 1:
+                users = session.query(User).filter(
+                    or_(
+                        and_(
+                            User.given_name.ilike(f"%{parts[0]}%"),
+                            User.family_name.ilike(f"%{parts[1]}%"),
+                        ),
+                        and_(
+                            User.given_name.ilike(f"%{parts[1]}%"),
+                            User.family_name.ilike(f"%{parts[0]}%"),
+                        ),
+                    )
+                )
+            else:
+                users = (
+                    session.query(User)
+                    .filter(
+                        or_(
+                            User.given_name.ilike(f"%{query}%"),
+                            User.family_name.ilike(f"%{query}%"),
+                        )
+                    )
+                    .offset(offset)
+                    .limit(limit)
+                    .all()
+                )
 
             if users != None:
                 result = users

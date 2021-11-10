@@ -375,6 +375,11 @@ def update_username():
 
     return jsonify({"result": RESPONSE_OK})
 
+def dict_get_or_default(dict, key, default):
+    try:
+        return dict[key]
+    except KeyError:
+        return default
 
 @userdata_blueprint.route("/api/search-users", methods=["POST"])
 @login_required
@@ -384,15 +389,16 @@ def search_users():
 
     Parameters:
         criteria (str): The search criteria to use. This value must be one of the following:
-            `given_name`: Search for users by their given name.
+            `name`: Search for users by their name.
             `username`: Search for users by their username.
         query (str): The query string to use.
         offset (int): The offset into the search results to start at. This value is optional.
         limit (int): The maximum number of users to return. This value is optional.
+        exclude_current (bool): Whether the search should exclude the currently logged-in user. This value is optional and is true by default.
 
     Response:
         {
-            users (list): A list of user objects containing only their IDs, usernames, and given names.
+            users (list): A list of user objects containing only their IDs, usernames, and names.
         }
 
     If the search query failed, an empty JSON object will be returned and will not contain a `users` entry.
@@ -401,10 +407,8 @@ def search_users():
     data = request.get_json()
     criteria = ""
     query = ""
-    offset = 0
-    limit = 10
 
-    CRITERIA_GIVEN_NAME = "given_name"
+    CRITERIA_NAME = "name"
     CRITERIA_USERNAME = "username"
 
     try:
@@ -414,22 +418,20 @@ def search_users():
         if (
             query == None
             or criteria == None
-            or (criteria != CRITERIA_GIVEN_NAME and criteria != CRITERIA_USERNAME)
+            or (criteria != CRITERIA_NAME and criteria != CRITERIA_USERNAME)
         ):
             return jsonify({})
     except KeyError:
         return jsonify({})
 
-    try:
-        offset = data["offset"]
-        limit = data["limit"]
-    except KeyError:
-        pass
+    offset = dict_get_or_default(data, "offset", 0)
+    limit = dict_get_or_default(data, "limit", 10)
+    exclude_current = dict_get_or_default(data, "exclude_current", True)
 
     users = []
     try:
-        if criteria == CRITERIA_GIVEN_NAME:
-            users = int__db.search_users_by_given_name(query, limit, offset)
+        if criteria == CRITERIA_NAME:
+            users = int__db.search_users_by_name(query, limit, offset)
         elif criteria == CRITERIA_USERNAME:
             users = int__db.search_users_by_username(query, limit, offset)
     except DatabaseException:
@@ -437,20 +439,28 @@ def search_users():
 
     user_json = []
     for x in users:
-        user_json.append({"id": x.id, "name": x.name, "username": x.username})
+        if exclude_current and x.id == current_user.id:
+            continue
+        user_json.append(
+            {
+                "id": x.id,
+                "given_name": x.given_name,
+                "family_name": x.family_name,
+                "username": x.username,
+            }
+        )
 
     return jsonify({"users": user_json})
 
 
-# TODO: Fix this
-@userdata_blueprint.route("/api2/start-login", methods=["POST"])
+@userdata_blueprint.route("/api/start-login", methods=["POST"])
 def start_login():
     """
     Initiates the login flow. The value returned by this function will be a redirect to Google's login handler URL.
     """
     google_provider = get_google_provider_cfg()
     authorization_endpoint = google_provider["authorization_endpoint"]
-    dest_uri = request.url_root + "login/callback"
+    dest_uri = request.url_root + "api/validate-login/callback"
     request_uri = login_handler_client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=dest_uri,
@@ -504,12 +514,18 @@ def get_google_user_info(google_provider):
     user_id = response_json["sub"]
     user_email = response_json["email"]
     user_pfp = response_json["picture"]
-    user_name = response_json["given_name"]
-    return {"id": user_id, "email": user_email, "name": user_name, "image": user_pfp}
+    given_name = response_json["given_name"]
+    family_name = response_json["family_name"]
+    return {
+        "id": user_id,
+        "email": user_email,
+        "given_name": given_name,
+        "family_name": family_name,
+        "image": user_pfp,
+    }
 
 
-# TODO: Fix this
-@userdata_blueprint.route("/login/callback")
+@userdata_blueprint.route("/api/validate-login/callback")
 def validate_login():
     """
     Validates that the attempted login was successful.
@@ -535,8 +551,7 @@ def validate_login():
     return redirect("/")
 
 
-# TODO: Fix this
-@userdata_blueprint.route("/api2/start-signup", methods=["POST"])
+@userdata_blueprint.route("/api/start-signup", methods=["POST"])
 def start_signup():
     """
     Initiates the signup flow. The value returned by this function will be a redirect to Google's login handler URL.
@@ -552,8 +567,7 @@ def start_signup():
     return redirect(request_uri)
 
 
-# TODO: Fix this
-@userdata_blueprint.route("/api2/validate-signup/callback")
+@userdata_blueprint.route("/api/validate-signup/callback")
 def validate_signup():
     """
     Validates that the attempted signup was successful.
@@ -573,36 +587,14 @@ def validate_signup():
     user = None
     try:
         user = int__db.add_user(
-            userinfo["id"], userinfo["email"], userinfo["name"], userinfo["image"]
+            userinfo["id"],
+            userinfo["email"],
+            given_name=userinfo["given_name"],
+            family_name=userinfo["family_name"],
+            profile_image=userinfo["image"],
         )
     except DatabaseException:
         return redirect("/signup")
 
     login_user(user)
-    return redirect("/")
-
-
-# XXX: This is temporary
-@userdata_blueprint.route("/api/start-login", methods=["POST"])
-def start_login2():
-    try:
-        user = int__db.get_user("12345")
-        if user == None:
-            return redirect("/login")
-        login_user(user)
-    except DatabaseException:
-        return redirect("/login")
-    return redirect("/")
-
-
-# XXX: This is temporary
-@userdata_blueprint.route("/api/start-signup", methods=["POST"])
-def start_signup2():
-    try:
-        user = int__db.add_user(
-            "12345", "wgarland@piecemeal.com", name="William Garland"
-        )
-        login_user(user)
-    except DatabaseException:
-        return redirect("/signup")
     return redirect("/")

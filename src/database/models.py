@@ -20,7 +20,8 @@ class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.String(255), unique=True, nullable=False, primary_key=True)
     email = db.Column(db.String(255), nullable=False)
-    name = db.Column(db.String(255))
+    given_name = db.Column(db.String(255))
+    family_name = db.Column(db.String(255))
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     profile_image = db.Column(db.Text, default="/static/default_user_profile_image.png")
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -36,7 +37,8 @@ class User(db.Model, UserMixin):
         return {
             "id": self.id,
             "email": self.email,
-            "name": self.name,
+            "given_name": self.given_name,
+            "family_name": self.family_name,
             "creation_date": self.creation_date,
             "profile_image": self.profile_image,
             "username": self.username,
