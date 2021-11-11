@@ -24,6 +24,7 @@ def get_blueprint():
     return search_blueprint
 
 
+
 @search_blueprint.route("/search_ingredients", methods=["POST"])
 def searchByingredients():
     if request.method == "POST":
