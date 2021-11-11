@@ -460,14 +460,15 @@ def search_ingredients(
         )
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make ingredient request: {str(e)}")
-
+    # ingredients = data
     ingredients = []
+    imageURL = "https://spoonacular.com/cdn/ingredients_250x250/"
     for ingredient in data["results"]:
         ingredients.append(
             {
                 "id": ingredient["id"],
-                "name": ingredient["title"],
-                "image": ingredient["image"],
+                "name": ingredient["name"],
+                "image": imageURL + ingredient["image"],
             }
         )
 
