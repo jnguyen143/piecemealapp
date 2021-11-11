@@ -4,8 +4,6 @@ import routes.util as util
 from api.spoonacular import search_recipes, search_ingredients
 
 
-# import spoonacular functions search_recipes, search_ingredients
-
 search_blueprint = Blueprint(
     "bp_search",
     __name__,
@@ -24,7 +22,6 @@ def get_blueprint():
         The blueprint object for this file.
     """
     return search_blueprint
-
 
 
 @search_blueprint.route("/search_ingredients", methods=["POST"])

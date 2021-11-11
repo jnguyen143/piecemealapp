@@ -4,6 +4,7 @@ import os
 from database import database
 import routes.util as util
 
+
 # Before anything else, make sure we have 3.9 or greater
 import sys
 
