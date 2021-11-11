@@ -15,7 +15,7 @@
 
     <form class="ingredients" action="/search_ingredients" method="POST">
       <p>Search for Ingredients</p>
-      <input type="text" placeholder="Peanut Butter, Jelly..." />
+      <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
       <div class="filters">
         <p>Filter by:</p>
         <input type="button" class="filter-button" value="Cuisine" />
@@ -66,8 +66,24 @@
         <!-- <h2>Sushi</h2>
         <p>Small recipe description goes here</p> -->
         {%endfor%}
+
+        <!-- </div> -->
+        {%for ingredient in ingredients%}
+        <!-- <div class="description"> -->
+        <!-- <div class="image">
+          <img src="{{ingredient['image']}}" style="width: 100px; height: 100px;"
+            alt="No image available for this recipe" />
+        </div> -->
+        <!-- <div> -->
+
+        <h2>{{ingredient['name']}}</h2>
+        <p>Recipe ID - {{ingredient['id']}}</p>
+        <!-- </div> -->
+        {%endfor%}
+
       </div>
     </div>
+  </div>
 
   </div>
 
