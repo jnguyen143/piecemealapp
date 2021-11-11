@@ -22,5 +22,5 @@ def get_blueprint():
 
 
 @signup_blueprint.route("/signup")
-def login():
+def signup():
     return render_template("signup.html")

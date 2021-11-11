@@ -2,7 +2,7 @@ import flask
 import dotenv
 import os
 from database import database
-import routes.util
+import routes.util as util
 
 # Before anything else, make sure we have 3.9 or greater
 import sys
@@ -16,6 +16,10 @@ if sys.version_info < MIN_PYTHON_VERSION:
 
 app = None
 db: database.Database = None
+
+
+def shutdown_session(exception=None):
+    db.finalize()
 
 
 def init_app():
@@ -41,8 +45,11 @@ def init_app():
     dotenv.load_dotenv(env_path)
 
     # Create the application
-    app = flask.Flask(__name__, static_folder=routes.util.get_static_folder())
+    app = flask.Flask(__name__, static_folder=util.get_static_folder())
     app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
+    # XXX: This is for debugging only!
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     # Initialize the database
     try:
@@ -51,15 +58,22 @@ def init_app():
         raise Exception(f"Failed to initialize database ({str(e)})")
 
     # Register the blueprints
-    from routes import index, login, signup, profile, search, userdata
-    userdata.set_db_obj(db)
+    import routes.index, routes.login, routes.signup, routes.profile, routes.search, routes.userdata, routes.account
 
-    app.register_blueprint(index.get_blueprint())
-    app.register_blueprint(login.get_blueprint())
-    app.register_blueprint(signup.get_blueprint())
-    app.register_blueprint(userdata.get_blueprint())
-    app.register_blueprint(profile.get_blueprint())
-    app.register_blueprint(search.get_blueprint())
+    routes.userdata.init(db)
+    routes.login.init(app, db)
+    routes.account.init(db)
+
+    app.register_blueprint(routes.index.get_blueprint())
+    app.register_blueprint(routes.login.get_blueprint())
+    app.register_blueprint(routes.signup.get_blueprint())
+    app.register_blueprint(routes.userdata.get_blueprint())
+    app.register_blueprint(routes.profile.get_blueprint())
+    app.register_blueprint(routes.search.get_blueprint())
+    app.register_blueprint(routes.account.get_blueprint())
+
+    # Register the teardown context
+    app.teardown_appcontext(shutdown_session)
 
 
 def start_app():
@@ -79,9 +93,4 @@ def start_app():
 
 if __name__ == "__main__":
     init_app()
-
-    @app.teardown_appcontext
-    def shutdown_session(exception=None):
-        db.finalize()
-
     start_app()

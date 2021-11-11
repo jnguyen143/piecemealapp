@@ -25,6 +25,7 @@ def get_blueprint():
     return search_blueprint
 
 
+
 @search_blueprint.route("/search_ingredients", methods=["POST"])
 def search_ingredients():
     if flask.request.method == "POST":
