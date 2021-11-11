@@ -11,22 +11,25 @@
 
   <div class="left-container">
 
-    <img class="logo" src="../static/logo.png" />
+    <img class="logo" src="../static/logo.svg" />
 
-    <form class="ingredients" action="/search_ingredients" method="POST">
-      <p>Search for Ingredients</p>
-      <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
+
+    <form class="recipes" action="/search_recipes" method="POST">
+      <p>Search for Recipes</p>
+      <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
+      <button type="submit">Search</button>
       <div class="filters">
         <p>Filter by:</p>
         <input type="button" class="filter-button" value="Cuisine" />
         <input type="button" class="filter-button" value="Allergies" />
       </div>
-      <button type="submit">Search</button>
     </form>
 
-    <form class="recipes" action="/search_recipes" method="POST">
-      <p>Search for Recipes</p>
-      <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
+
+    <form class="ingredients" action="/search_ingredients" method="POST">
+      <p>Search for Ingredients</p>
+      <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
+
       <button type="submit">Search</button>
     </form>
 
@@ -38,22 +41,13 @@
 
   <div class="right-container">
     <h1>Welcome</h1>
-    <p>Rediscover your appetite by signing up and exploring our more than 1,000,000+ recipes</p>
-    <p>Here goes the search results or dummy data for main page</p>
+    <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
 
-    <!-- <div class="recipe">
-      <div class="image">
-        <img src="../static/temp_ingredient.jpg" style="width: 100px; height: 100px;" />
-      </div>
-      <div class="description">
-        <h2>Butter</h2>
-        <p>Small recipe description goes here</p>
-      </div>
-    </div> -->
-
+    {%if recipes%}
     <div class="recipe">
       <!-- need if statement to hide recipe div -->
       <!--  -->
+
       {%for recipe in recipes%}
 
       <div class="description">
@@ -63,28 +57,27 @@
         </div>
         <h2>{{recipe['name']}}</h2>
         <p>Recipe ID - {{recipe['id']}}</p>
-        <!-- <h2>Sushi</h2>
-        <p>Small recipe description goes here</p> -->
-        {%endfor%}
-        <!-- </div> -->
-        {%for ingredient in ingredients%}
-        <!-- <div class="description"> -->
-        <!-- <div class="image">
-          <img src="{{ingredient['image']}}" style="width: 100px; height: 100px;"
-            alt="No image available for this recipe" />
-        </div> -->
-        <!-- <div> -->
 
-        <h2>{{ingredient['name']}}</h2>
-        <p>Recipe ID - {{ingredient['id']}}</p>
-        <!-- </div> -->
         {%endfor%}
+        {%endif%}
+        {%if ingredients%}
+        {%for ingredient in ingredients%}
+        <div class="description">
+          <div class="image">
+            <img src="{{ingredient['image']}}" style="width: 100px; height: 100px;"
+              alt="No image available for this recipe" />
+          </div>
+          <div>
+            <h2>{{ingredient['name']}}</h2>
+            <p>Recipe ID - {{ingredient['id']}}</p>
+            {%endfor%}
+            {%endif%}
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
-
-  </div>
-
 </body>
 
 </html>
