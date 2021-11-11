@@ -14,9 +14,7 @@ login_blueprint = Blueprint(
 def get_blueprint():
     """
     Returns the `Blueprint` object which stores all of the functions in this file.
-
     All routing files have the same function to retrieve their blueprints.
-
     Returns:
         The blueprint object for this file.
     """
@@ -38,7 +36,6 @@ def load_user(username):
 def init(app: Flask, db: database.Database):
     """
     Initializes this module using the provided arguments.
-
     Args:
         app (Flask): The application object.
         db (Database): The database object to use.
@@ -56,7 +53,7 @@ def login():
     return render_template("login.html")
 
 
-@login_blueprint.route("/logout")
-def logout():
-    logout_user()
-    return redirect("/")
+# @login_blueprint.route("/logout")
+# def logout():
+#     logout_user()
+#     return redirect("/")
