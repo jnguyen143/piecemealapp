@@ -9,7 +9,41 @@ from os import getenv
 import sqlalchemy.orm as orm
 from sqlalchemy import or_, and_
 import builtins
-from random import randrange
+from random import randbytes, randint, randrange
+from enum import Enum
+
+
+class UserStatus(Enum):
+    """
+    The status codes a user can have.
+    """
+
+    Unverified = 0
+    Verified = 1
+    Deactivated = 2
+
+    @classmethod
+    def has(cls, value):
+        return value in cls._value2member_map_
+
+
+class UserAuthentication(Enum):
+    """
+    The authentication methods a user can use.
+    """
+
+    Default = 0, "Default"
+    Google = 1, "Google"
+
+    def __new__(cls, value, label):
+        member = object.__new__(cls)
+        member._value_ = value
+        member.label = label
+        return member
+
+    @classmethod
+    def has(cls, value):
+        return value in cls._value2member_map_
 
 
 class DatabaseException(Exception):
@@ -420,7 +454,191 @@ class Database:
                 return False
         return True
 
-    def add_user(
+    def generate_user_id(self) -> str:
+        """
+        Generates a unique ID based on the specified username.
+
+        The returned value is guaranteed to be unique and not more than 255 characters in length.
+        """
+        result = randbytes(255).hex()[0:255]
+        while self.user_exists(result):
+            result = randbytes(255).hex()[0:255]
+        return result
+
+    def generate_encrypted_password(self, password: str) -> str:
+        """
+        Returns the encrypted version of the provided password.
+        """
+        from argon2 import PasswordHasher
+
+        ph = PasswordHasher()
+        return ph.hash(password)
+
+    def get_password_for_user(self, user_id: str):
+        """
+        Returns the password object associated with the specified user.
+
+        Args:
+            user_id (str): The ID of the target user.
+
+        Returns:
+            The password object associated with the specified user.
+
+        Raises:
+            NoUserException: If the specified user does not exist or does not have an account type which stores a password.
+            DatabaseException: If there was a problem querying the database.
+        """
+        from database.models import Password
+
+        session = self.int__Session()
+        try:
+            pwd = session.query(Password).filter_by(user_id=user_id).first()
+            if pwd == None:
+                raise NoUserException(user_id)
+            return pwd
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query password")
+        finally:
+            session.close()
+
+    def validate_password(self, user_id: str, password: str) -> bool:
+        """
+        Returns true if the provided password matches the stored password for the specified user.
+
+        If the stored hash needs to be updated, this function will update it.
+
+        Args:
+            user_id (str): The ID of the target user.
+            password (str): The target user's unencrypted password.
+
+        Returns:
+            True if the provided password matches the stored password, and false otherwise.
+
+        Raises:
+            NoUserException: If the specified user does not exist or does not have an account type which requires a password.
+            DatabaseException: If there was a problem querying the database.
+        """
+        hashed_password = self.get_password_for_user(user_id).phrase
+
+        from argon2 import PasswordHasher
+
+        ph = PasswordHasher()
+        try:
+            ph.verify(hashed_password, password)
+
+            if ph.check_needs_rehash(hashed_password):
+                self.set_password(user_id, ph.hash(password), encrypted=True)
+
+            return True
+        except:
+            return False
+
+    def set_password(self, user_id: str, password: str, encrypted=False):
+        """
+        Sets the user's password to the specified password.
+
+        Args:
+            user_id (str): The ID of the target user.
+            password (str): The target user's password.
+            encrypted (bool): Whether the provided password has already been encrypted. This value is false by default.
+
+        Raises:
+            NoUserException: If the specified user does not exist or its account type does not require a password.
+            DatabaseException: If there was a problem accessing the database.
+        """
+        if not encrypted:
+            password = self.generate_encrypted_password(password)
+
+        from database.models import Password
+
+        session = self.int__Session()
+        try:
+            pwd = session.query(Password).filter_by(user_id=user_id).first()
+            if pwd == None:
+                raise NoUserException(user_id)
+            pwd.phrase = password
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query database")
+        finally:
+            session.close()
+
+    def add_default_user(
+        self,
+        email: str,
+        password: str,
+        username: str = None,
+        given_name: str = "",
+        family_name: str = "",
+    ):
+        """
+        Creates a new user using default authentication and with the specified information and adds it to the database, then returns the created user.
+
+        Args:
+            email (str): The user's email. This field is not checked for validity.
+            password (str): The user's password.
+            username (str): The user's username. This value must be unique across all users and must be at least three characters.
+                If the username is not provided, then a new one will be randomly generated based on the user's given name.
+            given_name (str): The user's given name. This value is optional.
+            family_name (str): The user's family name. This value is optional.
+
+        Returns:
+            The newly created `User` object.
+
+        Raises:
+            DuplicateUserException: If a user with the specified username already exists.
+            DatabaseException: If there was a problem adding the user.
+        """
+        from database.models import User, Password
+
+        if username != None and self.username_exists(username):
+            raise DuplicateUserException(username)
+
+        # If the username is None, generate a new one
+        if username == None:
+            username = self.generate_username(given_name + " " + family_name)
+
+        # If the username is too short, raise an exception
+        if len(username) < 3:
+            raise DatabaseException(f'The specified username "{username}" is too short')
+
+        # If the username contains invalid characters, raise an exception
+        if not self.username_is_valid(username):
+            raise DatabaseException(
+                f'The specified username "{username}" contains invalid characters'
+            )
+
+        id = self.generate_user_id()
+
+        user = User(
+            id=id,
+            email=email,
+            given_name=given_name,
+            family_name=family_name,
+            username=username,
+            authentication=UserAuthentication.Default.value,
+            status=UserStatus.Verified.value,  # For now this is verified by default, but in the future it should be changed to be unverified by default until the user verifies their account via email
+        )
+
+        encrypted_password = self.generate_encrypted_password(password)
+        pwd = Password(user_id=id, phrase=encrypted_password)
+
+        session = self.int__Session()
+        try:
+            session.add(user)
+            session.add(pwd)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add user")
+        finally:
+            session.close()
+
+        return self.get_user(id)
+
+    def add_google_user(
         self,
         id: str,
         email: str,
@@ -430,7 +648,7 @@ class Database:
         profile_image: str = "",
     ):
         """
-        Creates a new user with the specified information and adds it to the database, then returns the created user.
+        Creates a new user using Google authentication and with the specified information and adds it to the database, then returns the created user.
 
         Args:
             id (str): The ID of the user. This value must be unique across all users.
@@ -476,6 +694,8 @@ class Database:
             family_name=family_name,
             profile_image=profile_image,
             username=username,
+            authentication=UserAuthentication.Google.value,
+            status=UserStatus.Verified.value,
         )
 
         session = self.int__Session()
@@ -489,6 +709,34 @@ class Database:
             session.close()
 
         return self.get_user(id)
+
+    def get_user_by_username(self, username: str) -> str:
+        """
+        Returns the user object associated with the specified username.
+
+        Args:
+            username (str): The username of the target user.
+
+        Returns:
+            The user object associated with the specified username.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If there was a problem querying the database.
+        """
+        from database.models import User
+
+        session = self.int__Session()
+        try:
+            user = session.query(User).filter_by(username=username).first()
+            if user == None:
+                raise NoUserException(username)
+            return user
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query database")
+        finally:
+            session.close()
 
     def add_recipe(self, id: int, name: str, image: str):
         """

@@ -4,14 +4,17 @@ This file defines all of the endpoints relating to user data, such as saving rec
 All of the endpoints defined in this file are API endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
 
-from flask import Blueprint, request, redirect, url_for
+from flask import Blueprint, request, redirect
 from flask.json import jsonify
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
-
-from database.database import DuplicateUserException
+from database.database import (
+    DuplicateUserException,
+    UserAuthentication,
+    DatabaseException,
+    Database,
+)
 from . import util
 from flask_login import login_required, current_user, login_user, logout_user
-from database.database import Database, DatabaseException
 import os
 import requests
 import json
@@ -375,11 +378,13 @@ def update_username():
 
     return jsonify({"result": RESPONSE_OK})
 
+
 def dict_get_or_default(dict, key, default):
     try:
         return dict[key]
     except KeyError:
         return default
+
 
 @userdata_blueprint.route("/api/search-users", methods=["POST"])
 @login_required
@@ -453,20 +458,82 @@ def search_users():
     return jsonify({"users": user_json})
 
 
+def get_private_key():
+    """
+    Returns the server's stored private key.
+
+    The private key must be stored in a file with the name "private_key.pem" in the application root directory.
+    """
+    import pathlib
+
+    root_dir = util.get_application_root_dir()
+    result = ""
+    with open(pathlib.Path(root_dir).joinpath("private_key.pem").resolve(), "r") as f:
+        result = f.read()
+    return result
+
+
 @userdata_blueprint.route("/api/start-login", methods=["POST"])
 def start_login():
     """
     Initiates the login flow. The value returned by this function will be a redirect to Google's login handler URL.
+
+    The input data for this endpoint must be encrypted using the correct public key.
+
+    Parameters:
+        authentication (str): The authentication method to use. This value should be one of the values in `database.UserAuthentication`.
+        username (str): The user's username. This value is optional depending on the authentication method.
+        password (str): The user's password. This value is optional depending on the authentication method.
+
+    Response:
+        If the authentication method is `database.UserAuthentication.Google`, then this function will return a redirect to Google's login handler URL.
+
+        Otherwise, the following value will be returned:
+        {
+            success (bool): Whether the user was successfully logged in.
+        }
     """
-    google_provider = get_google_provider_cfg()
-    authorization_endpoint = google_provider["authorization_endpoint"]
-    dest_uri = request.url_root + "api/validate-login/callback"
-    request_uri = login_handler_client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=dest_uri,
-        scope=["openid", "email", "profile"],
-    )
-    return redirect(request_uri)
+
+    message = ""
+    try:
+        message = request.get_data()
+    except:
+        return jsonify({"success": False})
+
+    from Crypto.Cipher import PKCS1_OAEP
+    from Crypto.PublicKey import RSA
+    from Crypto.Hash import SHA256
+    from base64 import b64decode
+
+    key = RSA.importKey(get_private_key())
+    cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+    decrypted_message = cipher.decrypt(b64decode(message))
+
+    actual_data = json.loads(decrypted_message)
+
+    auth = dict_get_or_default(actual_data, "authentication", None)
+    if auth == UserAuthentication.Google.label:
+        google_provider = get_google_provider_cfg()
+        authorization_endpoint = google_provider["authorization_endpoint"]
+        dest_uri = request.url_root + "api/validate-login/callback"
+        request_uri = login_handler_client.prepare_request_uri(
+            authorization_endpoint,
+            redirect_uri=dest_uri,
+            scope=["openid", "email", "profile"],
+        )
+        return redirect(request_uri)
+    elif auth == UserAuthentication.Default.label:
+        try:
+            username = actual_data["username"]
+            password = actual_data["password"]
+            user = int__db.get_user_by_username(username)
+            if int__db.validate_password(user.id, password):
+                login_user(user)
+            return jsonify({"success": True})
+        except:
+            return jsonify({"success": False})
+    else:
+        return jsonify({"success": False})
 
 
 def validate_with_google(google_provider, code):
@@ -555,16 +622,69 @@ def validate_login():
 def start_signup():
     """
     Initiates the signup flow. The value returned by this function will be a redirect to Google's login handler URL.
+
+    The input data for this endpoint must be encrypted using the correct public key.
+
+    Parameters:
+        authentication (str): The authentication method to use. This value should be one of the values in `database.UserAuthentication`.
+        username (str): The user's username. This value is optional depending on the authentication method.
+        email (str): The user's email. This value is optional depending on the authentication method.
+        given_name (str): The user's given name. This value is optional depending on the authentication method.
+        family_name (str): The user's family name. This value is optional depending on the authentication method.
+        password (str): The user's password. This value is optional depending on the authentication method.
+
+    Response:
+        If the authentication method is `database.UserAuthentication.Google`, then this function will return a redirect to Google's login handler URL.
+
+        Otherwise, the following value will be returned:
+        {
+            success (bool): Whether the user was successfully created and logged in.
+        }
     """
-    google_provider = get_google_provider_cfg()
-    authorization_endpoint = google_provider["authorization_endpoint"]
-    dest_uri = request.url_root + "api/validate-signup/callback"
-    request_uri = login_handler_client.prepare_request_uri(
-        authorization_endpoint,
-        redirect_uri=dest_uri,
-        scope=["openid", "email", "profile"],
-    )
-    return redirect(request_uri)
+    message = ""
+    try:
+        message = request.get_data()
+    except:
+        return jsonify({"success": False})
+
+    from Crypto.Cipher import PKCS1_OAEP
+    from Crypto.PublicKey import RSA
+    from Crypto.Hash import SHA256
+    from base64 import b64decode
+
+    key = RSA.importKey(get_private_key())
+    cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+    decrypted_message = cipher.decrypt(b64decode(message))
+
+    actual_data = json.loads(decrypted_message)
+
+    auth = dict_get_or_default(actual_data, "authentication", None)
+    if auth == UserAuthentication.Google.label:
+        google_provider = get_google_provider_cfg()
+        authorization_endpoint = google_provider["authorization_endpoint"]
+        dest_uri = request.url_root + "api/validate-signup/callback"
+        request_uri = login_handler_client.prepare_request_uri(
+            authorization_endpoint,
+            redirect_uri=dest_uri,
+            scope=["openid", "email", "profile"],
+        )
+        return redirect(request_uri)
+    elif auth == UserAuthentication.Default.label:
+        try:
+            username = actual_data["username"]
+            email = actual_data["email"]
+            given_name = actual_data["given_name"]
+            family_name = actual_data["family_name"]
+            password = actual_data["password"]
+            user = int__db.add_default_user(
+                email, password, username, given_name, family_name
+            )
+            login_user(user)
+            return jsonify({"success": True})
+        except:
+            return jsonify({"success": False})
+    else:
+        return jsonify({"success": False})
 
 
 @userdata_blueprint.route("/api/validate-signup/callback")
@@ -586,7 +706,7 @@ def validate_signup():
 
     user = None
     try:
-        user = int__db.add_user(
+        user = int__db.add_google_user(
             userinfo["id"],
             userinfo["email"],
             given_name=userinfo["given_name"],
@@ -598,3 +718,31 @@ def validate_signup():
 
     login_user(user)
     return redirect("/")
+
+
+def get_public_key():
+    """
+    Returns the server's stored public key.
+
+    The public key must be stored in a file with the name "public_key.pem" in the application root directory.
+    """
+    import pathlib
+
+    root_dir = util.get_application_root_dir()
+    result = ""
+    with open(pathlib.Path(root_dir).joinpath("public_key.pem").resolve(), "r") as f:
+        result = f.read()
+    return result
+
+
+@userdata_blueprint.route("/api/get-public-key")
+def get_server_public_key():
+    """
+    Returns the server's public key for use in encrypting data that should be sent back to the server.
+
+    Response:
+    {
+        key (str): The server's public key (as a string).
+    }
+    """
+    return jsonify({"key": get_public_key()})
