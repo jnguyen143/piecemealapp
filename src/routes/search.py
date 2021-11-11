@@ -1,9 +1,10 @@
 import flask
 from flask import Blueprint, render_template, request
 import routes.util as util
-import api.spoonacular
+from api.spoonacular import search_recipes, search_ingredients
 
-# import spoonacular somehow
+
+# import spoonacular functions search_recipes, search_ingredients
 
 search_blueprint = Blueprint(
     "bp_search",
