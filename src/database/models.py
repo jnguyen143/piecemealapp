@@ -7,6 +7,7 @@ Prior to importing this file anywhere in the application, `database.init()` must
 from sqlalchemy.orm import relationship
 from database.database import DatabaseException
 from datetime import datetime
+from flask_login import UserMixin
 import builtins
 from flask_login import UserMixin
 
