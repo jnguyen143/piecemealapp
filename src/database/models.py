@@ -26,6 +26,8 @@ class User(db.Model, UserMixin):
     creation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     profile_image = db.Column(db.Text, default="/static/default_user_profile_image.png")
     username = db.Column(db.String(50), unique=True, nullable=False)
+    authentication = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.Integer, nullable=False, default=0)
 
     def to_json(self):
         """
@@ -43,6 +45,8 @@ class User(db.Model, UserMixin):
             "creation_date": self.creation_date,
             "profile_image": self.profile_image,
             "username": self.username,
+            "authentication": self.authentication,
+            "status": self.status,
         }
 
 
@@ -170,3 +174,30 @@ class Relationship(db.Model):
             return {"user1": self.user1, "user2": self.user2}
 
         return {"user1": self.user1_obj.to_json(), "user2": self.user2_obj.to_json()}
+
+
+class Password(db.Model):
+    __tablename__ = "passwords"
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    phrase = db.Column(db.Text, nullable=False)
+    user_obj = relationship(User, foreign_keys=[user_id])
+
+    def to_json(self, shallow: bool = True):
+        """
+        Returns this row as a JSON object, where each key corresponds to a column
+        in the table and the values correspond to the entries in the current row.
+
+        Args:
+            shallow (bool): If set to false, the `user_id` key will be replaced with a `user` key which will map to the actual user object instead of just the ID.
+
+        Returns:
+            This row instance as a JSON object.
+        """
+        if shallow:
+            return {"user_id": self.user_id, "phrase": self.phrase}
+
+        return {
+            "user": self.user_obj.to_json(),
+            "phrase": self.phrase,
+        }
