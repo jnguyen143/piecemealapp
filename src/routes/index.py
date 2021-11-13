@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template
+from flask_login import current_user
 from . import util
+from flask_login import current_user
+from api.spoonacular import get_recommended_recipes
 
 index_blueprint = Blueprint(
     "bp_index",
@@ -22,5 +25,18 @@ def get_blueprint():
 
 
 @index_blueprint.route("/")
-def login():
-    return render_template("index.html")
+def index():
+    # If user is authenticated, get user recommendations based on saved ingredients and recipes
+    if current_user.is_authenticated:
+        data = (
+            "TESTING AUTH SECTION" + current_user.name,
+            current_user.email,
+            current_user.profile_pic,
+        )
+        # return render_template("index2.html", userdata=current_user.to_json())
+    # Else, get dummy data/random recommendations
+    else:
+        data = get_recommended_recipes()
+        print(data)
+
+    return render_template("index.html", data=data, len=len(data))

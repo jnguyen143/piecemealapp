@@ -6,3 +6,5 @@ requests
 requests_oauthlib
 pyOpenSSL
 psycopg2-binary
+argon2-cffi
+PyCryptodome

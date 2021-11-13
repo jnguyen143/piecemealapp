@@ -460,18 +460,68 @@ def search_ingredients(
         )
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make ingredient request: {str(e)}")
-
+    # ingredients = data
     ingredients = []
+    imageURL = "https://spoonacular.com/cdn/ingredients_250x250/"
     for ingredient in data["results"]:
         ingredients.append(
             {
                 "id": ingredient["id"],
-                "name": ingredient["title"],
-                "image": ingredient["image"],
+                "name": ingredient["name"],
+                "image": imageURL + ingredient["image"],
             }
         )
 
     return ingredients
+
+
+def get_recommended_recipes(
+    offset: int = 0,
+    limit: int = 10,
+) -> list:
+    """
+    Returns a list of randomly recommended recipes.
+
+    Args:
+        Number as the number of desired recipe results
+
+    Returns:
+        A list of JSON-encoded recipes.
+        Each recipe object consists of the following values:
+            - id (int): The ID of the recipe.
+            - name (str): The display name of the recipe.
+            - image (str): The URL of the image for the recipe.
+
+    Raises:
+        UndefinedApiKeyException: If the Spoonacular API key is undefined.
+        SpoonacularApiException: If there was a problem completing the request.
+    """
+
+    params = {"apiKey": get_api_key()}
+
+    params["offset"] = offset
+    params["number"] = limit
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/random?",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as e:
+        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
+
+    if not data:
+        return None
+
+    result = []
+    for recipe in data:
+        result.append(
+            {"id": recipe["id"], "name": recipe["name"], "image": recipe["image"]}
+        )
+
+    return result
 
 
 def get_ingredient(id: int) -> Ingredient:

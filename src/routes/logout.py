@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect
+from flask_login import logout_user
 from . import util
 
-signup_blueprint = Blueprint(
-    "bp_signup",
+
+logout_blueprint = Blueprint(
+    "bp_logout",
     __name__,
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),
@@ -12,15 +14,14 @@ signup_blueprint = Blueprint(
 def get_blueprint():
     """
     Returns the `Blueprint` object which stores all of the functions in this file.
-
     All routing files have the same function to retrieve their blueprints.
-
     Returns:
         The blueprint object for this file.
     """
-    return signup_blueprint
+    return logout_blueprint
 
 
-@signup_blueprint.route("/signup")
-def signup():
-    return render_template("signup.html")
+@logout_blueprint.route("/logout")
+def logout():
+    logout_user()
+    return redirect("/")

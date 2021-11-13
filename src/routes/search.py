@@ -5,6 +5,7 @@ from api.spoonacular import Cuisine, search_recipes, search_ingredients
 
 # import spoonacular functions search_recipes, search_ingredients
 
+
 search_blueprint = Blueprint(
     "bp_search",
     __name__,
@@ -48,6 +49,7 @@ def searchByrecipes():
         cuisine = request.form.get("cuisine")
         print(cuisine)
         ingredients += ", " + cuisine
+
         print(ingredients)
         returnedDict = search_recipes(ingredients)
         # prints the 10 recipes to the terminal
