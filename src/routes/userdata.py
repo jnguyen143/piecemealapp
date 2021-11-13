@@ -673,12 +673,9 @@ def start_signup():
         try:
             username = actual_data["username"]
             email = actual_data["email"]
-            given_name = actual_data["given_name"]
-            family_name = actual_data["family_name"]
+            fullname = actual_data["name"]
             password = actual_data["password"]
-            user = int__db.add_default_user(
-                email, password, username, given_name, family_name
-            )
+            user = int__db.add_default_user(email, password, username, fullname)
             login_user(user)
             return jsonify({"success": True})
         except:
@@ -709,8 +706,7 @@ def validate_signup():
         user = int__db.add_google_user(
             userinfo["id"],
             userinfo["email"],
-            given_name=userinfo["given_name"],
-            family_name=userinfo["family_name"],
+            userinfo["name"],
             profile_image=userinfo["image"],
         )
     except DatabaseException:
