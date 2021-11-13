@@ -469,6 +469,63 @@ def search_ingredients(
     return ingredients
 
 
+def get_recommended_recipes(
+    offset: int = 0,
+    limit: int = 10,
+) -> list:
+    """
+    Returns a list of randomly recommended recipes.
+
+    Args:
+        "number" for representing the maximum amount of recipes
+
+    Returns:
+        A list of JSON-encoded recipes.
+        Each recipe object consists of the following values:
+            - id (int): The ID of the recipe.
+            - name (str): The display name of the recipe.
+            - image (str): The URL of the image for the recipe.
+
+    Raises:
+        UndefinedApiKeyException: If the Spoonacular API key is undefined.
+        SpoonacularApiException: If there was a problem completing the request.
+    """
+
+    params = {"apiKey": get_api_key()}
+    params["offset"] = offset
+    params["number"] = limit
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/random?",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as e:
+        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
+
+    if not data:
+        return None
+
+    result = []
+    for recipe in data["recipes"]:
+        dict = {}
+        try:
+            dict["id"] = recipe["id"]
+            dict["name"] = recipe["title"]
+            try:
+                dict["image"] = recipe["image"]
+            except KeyError:
+                dict["image"] = "../static/noimage.jpg"
+        except KeyError:
+            print("Error: Unable to retrieve recipe data")
+
+        result.append(dict)
+
+    return result
+
+
 def get_ingredient(id: int) -> Ingredient:
     """
     Returns an `Ingredient` object associated with the specified ID.
