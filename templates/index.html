@@ -26,38 +26,37 @@
           <p>Filter by:</p>
         </div>
 
-        <div class="select">
-          <label for="cuisine">Cuisine:</label>
-          <select id="cuisine" name="cuisine">
-            <option value=""></option>
-            <option value="African">African</option>
-            <option value="American">American</option>
-            <option value="British"> British </option>
-            <option value="Cajun"> Cajun </option>
-            <option value="Caribbean"> Caribbean </option>
-            <option value="Chinese"> Chinese </option>
-            <option value="EasternEuropean"> EasternEuropean </option>
-            <option value="European"> European </option>
-            <option value="French"> French </option>
-            <option value="German"> German </option>
-            <option value="Greek"> Greek </option>
-            <option value="Indian"> Indian </option>
-            <option value="Irish"> Irish </option>
-            <option value="Italian"> Italian </option>
-            <option value="Japanese"> Japanese </option>
-            <option value="Jewish"> Jewish </option>
-            <option value="Korean"> Korean </option>
-            <option value="LatinAmerican"> Latin American </option>
-            <option value="Mediterranean"> Mediterranean </option>
-            <option value="Mexican"> Mexican </option>
-            <option value="MiddleEastern"> Middle Eastern </option>
-            <option value="Nordic"> Nordic </option>
-            <option value="Southern"> Southern </option>
-            <option value="Spanish"> Spanish </option>
-            <option value="Thai"> Thai </option>
-            <option value="Vietnamese"> Vietnamese </option>
-          </select>
-        </div>
+        <label for="cuisine">Cuisine:</label>
+        <select id="cuisine" name="cuisine">
+          <option value=""></option>
+          <option value="African">African</option>
+          <option value="American">American</option>
+          <option value="British"> British </option>
+          <option value="Cajun"> Cajun </option>
+          <option value="Caribbean"> Caribbean </option>
+          <option value="Chinese"> Chinese </option>
+          <option value="EasternEuropean"> EasternEuropean </option>
+          <option value="European"> European </option>
+          <option value="French"> French </option>
+          <option value="German"> German </option>
+          <option value="Greek"> Greek </option>
+          <option value="Indian"> Indian </option>
+          <option value="Irish"> Irish </option>
+          <option value="Italian"> Italian </option>
+          <option value="Japanese"> Japanese </option>
+          <option value="Jewish"> Jewish </option>
+          <option value="Korean"> Korean </option>
+          <option value="LatinAmerican"> Latin American </option>
+          <option value="Mediterranean"> Mediterranean </option>
+          <option value="Mexican"> Mexican </option>
+          <option value="MiddleEastern"> Middle Eastern </option>
+          <option value="Nordic"> Nordic </option>
+          <option value="Southern"> Southern </option>
+          <option value="Spanish"> Spanish </option>
+          <option value="Thai"> Thai </option>
+          <option value="Vietnamese"> Vietnamese </option>
+        </select>
+
       </form>
 
 
@@ -76,16 +75,16 @@
   </div>
 
   <div class="right-container">
+    <div class="header">
+      <h1>Recipes & Ingredients</h1>
 
+      <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
+    </div>
 
-    <h1>Recipes & Ingredients</h1>
+    <div class="content">
+      {%if recipes%}
 
-    <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
-
-    {%if recipes%}
-    <div class="recipe">
       <!-- need if statement to hide recipe div -->
-      <!--  -->
 
       {%for recipe in recipes%}
       <div class="recipe">
@@ -99,8 +98,8 @@
       </div>
       {%endfor%}
       {%endif%}
-    </div>
 
+    </div>
   </div>
 
 </body>

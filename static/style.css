@@ -13,27 +13,64 @@ body {
   flex-flow: row wrap;
 }
 
-/*Center container styling for login/or signup*/
+/*Center container styling for login*/
 
-.container {
-  background-color: #ffe6d3f1;
-  width: 40%;
-  height: 75%;
-  margin: auto;
-  position: absolute;
+.login-container {
+  display: flex;
+  flex-flow: column;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
+  width: 700px;
+  height: 550px;
+  margin: auto;
+  position: absolute;
   border-radius: 10px;
-  /* display: flex;
-  justify-content: center;
+  text-align: center;
+  overflow: auto;
+}
+
+/*Sub-container for login*/
+
+.login-sub-container {
+  background-color: #ffe6d3f1;
+  border-top-right-radius: 10px;
+  width: 700px;
+  height: 550px;
+  display: flex;
   align-items: center;
-  flex-flow: column wrap;
-  text-align: center; */
+  flex-flow: row;
+}
+
+/*Center container styling for signup*/
+
+.signup-container {
+  display: flex;
+  flex-flow: column;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 700px;
+  height: 600px;
+  margin: auto;
+  position: absolute;
+  border-radius: 10px;
+  text-align: center;
+  overflow: auto;
+}
+
+/*Sub-container for signup*/
+
+.signup-sub-container {
+  background-color: #ffe6d3f1;
+  border-top-right-radius: 10px;
+  width: 700px;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  flex-flow: row;
 }
 
 /*logo formatting*/
@@ -43,10 +80,29 @@ body {
   width:300px;
 }
 
-/*Navigation menu container*/
+/*Navigation menu container and styling*/
 
 .nav_menu {
+  border-top-right-radius: 10px;
   text-align: center;
+}
+
+.nav_menu a {
+  background: rgb(251,140,0);
+  background: linear-gradient(60deg, rgba(251,140,0,1) 50%, rgba(255,206,143,1) 100%);
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 14px 68px;
+  text-decoration: none;
+  font-size: 17px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.nav_menu a:hover {
+  background: #c46d04;
+  color: white;
 }
 
 /*main-container helper to set fixed sidebar*/
@@ -115,6 +171,7 @@ body {
   background-color: white;
   color: rgb(75, 74, 74);
   font-size: 10px;
+  width:100%;
   margin: 5px auto;
   padding: 5px;
   border-style: solid;
@@ -127,6 +184,7 @@ body {
   min-width: 340px;
   max-width: 340px;
   height: 130px;
+  overflow: auto;
 }
 
 /*Inner description div for recipe/ingredient container*/
@@ -164,7 +222,7 @@ body {
 /*All forms styling*/
 
 form {
-  margin-bottom: 70px;
+  margin-bottom: 40px;
   display: flex;
   flex-flow: column;
 }
@@ -173,10 +231,7 @@ form {
 
 input[type=text] {
   padding: 8px 10px;
-  margin: auto;
-  /* margin: 5px 100px 5px 100px; */
-  /* margin-left: 100px;
-  margin-right: 100px; */
+  margin: 10px auto;
   font-size: 14px;
   border: none;
   border-radius: 4px;
@@ -187,12 +242,17 @@ input[type=text] {
 
 input[type=password] {
   padding: 8px 10px;
-  margin-left: 100px;
-  margin-right: 100px;
+  margin: 10px auto;
   font-size: 14px;
   border: none;
   border-radius: 4px;
   text-align: center;
+}
+
+/*Format input type div - Google button*/
+
+input[type=submit] {
+  margin: auto;
 }
 
 /*Div containing filter options*/
@@ -239,6 +299,26 @@ input[type=password] {
   background: #c46d04;
 }
 
+/*Login and Signup button styling*/
+
+.account-button {
+  padding: 6px 10px;
+  width: 100px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 100px;
+  margin-right: 100px;
+  background: #FB8C00;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+.account-button:hover {
+  background: #c46d04;
+}
+
 /*account container styling*/
 
 .account {
@@ -270,6 +350,7 @@ input[type=password] {
   margin-top: 30px;
   height: 50px;
   width: 204px;
+  cursor: pointer;
 }
 
 .google-img:hover {
