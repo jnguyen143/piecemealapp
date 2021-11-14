@@ -49,7 +49,6 @@ def searchByrecipes():
         cuisine = request.form.get("cuisine")
         print(cuisine)
         ingredients += ", " + cuisine
-
         print(ingredients)
         returnedDict = search_recipes(ingredients)
         # prints the 10 recipes to the terminal
