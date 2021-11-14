@@ -342,7 +342,13 @@ def search_recipes(
     recipes = []
     for recipe in data["results"]:
         recipes.append(
-            {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
+            {
+                "id": recipe["id"],
+                "name": recipe["title"],
+                "image": recipe["image"],
+                "summary": extract_sentence(recipe["summary"]),
+                "full_summary": clean_summary(recipe["summary"]),
+            }
         )
 
     return recipes
@@ -541,7 +547,7 @@ def get_recommended_recipes(
             dict["name"] = recipe["title"]
             try:
                 dict["image"] = recipe["image"]
-                dict["full_summary"] = recipe["summary"]
+                dict["full_summary"] = clean_summary(recipe["summary"])
                 dict["summary"] = extract_sentence(recipe["summary"])
             except KeyError:
                 dict["image"] = "../static/noimage.jpg"
