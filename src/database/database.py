@@ -283,14 +283,15 @@ class Database:
         session = self.int__Session()
         recipes = []
         try:
-            recipes = session.query(SavedRecipe).filter_by(user_id=user_id).all()
+            saved_recipes = session.query(SavedRecipe).filter_by(user_id=user_id).all()
+            recipes = [x.recipe for x in saved_recipes]
         except:
             session.rollback()
             raise DatabaseException("Failed to perform query")
         finally:
             session.close()
 
-        return [x.recipe for x in recipes]
+        return recipes
 
     def get_saved_ingredients(self, user_id: str) -> list[int]:
         """
@@ -315,16 +316,17 @@ class Database:
         session = self.int__Session()
         ingredients = []
         try:
-            ingredients = (
+            saved_ingredients = (
                 session.query(SavedIngredient).filter_by(user_id=user_id).all()
             )
+            ingredients = [x.ingredient for x in saved_ingredients]
         except:
             session.rollback()
             raise DatabaseException("Failed to perform query")
         finally:
             session.close()
 
-        return [x.ingredient for x in ingredients]
+        return ingredients
 
     def get_intolerances(self, user_id: str) -> list[str]:
         """
@@ -416,14 +418,14 @@ class Database:
         suffix_digits = 5
         suffix_number = randint(0, 10 ** suffix_digits - 1)
         format_string = f"%{suffix_digits}d"
-        uname = prefix + str(format_string % suffix_number)
+        uname = prefix + str(format_string % suffix_number).strip()
         tries = 1
         while self.username_exists(uname):
             # The algorithm will try up to suffix_digits number of times to generate a username.
             # If it still fails to generate a unique username after this point, the number of digits in the suffix will increase by 1 and the process will begin again.
             suffix_number = randint(0, 10 ** suffix_digits - 1)
             format_string = f"%{suffix_digits}d"
-            uname = prefix + str(format_string % suffix_number)
+            uname = prefix + str(format_string % suffix_number).strip()
             tries += 1
 
             if tries >= suffix_digits:
@@ -1312,7 +1314,7 @@ class Database:
             tries = 0
             while recipes[index].id in result and tries <= MAX_TRIES:
                 # Increase the search range if it's still less than the length of the actual list
-                if current_range < recipes_len:
+                if current_range < recipe_count:
                     current_range += 1
                 index = randrange(recipes_len - current_range, recipes_len)
                 tries += 1

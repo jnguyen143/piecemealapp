@@ -87,8 +87,16 @@ class Ingredient(db.Model):
 class SavedRecipe(db.Model):
     __tablename__ = "saved_recipes"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False)
+    user_id = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    recipe_id = db.Column(
+        db.Integer,
+        db.ForeignKey("recipes.id", onupdate="CASCADE", ondelete="NO ACTION"),
+        nullable=False,
+    )
     recipe = relationship(Recipe, foreign_keys=[recipe_id])
 
     def to_json(self, shallow: bool = True):
@@ -111,9 +119,15 @@ class SavedRecipe(db.Model):
 class SavedIngredient(db.Model):
     __tablename__ = "saved_ingredients"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
     ingredient_id = db.Column(
-        db.Integer, db.ForeignKey("ingredients.id"), nullable=False
+        db.Integer,
+        db.ForeignKey("ingredients.id", onupdate="CASCADE", ondelete="NO ACTION"),
+        nullable=False,
     )
     ingredient = relationship(Ingredient, foreign_keys=[ingredient_id])
 
@@ -137,7 +151,11 @@ class SavedIngredient(db.Model):
 class Intolerance(db.Model):
     __tablename__ = "intolerances"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
     intolerance = db.Column(db.String(50), nullable=False)
 
     def to_json(self):
@@ -154,8 +172,16 @@ class Intolerance(db.Model):
 class Relationship(db.Model):
     __tablename__ = "friends"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user1 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
-    user2 = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user1 = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    user2 = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
     user1_obj = relationship(User, foreign_keys=[user1])
     user2_obj = relationship(User, foreign_keys=[user2])
 
@@ -179,7 +205,11 @@ class Relationship(db.Model):
 class Password(db.Model):
     __tablename__ = "passwords"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user_id = db.Column(db.String(255), db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
     phrase = db.Column(db.Text, nullable=False)
     user_obj = relationship(User, foreign_keys=[user_id])
 
