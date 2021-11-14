@@ -97,10 +97,26 @@
         </div>
       </div>
       {%endfor%}
-      {%endif%}
 
+      {%endif%}
     </div>
-  </div>
+    {%if ingredients%}
+    <div class="content">
+      {%for ingredient in ingredients%}
+      <div class="recipe">
+        <div class="image">
+          <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
+        </div>
+        <div class="description">
+          <h2>{{ingredient['name']}}</h2>
+          <p>Recipe ID - {{ingredient['id']}}</p>
+        </div>
+      </div>
+
+      {%endfor%}
+
+      {%endif%}
+    </div>
 
 </body>
 
