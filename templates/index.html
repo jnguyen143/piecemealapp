@@ -75,31 +75,31 @@
   </div>
 
   <div class="right-container">
+    <div class="header">
+      <h1>Recipes & Ingredients</h1>
 
-
-    <h1>Recipes & Ingredients</h1>
-
-    <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
-
-    {%if recipes%}
-
-    <!-- need if statement to hide recipe div -->
-    <!--  -->
-
-    {%for recipe in recipes%}
-    <div class="recipe">
-      <div class="image">
-        <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-      </div>
-      <div class="description">
-        <h2>{{recipe["name"]}}</h2>
-        <p>{{recipe["summary"]}}</p>
-      </div>
+      <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
     </div>
-    {%endfor%}
-    {%endif%}
 
+    <div class="content">
+      {%if recipes%}
 
+      <!-- need if statement to hide recipe div -->
+
+      {%for recipe in recipes%}
+      <div class="recipe">
+        <div class="image">
+          <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+        </div>
+        <div class="description">
+          <h2>{{recipe["name"]}}</h2>
+          <p>{{recipe["summary"]}}</p>
+        </div>
+      </div>
+      {%endfor%}
+      {%endif%}
+
+    </div>
   </div>
 
 </body>
