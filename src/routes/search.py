@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
+from werkzeug.datastructures import ImmutableHeadersMixin
 import routes.util as util
-from api.spoonacular import search_recipes, search_ingredients
+from api.spoonacular import Cuisine, search_recipes, search_ingredients
 
 # import spoonacular functions search_recipes, search_ingredients
 
@@ -45,6 +46,10 @@ def searchByrecipes():
     if request.method == "POST":
         ingredients = request.form.get("searchRecipes")
         # prints what the user searches for to the terminal
+        cuisine = request.form.get("cuisine")
+        print(cuisine)
+        ingredients += ", " + cuisine
+
         print(ingredients)
         returnedDict = search_recipes(ingredients)
         # prints the 10 recipes to the terminal
