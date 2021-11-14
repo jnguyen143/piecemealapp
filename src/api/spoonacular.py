@@ -13,6 +13,7 @@ from api.common import (
 )
 from enum import Enum
 from os import getenv
+import re
 
 
 class SpoonacularApiException(Exception):
@@ -252,6 +253,20 @@ def list_to_comma_separated_string(lst: list) -> str:
     return result
 
 
+# Function to clean html formatted string within JSON response item
+def clean_summary(summary):
+    clean_string = re.compile("<.*?>")
+    summary = re.sub(clean_string, "", summary)
+    return summary
+
+
+# Function that extract two sentences from recipe's summary description
+def extract_sentence(summary):
+    summary = clean_summary(summary)
+    sentences = [sentence + "." for sentence in summary.split(".")]
+    return sentences[0]
+
+
 def search_recipes(
     ingredients: list[str],
     intolerances: list[Intolerance] = None,
@@ -483,7 +498,7 @@ def get_recommended_recipes(
     Returns a list of randomly recommended recipes.
 
     Args:
-        Number as the number of desired recipe results
+        "number" for representing the maximum amount of recipes
 
     Returns:
         A list of JSON-encoded recipes.
@@ -498,7 +513,6 @@ def get_recommended_recipes(
     """
 
     params = {"apiKey": get_api_key()}
-
     params["offset"] = offset
     params["number"] = limit
 
@@ -515,11 +529,30 @@ def get_recommended_recipes(
     if not data:
         return None
 
+    for item in data["recipes"][0]:
+        print(item)
+
     result = []
-    for recipe in data:
-        result.append(
-            {"id": recipe["id"], "name": recipe["name"], "image": recipe["image"]}
-        )
+    for recipe in data["recipes"]:
+        dict = {}
+        summary = []
+        try:
+            dict["id"] = recipe["id"]
+            dict["name"] = recipe["title"]
+            try:
+                dict["image"] = recipe["image"]
+                dict["full_summary"] = recipe["summary"]
+                dict["summary"] = extract_sentence(recipe["summary"])
+            except KeyError:
+                dict["image"] = "../static/noimage.jpg"
+                dict[
+                    "full_summary"
+                ] = "Add some variety to you diet by trying this recipe!"
+                dict["summary"] = "Add some variety to you diet by trying this recipe!"
+        except KeyError:
+            print("Error: Unable to retrieve recipe data")
+
+        result.append(dict)
 
     return result
 
