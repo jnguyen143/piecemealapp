@@ -11,19 +11,27 @@
 </head>
 
 <body>
-  <div class="container">
+  <div class="login-container">
     <div class="nav_menu">
       <a href="/">Home</a>
       <a href="/login">Login</a>
       <a href="/signup">Signup</a>
     </div>
-    <div class="sub-container">
+    <div class="login-sub-container">
       <img class="logo" src="../static/logo.svg" />
-      <form action="/api/start-login" method="POST">
-        <p>Already a member?</p>
-        <p>Sign in through your google account</p>
-        <input type="submit" class="google-img" value="" />
-      </form>
+      <div style="margin:auto;">
+        <form action="/api/start-login" method="POST">
+          <p>Already a member?</p>
+          <p>Log in through your google account</p>
+          <input type="submit" class="google-img" value="" />
+        </form>
+        <form onsubmit="return loginDefault()" method="POST">
+          <p>or log in here</p>
+          <input type="text" id="username" placeholder="Username" />
+          <input type="password" id="password" placeholder="Password" />
+          <button type="submit" value="Log In" class="account-button">Log In</button>
+        </form>
+      </div>
     </div>
   </div>
 </body>

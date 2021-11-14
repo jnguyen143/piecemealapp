@@ -13,17 +13,46 @@ body {
   flex-flow: row wrap;
 }
 
-/*Center container styling for login/or signup*/
+/*Center container styling for login*/
 
-.container {
+.login-container {
   display: flex;
-  align-items: center;
   flex-flow: column;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  width: 550px;
+  width: 700px;
+  height: 550px;
+  margin: auto;
+  position: absolute;
+  border-radius: 10px;
+  text-align: center;
+  overflow: auto;
+}
+
+/*Sub-container for login*/
+
+.login-sub-container {
+  background-color: #ffe6d3f1;
+  border-top-right-radius: 10px;
+  width: 700px;
+  height: 550px;
+  display: flex;
+  align-items: center;
+  flex-flow: row;
+}
+
+/*Center container styling for signup*/
+
+.signup-container {
+  display: flex;
+  flex-flow: column;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 700px;
   height: 600px;
   margin: auto;
   position: absolute;
@@ -32,10 +61,16 @@ body {
   overflow: auto;
 }
 
-.sub-container {
+/*Sub-container for signup*/
+
+.signup-sub-container {
   background-color: #ffe6d3f1;
-  width: 550px;
+  border-top-right-radius: 10px;
+  width: 700px;
   height: 600px;
+  display: flex;
+  align-items: center;
+  flex-flow: row;
 }
 
 /*logo formatting*/
@@ -186,7 +221,7 @@ body {
 /*All forms styling*/
 
 form {
-  margin-bottom: 70px;
+  margin-bottom: 40px;
   display: flex;
   flex-flow: column;
 }
@@ -260,6 +295,26 @@ input[type=submit] {
 }
 
 .search-button:hover {
+  background: #c46d04;
+}
+
+/*Login and Signup button styling*/
+
+.account-button {
+  padding: 6px 10px;
+  width: 100px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 100px;
+  margin-right: 100px;
+  background: #FB8C00;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+.account-button:hover {
   background: #c46d04;
 }
 
