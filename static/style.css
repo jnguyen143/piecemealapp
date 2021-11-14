@@ -280,3 +280,11 @@ input[type=password] {
 .google-img:visited {
   background-image: url("../static/btn_google_signin_light_pressed_web.png");
 }
+
+
+
+.select{
+  font-family: Arial;
+
+  border-radius: 4px;
+}
