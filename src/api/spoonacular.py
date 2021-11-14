@@ -5,7 +5,7 @@ Before any of the functions in this file can be called,
 you must ensure that the `SPOONACULAR_API_KEY` environment variable has been defined.
 """
 
-from common import (
+from api.common import (
     api_get_json,
     RequestException,
     MalformedResponseException,
@@ -13,6 +13,7 @@ from common import (
 )
 from enum import Enum
 from os import getenv
+import re
 
 
 class SpoonacularApiException(Exception):
@@ -252,6 +253,20 @@ def list_to_comma_separated_string(lst: list) -> str:
     return result
 
 
+# Function to clean html formatted string within JSON response item
+def clean_summary(summary):
+    clean_string = re.compile("<.*?>")
+    summary = re.sub(clean_string, "", summary)
+    return summary
+
+
+# Function that extract two sentences from recipe's summary description
+def extract_sentence(summary):
+    summary = clean_summary(summary)
+    sentences = [sentence + "." for sentence in summary.split(".")]
+    return sentences[0]
+
+
 def search_recipes(
     ingredients: list[str],
     intolerances: list[Intolerance] = None,
@@ -310,15 +325,20 @@ def search_recipes(
     params["number"] = limit
 
     data = None
+
+    # combines ingredients param to properly search the website
+    #
+    URL = "recipes/complexSearch?query=" + ingredients
     try:
         data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT + "recipes/complexSearch",
+            SPOONACULAR_API_ROOT_ENDPOINT + URL,
             headers={"Content-Type": "application/json"},
             params=params,
         )
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make recipe search request: {str(e)}")
 
+    # recipes = data
     recipes = []
     for recipe in data["results"]:
         recipes.append(
@@ -455,14 +475,15 @@ def search_ingredients(
         )
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make ingredient request: {str(e)}")
-
+    # ingredients = data
     ingredients = []
+    imageURL = "https://spoonacular.com/cdn/ingredients_250x250/"
     for ingredient in data["results"]:
         ingredients.append(
             {
                 "id": ingredient["id"],
-                "name": ingredient["title"],
-                "image": ingredient["image"],
+                "name": ingredient["name"],
+                "image": imageURL + ingredient["image"],
             }
         )
 
@@ -508,16 +529,26 @@ def get_recommended_recipes(
     if not data:
         return None
 
+    for item in data["recipes"][0]:
+        print(item)
+
     result = []
     for recipe in data["recipes"]:
         dict = {}
+        summary = []
         try:
             dict["id"] = recipe["id"]
             dict["name"] = recipe["title"]
             try:
                 dict["image"] = recipe["image"]
+                dict["full_summary"] = recipe["summary"]
+                dict["summary"] = extract_sentence(recipe["summary"])
             except KeyError:
                 dict["image"] = "../static/noimage.jpg"
+                dict[
+                    "full_summary"
+                ] = "Add some variety to you diet by trying this recipe!"
+                dict["summary"] = "Add some variety to you diet by trying this recipe!"
         except KeyError:
             print("Error: Unable to retrieve recipe data")
 

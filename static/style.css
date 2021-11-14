@@ -1,4 +1,5 @@
 /*Body styling*/
+
 body {
   background-image: url("../static/img3.jpg");
   background-color: rgb(48, 44, 44);
@@ -6,71 +7,115 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   font-family: Arial;
   display: flex;
   flex-flow: row wrap;
 }
+
 /*Center container styling for login/or signup*/
+
 .container {
   background-color: #ffe6d3f1;
   width: 40%;
   height: 75%;
   margin: auto;
   position: absolute;
-  top:0;bottom:0;
-  left:0;right:0;
-  max-width:100%;
-  max-height:100%;
-  overflow:auto;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
   border-radius: 10px;
-  display: flex;
+  /* display: flex;
   justify-content: center;
   align-items: center;
   flex-flow: column wrap;
+  text-align: center; */
+}
+
+/*logo formatting*/
+
+.logo {
+  height:300px;
+  width:300px;
+}
+
+/*Navigation menu container*/
+
+.nav_menu {
   text-align: center;
 }
-/*Side container for search and login in index.html*/
+
+/*main-container helper to set fixed sidebar*/
+
+.main-container {
+  height: 100vh;
+  min-width: 320px;
+  max-width: 30%;
+}
+
+/*Left side container for navigation menu, search and login/Signup*/
+
 .left-container {
+  height: 100vh;
+  min-width: 320px;
+  max-width: 30%;
+  top: 8px;
+  z-index: 0;
+  left: 0;
+  position: fixed;
   background-color: #ffe6d3f1;
-  height: 100%;
-  width: 30%;
   text-align: center;
   border-radius: 10px;
-  margin-right: 20px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  overflow-x: hidden; /*Disables horizontal scroll*/
 }
+
 /*Right side container for search results formatting*/
+
 .right-container {
   background-color: #ffe6d3f1;
-  font-weight: bold;
-  height: 100%;
+  min-width: 350px;
   width: 60%;
+  font-weight: bold;
+  text-align: center;
+  margin-left: 10px;
   margin: 0 auto;
   text-align: center;
   border-radius: 10px;
+  min-height: 100vh;
 }
-/*Ingredients container*/
-.fav-ingredients {
-  color: rgb(39, 39, 39);
-  background-color: white;
-  width: 95%;
-  margin: 0 auto;
-  border-radius: 4px;
-  text-align: left;
+
+/*Right side container header*/
+
+.header {
+  color: rgb(75, 74, 74);
+  text-align: center;
+  margin: 10px;
 }
-/*Recipes container*/
-.fav-recipes {
-  color: rgb(39, 39, 39);
-  background-color: white;
-  width: 95%;
-  margin: 0 auto;
-  border-radius: 4px;
-  text-align: left;
+
+/*Content div for index.html random recipes and search results*/
+
+.content {
+  margin: auto;
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-flow: row wrap;
 }
+
 /*Individual recipe/ingredient container*/
+/* need to hide recipe div when outputing search results */
 .recipe {
   background-color: white;
   color: rgb(75, 74, 74);
-  margin: 5px;
+  font-size: 10px;
+  margin: 5px auto;
   padding: 5px;
   border-style: solid;
   border-color: rgb(194, 191, 191);
@@ -79,25 +124,57 @@ body {
   display: flex;
   flex-flow: row wrap;
   text-align: left;
+  min-width: 340px;
+  max-width: 340px;
+  height: 130px;
 }
+
 /*Inner description div for recipe/ingredient container*/
+
 .description {
   margin-left: 10px;
   margin-right: 10px;
+  width: 60%;
+  display: flex;
+  flex-flow: column;
 }
-/*logo formatting*/
-.logo {
-  margin-top: 20px;
-  margin-bottom:50px;
+
+/*Ingredients container*/
+
+.fav-ingredients {
+  color: rgb(39, 39, 39);
+  background-color: white;
+  width: 95%;
+  margin: 0 auto;
+  border-radius: 4px;
+  text-align: left;
 }
+
+/*Recipes container*/
+
+.fav-recipes {
+  color: rgb(39, 39, 39);
+  background-color: white;
+  width: 95%;
+  margin: 0 auto;
+  border-radius: 4px;
+  text-align: left;
+}
+
 /*All forms styling*/
+
 form {
   margin-bottom: 70px;
+  display: flex;
+  flex-flow: column;
 }
+
 /*Searchbox styling*/
+
 input[type=text] {
   padding: 8px 10px;
-  margin: 5px 100px 5px 100px;
+  margin: auto;
+  /* margin: 5px 100px 5px 100px; */
   /* margin-left: 100px;
   margin-right: 100px; */
   font-size: 14px;
@@ -105,7 +182,9 @@ input[type=text] {
   border-radius: 4px;
   text-align: center;
 }
+
 /*Searchbox styling*/
+
 input[type=password] {
   padding: 8px 10px;
   margin-left: 100px;
@@ -115,13 +194,17 @@ input[type=password] {
   border-radius: 4px;
   text-align: center;
 }
+
 /*Div containing filter options*/
+
 .filters {
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
 }
+
 /*Filter button styling*/
+
 .filter-button {
   margin: 10px;
   padding: 4px 6px;
@@ -131,12 +214,16 @@ input[type=password] {
   cursor: pointer;
   border-radius: 4px;
 }
+
 .filter-button:hover {
   background: #c46d04;
 }
+
 /*Search button styling*/
-button {
+
+.search-button {
   padding: 6px 10px;
+  width: 100px;
   margin-top: 8px;
   margin-bottom: 8px;
   margin-left: 100px;
@@ -147,37 +234,49 @@ button {
   cursor: pointer;
   border-radius: 20px;
 }
-button:hover {
+
+.search-button:hover {
   background: #c46d04;
 }
+
 /*account container styling*/
+
 .account {
-  margin-top: 150px;
+  margin-top: 50px;
 }
+
 /*padding between login and signup*/
+
 .account a {
   margin: 30px;
 }
+
 /*Click styling for hyperlink*/
+
 .account a:link {
   color: rgb(88, 86, 86);
 }
+
 .account a:visited {
   color: black;
 }
+
 /*Google login button styling*/
+
 .google-img {
   background-image: url("../static/btn_google_signin_light_normal_web.png");
   background-repeat: no-repeat;
   background-position: center;
   margin-top: 30px;
-  height:50px;
+  height: 50px;
   width: 204px;
 }
+
 .google-img:hover {
   background-image: url("../static/btn_google_signin_light_focus_web.png");
   box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
 }
+
 .google-img:visited {
   background-image: url("../static/btn_google_signin_light_pressed_web.png");
 }
