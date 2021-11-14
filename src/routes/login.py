@@ -51,9 +51,3 @@ def init(app: Flask, db: database.Database):
 @login_blueprint.route("/login")
 def login():
     return render_template("login.html")
-
-
-# @login_blueprint.route("/logout")
-# def logout():
-#     logout_user()
-#     return redirect("/")

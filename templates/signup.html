@@ -11,39 +11,31 @@
 </head>
 
 <body>
-  <div class="container">
-    <img class="logo" src="../static/logo.png" alt="PieceMeal" />
-    <form action="/api/start-signup" method="POST">
-      <input type="submit" class="google-img" value="" />
-    </form>
-    <form onsubmit="return signupDefault();" method="POST">
-      <input type="text" id="username" placeholder="Username" />
-      <input type="text" id="email" placeholder="Email" />
-      <input type="text" id="given_name" placeholder="First Name" />
-      <input type="text" id="family_name" placeholder="Last Name" />
-      <input type="password" id="password" placeholder="Password" />
-      <input type="submit" value="Sign Up" />
-    </form>
-
-    <!--<div class="G-Login">
-      <input id="google-button" type="button" class="google-img" href="/google_auth" />
-      <img class="googlelog" />
-    </div>-->
-
+  <div class="signup-container">
+    <div class="nav_menu">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/signup">Signup</a>
+    </div>
+    <div class="signup-sub-container">
+      <img class="logo" src="../static/logo.svg" />
+      <div style="margin:auto;">
+        <p>Create an account via google sign in</p>
+        <form action="/api/start-signup" method="POST">
+          <input type="submit" class="google-img" value="" />
+        </form>
+        <form onsubmit="return signupDefault();" method="POST">
+          <p>or create an account here</p>
+          <input type="text" id="username" placeholder="Username" />
+          <input type="text" id="email" placeholder="Email" />
+          <input type="text" id="given_name" placeholder="First Name" />
+          <input type="text" id="family_name" placeholder="Last Name" />
+          <input type="password" id="password" placeholder="Password" />
+          <button type="submit" value="Sign Up" class="account-button">Sign Up</button>
+        </form>
+      </div>
+    </div>
   </div>
 </body>
-<script>
-  // Template code to link google button to authorization process
-  // $('#google-button').on('click', function () {
-  //   // Initialize with your OAuth.io app public key
-  //   OAuth.initialize('YOUR_OAUTH_KEY');
-  //   // Use popup for OAuth
-  //   OAuth.popup('google').then(google => {
-  //     console.log(google);
-  //     // Retrieves user data from oauth provider
-  //     console.log(google.me());
-  //   });
-  // })
-</script>
 
 </html>

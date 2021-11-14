@@ -11,34 +11,29 @@
 </head>
 
 <body>
-  <div class="alt-body1">
-    <div class="container">
-      <img class="logo" src="../static/logo.png" alt="PieceMeal" />
-      <form action="/api/start-login" method="POST">
-        <input type="submit" class="google-img" value="" />
-      </form>
-      <form onsubmit="return loginDefault()" method="POST">
-        <input type="text" id="username" placeholder="Username" />
-        <input type="password" id="password" placeholder="Password" />
-        <input type="submit" value="Log In" />
-      </form>
-
+  <div class="login-container">
+    <div class="nav_menu">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/signup">Signup</a>
+    </div>
+    <div class="login-sub-container">
+      <img class="logo" src="../static/logo.svg" />
+      <div style="margin:auto;">
+        <form action="/api/start-login" method="POST">
+          <p>Already a member?</p>
+          <p>Log in through your google account</p>
+          <input type="submit" class="google-img" value="" />
+        </form>
+        <form onsubmit="return loginDefault()" method="POST">
+          <p>or log in here</p>
+          <input type="text" id="username" placeholder="Username" />
+          <input type="password" id="password" placeholder="Password" />
+          <button type="submit" value="Log In" class="account-button">Log In</button>
+        </form>
+      </div>
     </div>
   </div>
-
 </body>
-<script>
-  // Template code to link google button to authorization process
-  // $('#google-button').on('click', function () {
-  //   // Initialize with your OAuth.io app public key
-  //   OAuth.initialize('YOUR_OAUTH_KEY');
-  //   // Use popup for OAuth
-  //   OAuth.popup('google').then(google => {
-  //     console.log(google);
-  //     // Retrieves user data from oauth provider
-  //     console.log(google.me());
-  //   });
-  // })
-</script>
 
 </html>
