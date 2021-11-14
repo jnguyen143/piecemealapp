@@ -16,24 +16,26 @@ body {
 /*Center container styling for login/or signup*/
 
 .container {
-  background-color: #ffe6d3f1;
-  width: 40%;
-  height: 75%;
-  margin: auto;
-  position: absolute;
+  display: flex;
+  align-items: center;
+  flex-flow: column;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
+  width: 550px;
+  height: 600px;
+  margin: auto;
+  position: absolute;
   border-radius: 10px;
-  /* display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-flow: column wrap;
-  text-align: center; */
+  text-align: center;
+  overflow: auto;
+}
+
+.sub-container {
+  background-color: #ffe6d3f1;
+  width: 550px;
+  height: 600px;
 }
 
 /*logo formatting*/
@@ -43,10 +45,29 @@ body {
   width:300px;
 }
 
-/*Navigation menu container*/
+/*Navigation menu container and styling*/
 
 .nav_menu {
+  border-top-right-radius: 10px;
   text-align: center;
+}
+
+.nav_menu a {
+  background: rgb(251,140,0);
+  background: linear-gradient(60deg, rgba(251,140,0,1) 50%, rgba(255,206,143,1) 100%);
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 14px 68px;
+  text-decoration: none;
+  font-size: 17px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.nav_menu a:hover {
+  background: #c46d04;
+  color: white;
 }
 
 /*main-container helper to set fixed sidebar*/
@@ -127,6 +148,7 @@ body {
   min-width: 340px;
   max-width: 340px;
   height: 130px;
+  overflow: auto;
 }
 
 /*Inner description div for recipe/ingredient container*/
@@ -173,10 +195,7 @@ form {
 
 input[type=text] {
   padding: 8px 10px;
-  margin: auto;
-  /* margin: 5px 100px 5px 100px; */
-  /* margin-left: 100px;
-  margin-right: 100px; */
+  margin: 10px auto;
   font-size: 14px;
   border: none;
   border-radius: 4px;
@@ -187,12 +206,17 @@ input[type=text] {
 
 input[type=password] {
   padding: 8px 10px;
-  margin-left: 100px;
-  margin-right: 100px;
+  margin: 10px auto;
   font-size: 14px;
   border: none;
   border-radius: 4px;
   text-align: center;
+}
+
+/*Format input type div - Google button*/
+
+input[type=submit] {
+  margin: auto;
 }
 
 /*Div containing filter options*/
@@ -270,6 +294,7 @@ input[type=password] {
   margin-top: 30px;
   height: 50px;
   width: 204px;
+  cursor: pointer;
 }
 
 .google-img:hover {
