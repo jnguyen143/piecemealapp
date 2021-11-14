@@ -171,6 +171,7 @@ body {
   background-color: white;
   color: rgb(75, 74, 74);
   font-size: 10px;
+  width:100%;
   margin: 5px auto;
   padding: 5px;
   border-style: solid;
@@ -359,4 +360,12 @@ input[type=submit] {
 
 .google-img:visited {
   background-image: url("../static/btn_google_signin_light_pressed_web.png");
+}
+
+
+
+.select{
+  font-family: Arial;
+
+  border-radius: 4px;
 }
