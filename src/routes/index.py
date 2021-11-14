@@ -26,8 +26,10 @@ def get_blueprint():
 
 @index_blueprint.route("/")
 def index():
+    authenticated = False
     # If user is authenticated, get user recommendations based on saved ingredients and recipes
     if current_user.is_authenticated:
+        authenticated = True
         data = (
             "TESTING AUTH SECTION" + current_user.name,
             current_user.email,
@@ -38,4 +40,6 @@ def index():
     else:
         recipes = get_recommended_recipes()
 
-    return render_template("index.html", recipes=recipes, len=len(recipes))
+    return render_template(
+        "index.html", recipes=recipes, authenticated=authenticated, len=len(recipes)
+    )

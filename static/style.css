@@ -135,7 +135,6 @@ body {
 /*Right side container for search results formatting*/
 
 .right-container {
-  background-color: #ffe6d3f1;
   min-width: 350px;
   width: 60%;
   font-weight: bold;
@@ -143,7 +142,24 @@ body {
   margin-left: 10px;
   margin: 0 auto;
   text-align: center;
-  border-radius: 10px;
+  min-height: 100vh;
+  display: flex;
+  flex-flow: column;
+}
+
+/*Right side container for search results formatting*/
+
+.right-sub-container {
+  background-color: #ffe6d3f1;
+  min-width: 350px;
+  font-weight: bold;
+  text-align: center;
+  margin-left: 10px;
+  margin: 0 auto;
+  text-align: center;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   min-height: 100vh;
 }
 
@@ -224,6 +240,18 @@ form {
   margin-bottom: 40px;
   display: flex;
   flex-flow: column;
+}
+
+/*Select dropdown menu styling*/
+
+select {
+  width: 150px;
+  padding: 4px;
+  margin: 5px auto;
+  background: white;
+  border: none;
+  border-radius: 4px;
+  color: rgb(104, 102, 102);
 }
 
 /*Searchbox styling*/

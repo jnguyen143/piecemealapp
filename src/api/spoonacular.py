@@ -381,6 +381,9 @@ def get_recipe(id: int) -> Recipe:
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
 
+    for item in data["recipes"][0]:
+        print(item)
+
     if not data:
         return None
 
@@ -534,9 +537,6 @@ def get_recommended_recipes(
 
     if not data:
         return None
-
-    for item in data["recipes"][0]:
-        print(item)
 
     result = []
     for recipe in data["recipes"]:
