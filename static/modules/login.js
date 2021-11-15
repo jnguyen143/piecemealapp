@@ -1,9 +1,6 @@
 import { encryptData } from './EncryptedRequests.js';
 
-alert("running login");
-
 document.getElementById('login-form').onsubmit = () => {
-    alert("login");
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
