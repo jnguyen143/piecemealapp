@@ -554,7 +554,7 @@ def get_recommended_recipes(
                 dict["full_summary"] = clean_summary(recipe["summary"])
                 dict["summary"] = extract_sentence(recipe["summary"])
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict[
                     "full_summary"
                 ] = "Add some variety to you diet by trying this recipe!"
