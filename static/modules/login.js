@@ -1,35 +1,49 @@
 import { encryptData } from './EncryptedRequests.js';
+import { showToast } from './Toast.js';
 
-document.getElementById('login-form').onsubmit = () => {
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
+async function startLogin(data) {
+    return await fetch("/api/start-login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/octet-stream"
+        },
+        body: data
+    });
+}
 
+document.getElementById('default-login-form').onsubmit = () => {
     // Encrypt the data, then send it to the server
-    let payload = {
+    encryptData(JSON.stringify({
         authentication: "Default",
-        username: username,
-        password: password
-    };
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value
+    })).then(data => {
+        startLogin(data).then(response => response.json()).then(response => {
+            if (response.success) {
+                window.location.href = "/";
+            } else {
+                showToast("Failed to log in - Invalid credentials");
+            }
+        });
+    }).catch(() => {
+        showToast("Failed to log in - Internal server error");
+    });
 
-    try {
-        encryptData(JSON.stringify(payload)).then(data => {
-            fetch("/api/start-login", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/octet-stream'
-                },
-                body: data
-            }).then(response => response.json()).then(response => {
-                if (response.success)
-                    window.location.href = "/";
-                else
-                    alert("Error logging in");
-            });
-        }).catch(err => alert("ERROR: " + err));
-    } catch (e) {
-        alert("Err: " + e);
-        return false;
-    }
+    return false;
+};
+
+document.getElementById('google-login-form').onsubmit = () => {
+    encryptData(JSON.stringify({ authentication: "Google" })).then(data => {
+        startLogin(data).then(response => response.json()).then(response => {
+            if (response.success)
+                window.location.replace(response.redirect_url);
+            else {
+                showToast("Failed to log in - Invalid credentials");
+            }
+        });
+    }).catch(() => {
+        showToast("Failed to log in - Internal server error");
+    });
 
     return false;
 };

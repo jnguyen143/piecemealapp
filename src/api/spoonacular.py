@@ -542,9 +542,6 @@ def get_recommended_recipes(
     if not data:
         return None
 
-    for item in data["recipes"][0]:
-        print(item)
-
     result = []
     for recipe in data["recipes"]:
         dict = {}

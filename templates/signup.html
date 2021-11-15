@@ -5,6 +5,7 @@
   <title>PieceMeal - Sign Up</title>
   <link rel="stylesheet" type="text/css" href='../static/stylesheets/style.css'>
   <link rel="stylesheet" type="text/css" href='../static/stylesheets/signup.css'>
+  <script src="../static/modules/forge.min.js"></script>
   <script type="module" src="../static/modules/signup.js"></script>
 </head>
 
@@ -16,13 +17,13 @@
       <a href="/signup">Register</a>
     </div>
     <div class="signup-sub-container">
-      <img class="logo" src="../static/logo.svg" />
+      <img class="logo" src="../static/assets/logo.svg" />
       <div style="margin:auto;">
         <p>Create an account via google sign in</p>
-        <form action="/api/start-signup" method="POST">
+        <form id="google-signup-form" method="POST">
           <input type="submit" class="google-img" value="" />
         </form>
-        <form onsubmit="return signupDefault();" method="POST">
+        <form id="default-signup-form" method="POST">
           <p>or create an account here</p>
           <input type="text" id="username" placeholder="Username" />
           <input type="text" id="email" placeholder="Email" />
@@ -34,6 +35,8 @@
       </div>
     </div>
   </div>
+
+  {% include "Toast.html" %}
 </body>
 
 </html>
