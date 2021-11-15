@@ -346,8 +346,8 @@ def search_recipes(
                 "id": recipe["id"],
                 "name": recipe["title"],
                 "image": recipe["image"],
-                "summary": extract_sentence(recipe["summary"]),
-                "full_summary": clean_summary(recipe["summary"]),
+                # "summary": extract_sentence(recipe["summary"]),
+                # "full_summary": clean_summary(recipe["summary"]),
             }
         )
 
