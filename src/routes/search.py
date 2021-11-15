@@ -3,8 +3,6 @@ from werkzeug.datastructures import ImmutableHeadersMixin
 import routes.util as util
 from api.spoonacular import Cuisine, search_recipes, search_ingredients
 
-# import spoonacular functions search_recipes, search_ingredients
-
 
 search_blueprint = Blueprint(
     "bp_search",
@@ -26,40 +24,39 @@ def get_blueprint():
     return search_blueprint
 
 
+# Route that searches ingredients the user can add to profile
 @search_blueprint.route("/search_ingredients", methods=["POST"])
 def searchByingredients():
     if request.method == "POST":
         ingredients = request.form.get("searchIngredients")
-        # prints what the user searches for to the terminal
-        print(ingredients)
+        keyword = ingredients
         returnedDict = search_ingredients(ingredients)
-        # prints the 10 recipes to the terminal
-        print(returnedDict)
         if returnedDict == []:
-            print("error")
-        return render_template("index.html", ingredients=returnedDict)
+            print("No ingredients produced by API call")
+        return render_template(
+            "index.html",
+            ingredients=returnedDict,
+            keyword=keyword,
+            search=True,
+        )
     return render_template("index.html")
 
 
+# Route that searches for recipes based on user input keyword
 @search_blueprint.route("/search_recipes", methods=["POST"])
 def searchByrecipes():
     if request.method == "POST":
-        ingredients = request.form.get("searchRecipes")
-        # prints what the user searches for to the terminal
+        keyword = request.form.get("searchRecipes")
         cuisine = request.form.get("cuisine")
-        print(cuisine)
-        ingredients += ", " + cuisine
-
-        print(ingredients)
-        returnedDict = search_recipes(ingredients)
-        # prints the 10 recipes to the terminal
-        print(returnedDict)
+        query_string = keyword + ", " + cuisine
+        returnedDict = search_recipes(query_string)
         if returnedDict == []:
-            print("error")
-        return render_template("index.html", recipes=returnedDict)
+            print("No recipes produced by API call")
+        return render_template(
+            "index.html",
+            recipes=returnedDict,
+            keyword=keyword,
+            search=True,
+            recipe_search=True,
+        )
     return render_template("index.html")
-
-
-@search_blueprint.route("/search")
-def search():
-    return render_template("search.html")
