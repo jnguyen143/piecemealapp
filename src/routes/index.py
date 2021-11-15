@@ -36,7 +36,6 @@ def index():
         # return render_template("index2.html", userdata=current_user.to_json())
     # Else, get dummy data/random recommendations
     else:
-        data = get_recommended_recipes()
-        print(data)
+        recipes = get_recommended_recipes()
 
-    return render_template("index.html", data=data, len=len(data))
+    return render_template("index.html", recipes=recipes, len=len(recipes))

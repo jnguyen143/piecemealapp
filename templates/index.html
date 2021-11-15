@@ -3,81 +3,120 @@
 
 <head>
   <title>PieceMeal</title>
-  <link rel="stylesheet" type="text/css" href='../static/stylesheets/style.css'>
-
+  <link rel="stylesheet" type="text/css" href='../static/style.css'>
 </head>
 
 <body>
+  <div class="main-container">
 
-  <div class="left-container">
+    <div class="left-container">
 
-    <img class="logo" src="../static/assets/logo.svg" />
+      <img class="logo" src="../static/logo.svg" />
 
+      <div class="nav_menu">
 
-    <form class="recipes" action="/search_recipes" method="POST">
-      <p>Search for Recipes</p>
-      <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
-      <button type="submit">Search</button>
-      <div class="filters">
-        <p>Filter by:</p>
-        <input type="button" class="filter-button" value="Cuisine" />
-        <input type="button" class="filter-button" value="Allergies" />
       </div>
-    </form>
+      <form class="recipes" action="/search_recipes" method="POST">
+        <p>Search for Recipes</p>
+
+        <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
+
+        <button type="submit" class="search-button">Search</button>
+        <div class="filters">
+          <p>Filter by:</p>
+        </div>
+
+        <label for="cuisine">Cuisine:</label>
+        <select id="cuisine" name="cuisine">
+          <option value=""></option>
+          <option value="African">African</option>
+          <option value="American">American</option>
+          <option value="British"> British </option>
+          <option value="Cajun"> Cajun </option>
+          <option value="Caribbean"> Caribbean </option>
+          <option value="Chinese"> Chinese </option>
+          <option value="EasternEuropean"> EasternEuropean </option>
+          <option value="European"> European </option>
+          <option value="French"> French </option>
+          <option value="German"> German </option>
+          <option value="Greek"> Greek </option>
+          <option value="Indian"> Indian </option>
+          <option value="Irish"> Irish </option>
+          <option value="Italian"> Italian </option>
+          <option value="Japanese"> Japanese </option>
+          <option value="Jewish"> Jewish </option>
+          <option value="Korean"> Korean </option>
+          <option value="LatinAmerican"> Latin American </option>
+          <option value="Mediterranean"> Mediterranean </option>
+          <option value="Mexican"> Mexican </option>
+          <option value="MiddleEastern"> Middle Eastern </option>
+          <option value="Nordic"> Nordic </option>
+          <option value="Southern"> Southern </option>
+          <option value="Spanish"> Spanish </option>
+          <option value="Thai"> Thai </option>
+          <option value="Vietnamese"> Vietnamese </option>
+        </select>
+
+      </form>
 
 
-    <form class="ingredients" action="/search_ingredients" method="POST">
-      <p>Search for Ingredients</p>
-      <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
 
-      <button type="submit">Search</button>
-    </form>
+      <form class="ingredients" action="/search_ingredients" method="POST">
+        <p>Search for Ingredients</p>
+        <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
+        <button type="submit" class="search-button">Search</button>
+      </form>
 
-    <div class="account">
-      <a href="/login">Login</a>
-      <a href="/signup">Signup</a>
+      <div class="account">
+        <a href="/login">Login</a>
+        <a href="/signup">Signup</a>
+      </div>
     </div>
   </div>
 
   <div class="right-container">
-    <h1>Welcome</h1>
-    <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
+    <div class="header">
+      <h1>Recipes & Ingredients</h1>
 
-    {%if recipes%}
-    <div class="recipe">
+      <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
+    </div>
+
+    <div class="content">
+      {%if recipes%}
+
       <!-- need if statement to hide recipe div -->
-      <!--  -->
 
       {%for recipe in recipes%}
-
-      <div class="description">
+      <div class="recipe">
         <div class="image">
-          <img src="{{recipe['image']}}" style="width: 100px; height: 100px;"
-            alt="No image available for this recipe" />
+          <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
         </div>
-        <h2>{{recipe['name']}}</h2>
-        <p>Recipe ID - {{recipe['id']}}</p>
-
-        {%endfor%}
-        {%endif%}
-        {%if ingredients%}
-        {%for ingredient in ingredients%}
         <div class="description">
-          <div class="image">
-            <img src="{{ingredient['image']}}" style="width: 100px; height: 100px;"
-              alt="No image available for this recipe" />
-          </div>
-          <div>
-            <h2>{{ingredient['name']}}</h2>
-            <p>Recipe ID - {{ingredient['id']}}</p>
-            {%endfor%}
-            {%endif%}
-          </div>
+          <h2>{{recipe["name"]}}</h2>
+          <p>{{recipe["summary"]}}</p>
+        </div>
+      </div>
+      {%endfor%}
+
+      {%endif%}
+    </div>
+    {%if ingredients%}
+    <div class="content">
+      {%for ingredient in ingredients%}
+      <div class="recipe">
+        <div class="image">
+          <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
+        </div>
+        <div class="description">
+          <h2>{{ingredient['name']}}</h2>
         </div>
       </div>
 
+      {%endfor%}
+
+      {%endif%}
     </div>
-  </div>
+
 </body>
 
 </html>

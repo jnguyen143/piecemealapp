@@ -7,55 +7,197 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   font-family: Arial;
   display: flex;
   flex-flow: row wrap;
 }
 
-/*Center container styling for login/or signup*/
+/*Center container styling for login*/
 
-.container {
-  background-color: #ffe6d3f1;
-  width: 40%;
-  height: 75%;
-  margin: auto;
-  position: absolute;
+.login-container {
+  display: flex;
+  flex-flow: column;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
+  width: 700px;
+  height: 550px;
+  margin: auto;
+  position: absolute;
   border-radius: 10px;
+  text-align: center;
+  overflow: auto;
+}
+
+/*Sub-container for login*/
+
+.login-sub-container {
+  background-color: #ffe6d3f1;
+  border-top-right-radius: 10px;
+  width: 700px;
+  height: 550px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  flex-flow: column wrap;
+  flex-flow: row;
+}
+
+/*Center container styling for signup*/
+
+.signup-container {
+  display: flex;
+  flex-flow: column;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 700px;
+  height: 600px;
+  margin: auto;
+  position: absolute;
+  border-radius: 10px;
+  text-align: center;
+  overflow: auto;
+}
+
+/*Sub-container for signup*/
+
+.signup-sub-container {
+  background-color: #ffe6d3f1;
+  border-top-right-radius: 10px;
+  width: 700px;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  flex-flow: row;
+}
+
+/*logo formatting*/
+
+.logo {
+  height: 300px;
+  width: 300px;
+}
+
+/*Navigation menu container and styling*/
+
+.nav_menu {
+  border-top-right-radius: 10px;
   text-align: center;
 }
 
-/*Side container for search and login in index.html*/
+.nav_menu a {
+  background: rgb(251, 140, 0);
+  background: linear-gradient(60deg, rgba(251, 140, 0, 1) 50%, rgba(255, 206, 143, 1) 100%);
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 14px 68px;
+  text-decoration: none;
+  font-size: 17px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.nav_menu a:hover {
+  background: #c46d04;
+  color: white;
+}
+
+/*main-container helper to set fixed sidebar*/
+
+.main-container {
+  height: 100vh;
+  min-width: 320px;
+  max-width: 30%;
+}
+
+/*Left side container for navigation menu, search and login/Signup*/
 
 .left-container {
+  height: 100vh;
+  min-width: 320px;
+  max-width: 30%;
+  top: 8px;
+  z-index: 0;
+  left: 0;
+  position: fixed;
   background-color: #ffe6d3f1;
-  height: 100%;
-  width: 30%;
   text-align: center;
   border-radius: 10px;
-  margin-right: 20px;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  overflow-x: hidden;
+  /*Disables horizontal scroll*/
 }
 
 /*Right side container for search results formatting*/
 
 .right-container {
   background-color: #ffe6d3f1;
-  font-weight: bold;
-  height: 100%;
+  min-width: 350px;
   width: 60%;
+  font-weight: bold;
+  text-align: center;
+  margin-left: 10px;
   margin: 0 auto;
   text-align: center;
   border-radius: 10px;
+  min-height: 100vh;
+}
+
+/*Right side container header*/
+
+.header {
+  color: rgb(75, 74, 74);
+  text-align: center;
+  margin: 10px;
+}
+
+/*Content div for index.html random recipes and search results*/
+
+.content {
+  margin: auto;
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+/*Individual recipe/ingredient container*/
+
+/* need to hide recipe div when outputing search results */
+
+.recipe {
+  background-color: white;
+  color: rgb(75, 74, 74);
+  font-size: 10px;
+  width: 100%;
+  margin: 5px auto;
+  padding: 5px;
+  border-style: solid;
+  border-color: rgb(194, 191, 191);
+  border-width: 1px;
+  border-radius: 5px;
+  display: flex;
+  flex-flow: row wrap;
+  text-align: left;
+  min-width: 340px;
+  max-width: 340px;
+  height: 130px;
+  overflow: auto;
+}
+
+/*Inner description div for recipe/ingredient container*/
+
+.description {
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 60%;
+  display: flex;
+  flex-flow: column;
 }
 
 /*Ingredients container*/
@@ -80,55 +222,19 @@ body {
   text-align: left;
 }
 
-/*Individual recipe/ingredient container*/
-
-/* need to hide recipe div before searches */
-
-/*  */
-
-.recipe {
-  background-color: white;
-  color: rgb(75, 74, 74);
-  margin: 5px;
-  padding: 5px;
-  border-style: solid;
-  border-color: rgb(194, 191, 191);
-  border-width: 1px;
-  border-radius: 5px;
-  display: flex;
-  flex-flow: row wrap;
-  text-align: left;
-}
-
-/*Inner description div for recipe/ingredient container*/
-
-.description {
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-/*logo formatting*/
-
-.logo {
-  /* margin-top: 10px; */
-  /* margin-bottom:5px; */
-  height: 200px;
-  width: 200px;
-}
-
 /*All forms styling*/
 
 form {
-  margin-bottom: 70px;
+  margin-bottom: 40px;
+  display: flex;
+  flex-flow: column;
 }
 
 /*Searchbox styling*/
 
 input[type=text] {
   padding: 8px 10px;
-  margin: 5px 100px 5px 100px;
-  /* margin-left: 100px;
-  margin-right: 100px; */
+  margin: 10px auto;
   font-size: 14px;
   border: none;
   border-radius: 4px;
@@ -139,12 +245,17 @@ input[type=text] {
 
 input[type=password] {
   padding: 8px 10px;
-  margin-left: 100px;
-  margin-right: 100px;
+  margin: 10px auto;
   font-size: 14px;
   border: none;
   border-radius: 4px;
   text-align: center;
+}
+
+/*Format input type div - Google button*/
+
+input[type=submit] {
+  margin: auto;
 }
 
 /*Div containing filter options*/
@@ -173,8 +284,9 @@ input[type=password] {
 
 /*Search button styling*/
 
-button {
+.search-button {
   padding: 6px 10px;
+  width: 100px;
   margin-top: 8px;
   margin-bottom: 8px;
   margin-left: 100px;
@@ -186,14 +298,34 @@ button {
   border-radius: 20px;
 }
 
-button:hover {
+.search-button:hover {
+  background: #c46d04;
+}
+
+/*Login and Signup button styling*/
+
+.account-button {
+  padding: 6px 10px;
+  width: 100px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 100px;
+  margin-right: 100px;
+  background: #FB8C00;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+.account-button:hover {
   background: #c46d04;
 }
 
 /*account container styling*/
 
 .account {
-  margin-top: 150px;
+  margin-top: 50px;
 }
 
 /*padding between login and signup*/
@@ -221,6 +353,7 @@ button:hover {
   margin-top: 30px;
   height: 50px;
   width: 204px;
+  cursor: pointer;
 }
 
 .google-img:hover {
@@ -229,5 +362,10 @@ button:hover {
 }
 
 .google-img:visited {
-  background-image: url("../assets/btn_google_signin_light_pressed_web.png");
+  background-image: url("../static/btn_google_signin_light_pressed_web.png");
+}
+
+.select {
+  font-family: Arial;
+  border-radius: 4px;
 }
