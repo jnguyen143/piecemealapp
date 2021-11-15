@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, render_template, redirect
+from flask import Flask, Blueprint, render_template, request
 from . import util
 from database import database
 from flask_login import LoginManager, logout_user
@@ -50,4 +50,5 @@ def init(app: Flask, db: database.Database):
 
 @login_blueprint.route("/login")
 def login():
-    return render_template("login.html")
+    login_error = request.args.get("login-auth-status", 0, type=int)
+    return render_template("login.html", login_error=login_error)
