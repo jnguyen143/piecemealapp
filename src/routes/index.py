@@ -28,14 +28,9 @@ def get_blueprint():
 def index():
     # If user is authenticated, get user recommendations based on saved ingredients and recipes
     if current_user.is_authenticated:
-        data = (
-            "TESTING AUTH SECTION" + current_user.name,
-            current_user.email,
-            current_user.profile_pic,
-        )
-        # return render_template("index2.html", userdata=current_user.to_json())
+        return render_template("index2.html", userdata=current_user.to_json())
+    # return render_template("index2.html", userdata=current_user.to_json())
     # Else, get dummy data/random recommendations
-    else:
-        recipes = get_recommended_recipes()
+    recipes = get_recommended_recipes()
 
     return render_template("index.html", recipes=recipes, len=len(recipes))
