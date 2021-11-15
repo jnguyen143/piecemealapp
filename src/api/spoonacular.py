@@ -496,6 +496,13 @@ def search_ingredients(
     return ingredients
 
 
+def get_or_default(dict, key, default):
+    try:
+        return dict[key]
+    except KeyError:
+        return default
+
+
 def get_recommended_recipes(
     offset: int = 0,
     limit: int = 10,
@@ -535,9 +542,6 @@ def get_recommended_recipes(
     if not data:
         return None
 
-    for item in data["recipes"][0]:
-        print(item)
-
     result = []
     for recipe in data["recipes"]:
         dict = {}
@@ -550,7 +554,7 @@ def get_recommended_recipes(
                 dict["full_summary"] = clean_summary(recipe["summary"])
                 dict["summary"] = extract_sentence(recipe["summary"])
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict[
                     "full_summary"
                 ] = "Add some variety to you diet by trying this recipe!"

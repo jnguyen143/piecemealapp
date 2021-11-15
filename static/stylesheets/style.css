@@ -1,7 +1,7 @@
 /*Body styling*/
 
 body {
-  background-image: url("../static/img3.jpg");
+  background-image: url("../assets/img3.jpg");
   background-color: rgb(48, 44, 44);
   height: 100vh;
   background-repeat: no-repeat;
@@ -76,8 +76,8 @@ body {
 /*logo formatting*/
 
 .logo {
-  height:300px;
-  width:300px;
+  height: 300px;
+  width: 300px;
 }
 
 /*Navigation menu container and styling*/
@@ -88,8 +88,8 @@ body {
 }
 
 .nav_menu a {
-  background: rgb(251,140,0);
-  background: linear-gradient(60deg, rgba(251,140,0,1) 50%, rgba(255,206,143,1) 100%);
+  background: rgb(251, 140, 0);
+  background: linear-gradient(60deg, rgba(251, 140, 0, 1) 50%, rgba(255, 206, 143, 1) 100%);
   float: left;
   color: white;
   text-align: center;
@@ -129,7 +129,8 @@ body {
   display: flex;
   flex-flow: column;
   align-items: center;
-  overflow-x: hidden; /*Disables horizontal scroll*/
+  overflow-x: hidden;
+  /*Disables horizontal scroll*/
 }
 
 /*Right side container for search results formatting*/
@@ -166,12 +167,14 @@ body {
 }
 
 /*Individual recipe/ingredient container*/
+
 /* need to hide recipe div when outputing search results */
+
 .recipe {
   background-color: white;
   color: rgb(75, 74, 74);
   font-size: 10px;
-  width:100%;
+  width: 100%;
   margin: 5px auto;
   padding: 5px;
   border-style: solid;
@@ -344,7 +347,7 @@ input[type=submit] {
 /*Google login button styling*/
 
 .google-img {
-  background-image: url("../static/btn_google_signin_light_normal_web.png");
+  background-image: url("../assets/btn_google_signin_light_normal_web.png");
   background-repeat: no-repeat;
   background-position: center;
   margin-top: 30px;
@@ -354,7 +357,7 @@ input[type=submit] {
 }
 
 .google-img:hover {
-  background-image: url("../static/btn_google_signin_light_focus_web.png");
+  background-image: url("../assets/btn_google_signin_light_focus_web.png");
   box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
 }
 
@@ -362,10 +365,7 @@ input[type=submit] {
   background-image: url("../static/btn_google_signin_light_pressed_web.png");
 }
 
-
-
-.select{
+.select {
   font-family: Arial;
-
   border-radius: 4px;
 }

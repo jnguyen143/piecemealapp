@@ -13,3 +13,5 @@ async function encryptData(original) {
     });
     return result;
 }
+
+export { encryptData };

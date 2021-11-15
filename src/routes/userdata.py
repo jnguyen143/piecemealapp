@@ -521,7 +521,7 @@ def start_login():
             redirect_uri=dest_uri,
             scope=["openid", "email", "profile"],
         )
-        return redirect(request_uri)
+        return jsonify({"redirect_url": request_uri, "success": True})
     elif auth == UserAuthentication.Default.label:
         try:
             username = actual_data["username"]
@@ -529,7 +529,9 @@ def start_login():
             user = int__db.get_user_by_username(username)
             if int__db.validate_password(user.id, password):
                 login_user(user)
-            return jsonify({"success": True})
+                return jsonify({"success": True})
+            else:
+                return jsonify({"success": False})
         except:
             return jsonify({"success": False})
     else:
@@ -621,7 +623,7 @@ def validate_login():
 @userdata_blueprint.route("/api/start-signup", methods=["POST"])
 def start_signup():
     """
-    Initiates the signup flow. The value returned by this function will be a redirect to Google's login handler URL.
+    Initiates the signup flow. The value returned by this function will be a JSON object containing information about the result of the call.
 
     The input data for this endpoint must be encrypted using the correct public key.
 
@@ -634,11 +636,9 @@ def start_signup():
         password (str): The user's password. This value is optional depending on the authentication method.
 
     Response:
-        If the authentication method is `database.UserAuthentication.Google`, then this function will return a redirect to Google's login handler URL.
-
-        Otherwise, the following value will be returned:
         {
             success (bool): Whether the user was successfully created and logged in.
+            redirect_url (str): The destination URL for a Google-authenticated signup request. This value is only present if the authentication method is `database.UserAuthentication.Google`.
         }
     """
     message = ""
@@ -668,7 +668,7 @@ def start_signup():
             redirect_uri=dest_uri,
             scope=["openid", "email", "profile"],
         )
-        return redirect(request_uri)
+        return {"redirect_url": str(request_uri), "success": True}
     elif auth == UserAuthentication.Default.label:
         try:
             username = actual_data["username"]
