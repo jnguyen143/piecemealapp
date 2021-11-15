@@ -154,13 +154,15 @@ body {
 .right-sub-container {
   background-color: #ffe6d3f1;
   min-width: 100%;
+  /* min-height: 100vh; */
   font-weight: bold;
   text-align: center;
-  margin-left: 10px;
   margin: 0 auto;
+  padding: 10px;
   text-align: center;
-  border-radius: 10px;
-  min-height: 100vh;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 /*Right side container header*/
@@ -183,13 +185,10 @@ body {
 
 /*Individual recipe/ingredient container*/
 
-/* need to hide recipe div when outputing search results */
-
 .recipe {
   background-color: white;
   color: rgb(75, 74, 74);
   font-size: 10px;
-  width: 100%;
   margin: 5px auto;
   padding: 5px;
   border-style: solid;
@@ -199,9 +198,8 @@ body {
   display: flex;
   flex-flow: row wrap;
   text-align: left;
-  min-width: 340px;
-  max-width: 340px;
-  height: 130px;
+  width: 340px;
+  height: 140px;
   overflow: auto;
 }
 
@@ -317,6 +315,24 @@ input[type=submit] {
   background: #c46d04;
 }
 
+/*Add button styling*/
+
+.add-button {
+  margin: 5px auto;
+  padding: 5px;
+  background: #ffe6d3f1;
+  font-size: 14px;
+  color: #c46d04;
+  border: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.add-button:hover {
+  color: white;
+  background: #FB8C00;
+}
+
 /*Login and Signup button styling*/
 
 .account-button {
@@ -380,6 +396,8 @@ input[type=submit] {
   background-image: url("../static/btn_google_signin_light_pressed_web.png");
 }
 
+/*Styling for select dropdown option menu for cuisine types*/
+
 select {
   background: white;
   margin: auto;
@@ -388,4 +406,11 @@ select {
   border: none;
   font-family: Arial;
   border-radius: 4px;
+}
+
+/*Styling for image div for recipes and ingredients*/
+
+.image {
+  display: flex;
+  flex-flow: column;
 }
