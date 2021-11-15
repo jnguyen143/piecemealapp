@@ -231,3 +231,36 @@ class Password(db.Model):
             "user": self.user_obj.to_json(),
             "phrase": self.phrase,
         }
+
+
+class FriendRequest(db.Model):
+    __tablename__ = "friend_requests"
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    src = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    target = db.Column(
+        db.String(255),
+        db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    src_obj = relationship(User, foreign_keys=[src])
+    target_obj = relationship(User, foreign_keys=[target])
+
+    def to_json(self, shallow: bool = True):
+        """
+        Returns this row as a JSON object, where each key corresponds to a column
+        in the table and the values correspond to the entries in the current row.
+
+        Args:
+            shallow (bool): If set to false, the `src` and `target` keys will map to actual user objects instead of just their IDs.
+
+        Returns:
+            This row instance as a JSON object.
+        """
+        if shallow:
+            return {"src": self.src, "target": self.target}
+
+        return {"src": self.src_obj.to_json(), "target": self.target_obj.to_json()}

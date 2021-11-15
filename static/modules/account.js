@@ -2,6 +2,139 @@ import { showToast } from "./Toast.js";
 import { encryptData } from "./EncryptedRequests.js";
 
 // ========== CONTENT-SPECIFIC FUNCTIONS ========== //
+
+// ---------- FRIENDS ---------- //
+function loadFriendsEvents() {
+    for (let btn of document.getElementsByClassName("friend-delete")) {
+        btn.addEventListener("click", (event) => {
+            let userId = event.target.getAttribute("friend-id");
+            fetch("/api/delete-relationship", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: userId })
+            }).then(response => response.json()).then(response => {
+                if (response.result != 0)
+                    showToast("Failed to delete friend");
+                else {
+                    gotoPage("friends").then(() => loadFriendsEvents()).then(() => showToast("Successfully deleted friend"));
+                }
+            }).catch(() => showToast("Failed to delete friend"));
+        });
+    }
+
+    for (let btn of document.getElementsByClassName("friend-request-accept")) {
+        let listElement = btn.parentElement;
+        btn.addEventListener("click", (event) => {
+            let userId = event.target.getAttribute("friend-id");
+            fetch("/api/handle-friend-request", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: userId, action: 1 })
+            }).then(response => response.json()).then(response => {
+                if (response.result != 0)
+                    showToast("Failed to add friend");
+                else {
+                    listElement.remove();
+                    gotoPage("friends").then(() => loadFriendsEvents()).then(() => showToast("Successfully added friend"));
+                }
+            }).catch(() => showToast("Failed to add friend"));
+        });
+    }
+
+    for (let btn of document.getElementsByClassName("friend-request-deny")) {
+        let listElement = btn.parentElement;
+        btn.addEventListener("click", (event) => {
+            let userId = event.target.getAttribute("friend-id");
+            fetch("/api/handle-friend-request", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: userId, action: 0 })
+            }).then(response => response.json()).then(response => {
+                if (response.result != 0)
+                    showToast("Failed to deny friend request");
+                else {
+                    listElement.remove();
+                    gotoPage("friends").then(() => loadFriendsEvents()).then(() => showToast("Friend request denied"));
+                }
+            }).catch(() => showToast("Failed to deny friend request"));
+        });
+    }
+
+    document.getElementById("friends-add-name-field").addEventListener("input", (event) => {
+        // If this field is now blank, enable the username field
+        let value = event.target.value;
+        if (value === "") {
+            document.getElementById("friends-add-username-field").disabled = false;
+        } else {
+            document.getElementById("friends-add-username-field").disabled = true;
+        }
+    });
+
+    document.getElementById("friends-add-username-field").addEventListener("input", (event) => {
+        // If this field is now blank, enable the name field
+        let value = event.target.value;
+        if (value === "") {
+            document.getElementById("friends-add-name-field").disabled = false;
+        } else {
+            document.getElementById("friends-add-name-field").disabled = true;
+        }
+    });
+
+    document.getElementById("friends-add-search-button").addEventListener("click", () => {
+        let nameField = document.getElementById("friends-add-name-field");
+        let usernameField = document.getElementById("friends-add-username-field");
+
+        if (nameField.disabled) {
+            // Search by username
+            fetch("/api/account/search-users?" + new URLSearchParams({
+                search_by: "username", query: usernameField.value
+            })).then(response => response.text()).then(response => {
+                document.getElementById("friends-add-search-results").innerHTML = response;
+                loadFriendSearchEvents();
+            }).catch((err) => showToast("Failed to search for users: " + err));
+        } else {
+            // Search by name
+            fetch("/api/account/search-users?" + new URLSearchParams({
+                search_by: "name", query: nameField.value
+            })).then(response => response.text()).then(response => {
+                document.getElementById("friends-add-search-results").innerHTML = response;
+                loadFriendSearchEvents();
+            }).catch((err) => showToast("Failed to search for users " + err));
+        }
+    });
+}
+
+function loadFriendSearchEvents() {
+    for (let btn of document.getElementsByClassName("search-results-user-add")) {
+        btn.addEventListener("click", (event) => {
+            // Send a friend request
+            let userId = event.target.getAttribute("user-id");
+            fetch("/api/send-friend-request", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id: userId })
+            }).then(response => response.json()).then(response => {
+                if (response.result == 0) {
+                    showToast("Friend request sent");
+                    btn.disabled = true;
+                } else {
+                    showToast("Failed to send friend request");
+                }
+            }).catch(() => showToast("Failed to send friend request"));
+        });
+    }
+}
+
+// ---------- PROFILE ---------- //
+
 function containsInvalidUsernameChars(str) {
     return !(/^([a-zA-Z0-9\$\.\_\-]+)$/.test(str));
 }
@@ -127,7 +260,7 @@ document.getElementById("sb-profile").onclick = () => {
 };
 
 document.getElementById("sb-friends").onclick = () => {
-    gotoPage("friends");
+    gotoPage("friends").then(() => loadFriendsEvents());
 };
 
 document.getElementById("sb-recipes").onclick = () => {

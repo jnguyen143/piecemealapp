@@ -4,6 +4,7 @@ This file defines common types and functions used across all database-related ca
 """
 
 from flask import Flask
+from flask.scaffold import F
 from flask_sqlalchemy import SQLAlchemy
 from os import getenv
 import sqlalchemy.orm as orm
@@ -186,7 +187,7 @@ class Database:
         user = None
         try:
             user = session.query(User).filter_by(id=id).first()
-        except Exception as e:
+        except:
             session.rollback()
             raise DatabaseException("Failed to perform query")
         finally:
@@ -576,7 +577,7 @@ class Database:
         Args:
             id (str): The ID of the user.
             kwargs: The userdata to change. The keys must correspond to any of the updatable fields for a user.
-        
+
         Raises:
             NoUserException: If the specified user does not exist.
             KeyError: If any of the specified userdata keys do not correspond to a valid modifiable field.
@@ -608,7 +609,6 @@ class Database:
             raise DatabaseException("Failed to set username")
         finally:
             session.close()
-
 
     def add_default_user(
         self,
@@ -1166,7 +1166,10 @@ class Database:
             has_relationship = (
                 session.query(Relationship)
                 .filter(
-                    or_(and_(user1=user1, user2=user2), and_(user1=user2, user2=user1))
+                    or_(
+                        and_(Relationship.user1 == user1, Relationship.user2 == user2),
+                        and_(Relationship.user1 == user2, Relationship.user2 == user1),
+                    )
                 )
                 .first()
                 is not None
@@ -1176,8 +1179,9 @@ class Database:
 
             session.add(Relationship(user1=user1, user2=user2))
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
+            print(f"dberr: {e}")
             raise DatabaseException("Failed to add relationship")
         finally:
             session.close()
@@ -1310,7 +1314,6 @@ class Database:
             )
             for relationship in user2_relationships:
                 users.append(relationship.user1_obj)
-            session.commit()
         except:
             session.rollback()
             raise DatabaseException("Failed to query relationships")
@@ -1691,4 +1694,177 @@ class Database:
         finally:
             session.close()
 
+        return result
+
+    def get_friend_request(self, src: str, target: str):
+        """
+        Returns the friend request object for the specified source and target users.
+
+        Args:
+            src (str): The ID of the source user.
+            target (str): The ID of the target user.
+
+        Returns:
+            The friend request object, or `None` if the request does not exist.
+
+        Raises:
+            NoUserException: If either of the specified users do not exist.
+            DatabaseException: If there was a problem querying the friend request.
+        """
+
+        if not self.user_exists(src):
+            raise NoUserException(src)
+        if not self.user_exists(target):
+            raise NoUserException(target)
+
+        from database.models import FriendRequest
+
+        session = self.int__Session()
+        request = None
+        try:
+            request = (
+                session.query(FriendRequest).filter_by(src=src, target=target).first()
+            )
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query friend request")
+        finally:
+            session.close()
+        return request
+
+    def add_friend_request(self, src: str, target: str):
+        """
+        Adds a friend request from the `src` user to the `target` user.
+
+        This function does nothing if the request is already present.
+
+        Args:
+            src (str): The ID of the source user.
+            target (str): The ID of the target user.
+
+        Returns:
+            The friend request object.
+
+        Raises:
+            NoUserException: If either of the specified users do not exist.
+            DatabaseException: If there was a problem adding the friend request.
+        """
+
+        request = self.get_friend_request(src, target)
+
+        if request is not None:
+            return request
+
+        from database.models import FriendRequest
+
+        session = self.int__Session()
+        try:
+            request = FriendRequest(src=src, target=target)
+            session.add(request)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add friend request")
+        finally:
+            session.close()
+
+        return self.get_friend_request(src, target)
+
+    def delete_friend_request(self, src: str, target: str) -> bool:
+        """
+        Deletes the friend request for the specified source and target users.
+
+        Args:
+            src (str): The ID of the source user.
+            target (str): The ID of the target user.
+
+        Returns:
+            True if the friend request was successfully deleted and false otherwise.
+
+        Raises:
+            NoUserException: If either of the specified users do not exist.
+            DatabaseException: If there was a problem deleting the friend request.
+        """
+
+        request = self.get_friend_request(src, target)
+
+        if request is None:
+            return False
+
+        from database.models import FriendRequest
+
+        session = self.int__Session()
+        try:
+            session.query(FriendRequest).filter_by(src=src, target=target).delete()
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to delete friend request")
+        finally:
+            session.close()
+
+        return True
+
+    def get_friend_requests_for_src_user(self, src: str):
+        """
+        Returns a list of target user objects in friend requests for which the source is the specified user.
+
+        Args:
+            src (str): The ID of the source user.
+
+        Returns:
+            A list of target user objects, or an empty list if there are no associated friend requests.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If there was a problem querying the friend requests.
+        """
+        if not self.user_exists(src):
+            raise NoUserException(src)
+
+        from database.models import FriendRequest
+
+        session = self.int__Session()
+        result = []
+        try:
+            requests = session.query(FriendRequest).filter_by(src=src).all()
+            for request in requests:
+                result.append(request.target_obj)
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query friend requests")
+        finally:
+            session.close()
+        return result
+
+    def get_friend_requests_for_target_user(self, target: str):
+        """
+        Returns a list of source user objects in friend requests for which the target is the specified user.
+
+        Args:
+            target (str): The ID of the target user.
+
+        Returns:
+            A list of source user objects, or an empty list if there are no associated friend requests.
+
+        Raises:
+            NoUserException: If the specified user does not exist.
+            DatabaseException: If there was a problem querying the friend requests.
+        """
+        if not self.user_exists(target):
+            raise NoUserException(target)
+
+        from database.models import FriendRequest
+
+        session = self.int__Session()
+        result = []
+        try:
+            requests = session.query(FriendRequest).filter_by(target=target).all()
+            for request in requests:
+                result.append(request.src_obj)
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to query friend requests")
+        finally:
+            session.close()
         return result

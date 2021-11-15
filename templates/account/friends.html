@@ -1,3 +1,43 @@
 <div>
     <div id="main-content-title">My Friends</div>
+    <div id="friends-list">
+        <ul>
+            {% for friend in friends %}
+            <li>
+                <div class="friend-name">
+                    {{friend["given_name"]}} {{friend["family_name"]}} &lpar;{{friend["username"]}}&rpar;
+                </div>
+                <button class="friend-delete" friend-id="{{friend['id']}}">X</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div id="friends-request-section">
+        <div id="friends-request-section-title">Friend Requests</div>
+        <div id="friends-request-list">
+            <ul>
+                {% for friend in friend_requests %}
+                <li>
+                    <div class="friend-name">
+                        {{friend["given_name"]}} {{friend["family_name"]}} &lpar;{{friend["username"]}}&rpar;
+                    </div>
+                    <button class="friend-request-accept" friend-id="{{friend['id']}}">&check;</button>
+                    <button class="friend-request-deny" friend-id="{{friend['id']}}">X</button>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div id="friends-add-section">
+        <div>
+            <div>Search for users by name</div>
+            <input type="text" placeholder="Name" id="friends-add-name-field" />
+        </div>
+        <div>
+            <div>Search for users by username</div>
+            <input type="text" placeholder="Username" id="friends-add-username-field" />
+        </div>
+        <button id="friends-add-search-button">Search</button>
+        <div id="friends-add-search-results"></div>
+    </div>
 </div>

@@ -844,3 +844,169 @@ def update_password():
         return jsonify({"result": RESPONSE_PASSWORD_SET_FAIL})
 
     return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/delete-relationship", methods=["POST"])
+def delete_friend():
+    """
+    Deletes the relationship between the current user and the specified user.
+
+    This operation works both ways; the relationship will be deleted for the current user against the specified user and vice versa.
+
+    Parameters:
+        user_id (str): The ID of the related user to be deleted.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The relationship was deleted successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The current user does not have a relationship with the specified user.
+                3: There was a problem deleting the relationship.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_NO_RELATIONSHIP = 2
+    RESPONSE_RELATIONSHIP_DELETE_FAIL = 3
+    RESPONSE_NO_USER = 4
+
+    user_id = None
+
+    try:
+        user_id = request.get_json()["user_id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    try:
+        int__db.delete_relationship(user.id, user_id)
+    except NoUserException:
+        return jsonify({"result": RESPONSE_NO_RELATIONSHIP})
+    except:
+        return jsonify({"result": RESPONSE_RELATIONSHIP_DELETE_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/send-friend-request", methods=["POST"])
+def send_friend_request():
+    """
+    Sends a friend request from the current user to the specified user.
+
+    Parameters:
+        user_id (str): The ID of the user to receive the request.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The request was sent successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The specified user does not exist.
+                3: There was a problem sending the request.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_NO_TARGET_USER = 2
+    RESPONSE_REQUEST_ADD_FAIL = 3
+    RESPONSE_NO_USER = 4
+
+    user_id = None
+
+    try:
+        user_id = request.get_json()["user_id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    try:
+        int__db.add_friend_request(user.id, user_id)
+    except NoUserException:
+        return jsonify({"result": RESPONSE_NO_TARGET_USER})
+    except:
+        return jsonify({"result": RESPONSE_REQUEST_ADD_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/handle-friend-request", methods=["POST"])
+def handle_friend_request():
+    """
+    Handles the friend request for the current user against the specified user.
+
+    If the friend request is accepted, this function will delete the request from the table and add a relationship between the current user and the specified user.
+
+    Parameters:
+        user_id (str): The ID of the user who sent the request.
+        action (int): The action to perform on the request, which must be one of:
+            0: Deny the request.
+            1: Accept the request.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The action was performed successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The specified user does not exist.
+                3: There was a problem performing the action.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_NO_SRC_USER = 2
+    RESPONSE_REQUEST_ACTION_FAIL = 3
+    RESPONSE_NO_USER = 4
+
+    ACTION_DENY = 0
+    ACTION_ACCEPT = 1
+
+    user_id = None
+    action = None
+
+    try:
+        data = request.get_json()
+        user_id = data["user_id"]
+        action = int(data["action"])
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    if action == ACTION_ACCEPT:
+        try:
+            int__db.delete_friend_request(user_id, user.id)
+            int__db.add_relationship(user.id, user_id)
+        except NoUserException:
+            print("err1")
+            return jsonify({"result": RESPONSE_NO_SRC_USER})
+        except Exception as e:
+            print(f"err2: {e}")
+            return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
+    elif action == ACTION_DENY:
+        try:
+            result = int__db.delete_friend_request(user_id, user.id)
+            if not result:
+                return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
+        except NoUserException:
+            return jsonify({"result": RESPONSE_NO_SRC_USER})
+        except:
+            return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
+    else:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    return jsonify({"result": RESPONSE_OK})

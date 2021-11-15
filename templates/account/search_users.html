@@ -1,0 +1,16 @@
+<div>
+    {% if search_results|length == 0 %}
+    <div id="search-results-no-match">No users match the provided query</div>
+    {% else %}
+    {% for user in search_results %}
+    <ul>
+        <li>
+            <div class="search-results-user-name">
+                {{user["given_name"]}} {{user["family_name"]}} &lpar;{{user["username"]}}&rpar;
+            </div>
+            <button class="search-results-user-add" user-id="{{user['id']}}">Add</button>
+        </li>
+    </ul>
+    {% endfor %}
+    {% endif %}
+</div>
