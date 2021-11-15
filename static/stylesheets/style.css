@@ -154,7 +154,7 @@ body {
 .right-sub-container {
   background-color: #ffe6d3f1;
   min-width: 100%;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   font-weight: bold;
   text-align: center;
   margin: 0 auto;
