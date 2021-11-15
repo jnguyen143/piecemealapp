@@ -45,3 +45,28 @@ def account():
         x.to_json() for x in int__db.get_relationships_for_user(current_user.id)
     ]
     return render_template("account.html", userdata=current_user.to_json())
+
+
+@account_blueprint.route("/api/account/profile")
+def profile():
+    return render_template("account/profile.html", userdata=current_user.to_json())
+
+
+@account_blueprint.route("/api/account/friends")
+def friends():
+    return render_template("account/friends.html", userdata=current_user.to_json())
+
+
+@account_blueprint.route("/api/account/recipes")
+def recipes():
+    return render_template("account/recipes.html", userdata=current_user.to_json())
+
+
+@account_blueprint.route("/api/account/ingredients")
+def ingredients():
+    return render_template("account/ingredients.html", userdata=current_user.to_json())
+
+
+@account_blueprint.route("/api/account/intolerances")
+def intolerances():
+    return render_template("account/intolerances.html", userdata=current_user.to_json())

@@ -14,7 +14,13 @@ function showToast(message, duration = 3000) {
     // Add the "show" class to DIV
     x.className = "toast-show";
 
-    // After 3 seconds, remove the show class from DIV
+    let seconds = duration / 1000.0;
+    seconds -= 0.5; // To account for the fadeout offset of 0.5s
+
+    x.style["-webkit-animation"] = `fadein 0.5s, fadeout 0.5s ${seconds}s`;
+    x.style["animation"] = `fadein 0.5s, fadeout 0.5s ${seconds}s`;
+
+    // After the specified duration, remove the show class from DIV
     setTimeout(function () { x.className = x.className.replace("toast-show", ""); }, duration);
 }
 

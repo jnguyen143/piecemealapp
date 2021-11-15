@@ -567,6 +567,49 @@ class Database:
         finally:
             session.close()
 
+    def set_userdata(self, id: str, **kwargs):
+        """
+        Sets the userdata for the user with the specified ID.
+
+        Usernames cannot be set using this function. To set a username, use `set_username()`.
+
+        Args:
+            id (str): The ID of the user.
+            kwargs: The userdata to change. The keys must correspond to any of the updatable fields for a user.
+        
+        Raises:
+            NoUserException: If the specified user does not exist.
+            KeyError: If any of the specified userdata keys do not correspond to a valid modifiable field.
+            DatabaseException: If there was a problem accessing the database.
+        """
+        if not self.user_exists(id):
+            raise NoUserException(id)
+
+        from database.models import User
+
+        session = self.int__Session()
+        try:
+            user = session.query(User).filter_by(id=id).first()
+            for k in kwargs.keys():
+                if k == "email":
+                    user.email = kwargs["email"]
+                elif k == "given_name":
+                    user.given_name = kwargs["given_name"]
+                elif k == "family_name":
+                    user.family_name = kwargs["family_name"]
+                else:
+                    raise KeyError(f"Invalid key {k}")
+            session.commit()
+        except KeyError as e:
+            session.rollback()
+            raise e
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to set username")
+        finally:
+            session.close()
+
+
     def add_default_user(
         self,
         email: str,

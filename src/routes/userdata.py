@@ -12,6 +12,7 @@ from database.database import (
     UserAuthentication,
     DatabaseException,
     Database,
+    NoUserException,
 )
 from . import util
 from flask_login import login_required, current_user, login_user, logout_user
@@ -505,9 +506,13 @@ def start_login():
     from Crypto.Hash import SHA256
     from base64 import b64decode
 
-    key = RSA.importKey(get_private_key())
-    cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
-    decrypted_message = cipher.decrypt(b64decode(message))
+    decrypted_message = ""
+    try:
+        key = RSA.importKey(get_private_key())
+        cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+        decrypted_message = cipher.decrypt(b64decode(message))
+    except:
+        return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
 
@@ -599,6 +604,8 @@ def validate_login():
     """
     Validates that the attempted login was successful.
 
+    If there was a problem logging in using the Google account, this function will redirect back to the `/login` endpoint with an error flag set in the request parameters.
+
     Do not use this endpoint directly; it's only intended for use as a redirect destination from the Google login flow.
     """
     userinfo = None
@@ -609,12 +616,20 @@ def validate_login():
         login_handler_client.parse_request_body_response(json.dumps(response))
         userinfo = get_google_user_info(google_provider)
     except Exception:
-        return redirect("/login")
+        return redirect("/login?login-auth-status=1")
 
     user = int__db.get_user(userinfo["id"])
 
     if user == None:
-        return redirect("/login")
+        return redirect("/login?login-auth-status=2")
+
+    # With Google-authenticated accounts, Google controls the user's email and name. Therefore they need to be updated to reflect Google's changes
+    int__db.set_userdata(
+        user.id,
+        email=userinfo["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+    )
 
     login_user(user)
     return redirect("/")
@@ -652,9 +667,13 @@ def start_signup():
     from Crypto.Hash import SHA256
     from base64 import b64decode
 
-    key = RSA.importKey(get_private_key())
-    cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
-    decrypted_message = cipher.decrypt(b64decode(message))
+    decrypted_message = ""
+    try:
+        key = RSA.importKey(get_private_key())
+        cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+        decrypted_message = cipher.decrypt(b64decode(message))
+    except:
+        return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
 
@@ -746,3 +765,82 @@ def get_server_public_key():
     }
     """
     return jsonify({"key": get_public_key()})
+
+
+@userdata_blueprint.route("/api/update-password", methods=["POST"])
+def update_password():
+    """
+    Updates the current user's password.
+
+    The input data for this endpoint must be encrypted using the correct public key.
+
+    Parameters:
+        old_password (str): The user's current password.
+        new_password (str): The new password to use.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The password was updated successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The old password was incorrect.
+                3: The user's account type does not allow for passwords.
+                4: There was a problem updating the username.
+                5: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_INVALID_PASSWORD = 2
+    RESPONSE_INVALID_AUTH = 3
+    RESPONSE_PASSWORD_SET_FAIL = 4
+    RESPONSE_NO_USER = 5
+
+    message = ""
+    try:
+        message = request.get_data()
+    except:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    from Crypto.Cipher import PKCS1_OAEP
+    from Crypto.PublicKey import RSA
+    from Crypto.Hash import SHA256
+    from base64 import b64decode
+
+    decrypted_message = ""
+    try:
+        key = RSA.importKey(get_private_key())
+        cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+        decrypted_message = cipher.decrypt(b64decode(message))
+    except:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    actual_data = json.loads(decrypted_message)
+    old_ps = ""
+    new_ps = ""
+
+    try:
+        old_ps = actual_data["old_password"]
+        new_ps = actual_data["new_password"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    try:
+        if not int__db.validate_password(user.id, old_ps):
+            return jsonify({"result": RESPONSE_INVALID_PASSWORD})
+    except NoUserException:
+        return jsonify({"result": RESPONSE_INVALID_AUTH})
+    except:
+        return jsonify({"result": RESPONSE_PASSWORD_SET_FAIL})
+
+    try:
+        int__db.set_password(user.id, new_ps)
+    except:
+        return jsonify({"result": RESPONSE_PASSWORD_SET_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
