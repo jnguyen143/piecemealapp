@@ -12,6 +12,7 @@ from database.database import (
     UserAuthentication,
     DatabaseException,
     Database,
+    NoUserException,
 )
 from . import util
 from flask_login import login_required, current_user, login_user, logout_user
@@ -505,9 +506,13 @@ def start_login():
     from Crypto.Hash import SHA256
     from base64 import b64decode
 
-    key = RSA.importKey(get_private_key())
-    cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
-    decrypted_message = cipher.decrypt(b64decode(message))
+    decrypted_message = ""
+    try:
+        key = RSA.importKey(get_private_key())
+        cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+        decrypted_message = cipher.decrypt(b64decode(message))
+    except:
+        return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
 
@@ -599,6 +604,8 @@ def validate_login():
     """
     Validates that the attempted login was successful.
 
+    If there was a problem logging in using the Google account, this function will redirect back to the `/login` endpoint with an error flag set in the request parameters.
+
     Do not use this endpoint directly; it's only intended for use as a redirect destination from the Google login flow.
     """
     userinfo = None
@@ -609,12 +616,20 @@ def validate_login():
         login_handler_client.parse_request_body_response(json.dumps(response))
         userinfo = get_google_user_info(google_provider)
     except Exception:
-        return redirect("/login")
+        return redirect("/login?login-auth-status=1")
 
     user = int__db.get_user(userinfo["id"])
 
     if user == None:
-        return redirect("/login")
+        return redirect("/login?login-auth-status=2")
+
+    # With Google-authenticated accounts, Google controls the user's email and name. Therefore they need to be updated to reflect Google's changes
+    int__db.set_userdata(
+        user.id,
+        email=userinfo["email"],
+        given_name=userinfo["given_name"],
+        family_name=userinfo["family_name"],
+    )
 
     login_user(user)
     return redirect("/")
@@ -652,9 +667,13 @@ def start_signup():
     from Crypto.Hash import SHA256
     from base64 import b64decode
 
-    key = RSA.importKey(get_private_key())
-    cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
-    decrypted_message = cipher.decrypt(b64decode(message))
+    decrypted_message = ""
+    try:
+        key = RSA.importKey(get_private_key())
+        cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+        decrypted_message = cipher.decrypt(b64decode(message))
+    except:
+        return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
 
@@ -746,3 +765,248 @@ def get_server_public_key():
     }
     """
     return jsonify({"key": get_public_key()})
+
+
+@userdata_blueprint.route("/api/update-password", methods=["POST"])
+def update_password():
+    """
+    Updates the current user's password.
+
+    The input data for this endpoint must be encrypted using the correct public key.
+
+    Parameters:
+        old_password (str): The user's current password.
+        new_password (str): The new password to use.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The password was updated successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The old password was incorrect.
+                3: The user's account type does not allow for passwords.
+                4: There was a problem updating the username.
+                5: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_INVALID_PASSWORD = 2
+    RESPONSE_INVALID_AUTH = 3
+    RESPONSE_PASSWORD_SET_FAIL = 4
+    RESPONSE_NO_USER = 5
+
+    message = ""
+    try:
+        message = request.get_data()
+    except:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    from Crypto.Cipher import PKCS1_OAEP
+    from Crypto.PublicKey import RSA
+    from Crypto.Hash import SHA256
+    from base64 import b64decode
+
+    decrypted_message = ""
+    try:
+        key = RSA.importKey(get_private_key())
+        cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
+        decrypted_message = cipher.decrypt(b64decode(message))
+    except:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    actual_data = json.loads(decrypted_message)
+    old_ps = ""
+    new_ps = ""
+
+    try:
+        old_ps = actual_data["old_password"]
+        new_ps = actual_data["new_password"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    try:
+        if not int__db.validate_password(user.id, old_ps):
+            return jsonify({"result": RESPONSE_INVALID_PASSWORD})
+    except NoUserException:
+        return jsonify({"result": RESPONSE_INVALID_AUTH})
+    except:
+        return jsonify({"result": RESPONSE_PASSWORD_SET_FAIL})
+
+    try:
+        int__db.set_password(user.id, new_ps)
+    except:
+        return jsonify({"result": RESPONSE_PASSWORD_SET_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/delete-relationship", methods=["POST"])
+def delete_friend():
+    """
+    Deletes the relationship between the current user and the specified user.
+
+    This operation works both ways; the relationship will be deleted for the current user against the specified user and vice versa.
+
+    Parameters:
+        user_id (str): The ID of the related user to be deleted.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The relationship was deleted successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The current user does not have a relationship with the specified user.
+                3: There was a problem deleting the relationship.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_NO_RELATIONSHIP = 2
+    RESPONSE_RELATIONSHIP_DELETE_FAIL = 3
+    RESPONSE_NO_USER = 4
+
+    user_id = None
+
+    try:
+        user_id = request.get_json()["user_id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    try:
+        int__db.delete_relationship(user.id, user_id)
+    except NoUserException:
+        return jsonify({"result": RESPONSE_NO_RELATIONSHIP})
+    except:
+        return jsonify({"result": RESPONSE_RELATIONSHIP_DELETE_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/send-friend-request", methods=["POST"])
+def send_friend_request():
+    """
+    Sends a friend request from the current user to the specified user.
+
+    Parameters:
+        user_id (str): The ID of the user to receive the request.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The request was sent successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The specified user does not exist.
+                3: There was a problem sending the request.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_NO_TARGET_USER = 2
+    RESPONSE_REQUEST_ADD_FAIL = 3
+    RESPONSE_NO_USER = 4
+
+    user_id = None
+
+    try:
+        user_id = request.get_json()["user_id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    try:
+        int__db.add_friend_request(user.id, user_id)
+    except NoUserException:
+        return jsonify({"result": RESPONSE_NO_TARGET_USER})
+    except:
+        return jsonify({"result": RESPONSE_REQUEST_ADD_FAIL})
+
+    return jsonify({"result": RESPONSE_OK})
+
+
+@userdata_blueprint.route("/api/handle-friend-request", methods=["POST"])
+def handle_friend_request():
+    """
+    Handles the friend request for the current user against the specified user.
+
+    If the friend request is accepted, this function will delete the request from the table and add a relationship between the current user and the specified user.
+
+    Parameters:
+        user_id (str): The ID of the user who sent the request.
+        action (int): The action to perform on the request, which must be one of:
+            0: Deny the request.
+            1: Accept the request.
+
+    Response:
+        {
+            result (int): The result of the operation, which is one of the following values:
+                0: The action was performed successfully.
+                1: The input arguments were corrupted or otherwise invalid.
+                2: The specified user does not exist.
+                3: There was a problem performing the action.
+                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+        }
+    """
+    RESPONSE_OK = 0
+    RESPONSE_CORRUPT_INPUT = 1
+    RESPONSE_NO_SRC_USER = 2
+    RESPONSE_REQUEST_ACTION_FAIL = 3
+    RESPONSE_NO_USER = 4
+
+    ACTION_DENY = 0
+    ACTION_ACCEPT = 1
+
+    user_id = None
+    action = None
+
+    try:
+        data = request.get_json()
+        user_id = data["user_id"]
+        action = int(data["action"])
+    except KeyError:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    user = get_current_user()
+
+    if user == None:
+        return jsonify({"result": RESPONSE_NO_USER})
+
+    if action == ACTION_ACCEPT:
+        try:
+            int__db.delete_friend_request(user_id, user.id)
+            int__db.add_relationship(user.id, user_id)
+        except NoUserException:
+            print("err1")
+            return jsonify({"result": RESPONSE_NO_SRC_USER})
+        except Exception as e:
+            print(f"err2: {e}")
+            return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
+    elif action == ACTION_DENY:
+        try:
+            result = int__db.delete_friend_request(user_id, user.id)
+            if not result:
+                return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
+        except NoUserException:
+            return jsonify({"result": RESPONSE_NO_SRC_USER})
+        except:
+            return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
+    else:
+        return jsonify({"result": RESPONSE_CORRUPT_INPUT})
+
+    return jsonify({"result": RESPONSE_OK})

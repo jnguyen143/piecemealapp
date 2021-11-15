@@ -3,151 +3,41 @@
 
 <head>
     <title>PieceMeal - My Account</title>
+    <link rel="stylesheet" type="text/css" href='../static/stylesheets/style.css'>
+    <script src="../static/modules/forge.min.js"></script>
 </head>
 
 <body>
-    <div>
-        <a href="/">Back to Dashboard</a>
-        <p>Name: {{userdata['given_name']}} {{userdata['family_name']}}</p>
-        <p>Email: {{userdata['email']}}</p>
-        <span>
-            <p>Username: {{userdata['username']}}</p>
-            <form method="POST" onsubmit="return updateUsername();">
-                <input type="text" id="username_text_box" placeholder="New Username">
-                <input type="submit" value="Update">
-            </form>
-
-            <script>
-                function updateUsername() {
-                    let username = document.getElementById("username_text_box").value;
-                    fetch("/api/update-username", {
-                        method: "POST",
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ new_username: username })
-                    }).then(response => {
-                        if (response.ok)
-                            return response.json();
-                        else {
-                            alert("Failed to set username");
-                        }
-                    }).then(response => {
-                        if (response.result != 0)
-                            alert("Failed to set username (got response " + response.result + ")");
-                        else
-                            location.reload();
-                    }).catch(e => {
-                        alert("Error setting username: " + e);
-                    });
-                    return false;
-                }
-            </script>
-        </span>
-        <p>Profile Picture:</p>
-        <img src="{{userdata['profile_image']}}" alt="Profile Picture" />
-
-        <p>Friends:</p>
-        <table>
-            {%for friend in userdata['friends']%}
-            <tr>
-                <td>
-                    {{friend['given_name']}} {{friend['family_name']}} - {{friend['email']}}
-                </td>
-            </tr>
-            {%endfor%}
-        </table>
-
-        <form method="POST" onsubmit="return searchUsersByUsername();">
-            <input type="text" id="search_username_text_box" placeholder="Username">
-            <input type="submit" value="Search">
-        </form>
-
-        <script>
-            function searchUsersByUsername() {
-                let username = document.getElementById("search_username_text_box").value;
-                fetch("/api/search-users", {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ criteria: "username", query: username })
-                }).then(response => {
-                    if (response.ok)
-                        return response.json();
-                    else {
-                        alert("Failed to search users");
-                    }
-                }).then(response => {
-                    if (!('users' in response))
-                        alert("Failed to search users");
-                    else {
-                        let results = "";
-                        for (const user of response.users) {
-                            results += "User: " + user.username + " -> " + user.given_name + " " + user.family_name + "\n";
-                        }
-                        alert("Results:\n" + results);
-                    }
-                }).catch(e => {
-                    alert("Error searching users: " + e);
-                });
-                return false;
-            }
-        </script>
-
-        <form method="POST" onsubmit="return searchUsersByName();">
-            <input type="text" id="search_name_text_box" placeholder="Name">
-            <input type="submit" value="Search">
-        </form>
-
-        <script>
-            function searchUsersByName() {
-                let name = document.getElementById("search_name_text_box").value;
-                fetch("/api/search-users", {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ criteria: "name", query: name })
-                }).then(response => {
-                    if (response.ok)
-                        return response.json();
-                    else {
-                        alert("Failed to search users");
-                    }
-                }).then(response => {
-                    if (!('users' in response))
-                        alert("Failed to search users");
-                    else {
-                        let results = "";
-                        for (const user of response.users) {
-                            results += "User: " + user.username + " -> " + user.given_name + " " + user.family_name + "\n";
-                        }
-                        alert("Results:\n" + results);
-                    }
-                }).catch(e => {
-                    alert("Error searching users: " + e);
-                });
-                return false;
-            }
-        </script>
-
-        <button type="button" onclick="deleteAccount()">Delete Account</button>
-        <script>
-            function deleteAccount() {
-                fetch("/api/delete-user", { method: "POST" })
-                    .then(response => response.json()).then(value => {
-                        if (value.result == 0) {
-                            window.location.href = "/";
-                        } else {
-                            alert("Error deleting user");
-                        }
-                    }).catch(err => {
-                        alert("Error deleting user");
-                    });
-            }
-        </script>
+    <div id="navbar">
+        <div id="homepage-link"><img class="logo" src="../static/assets/logo.svg" /></div>
+        <div id="page-title">My Account</div>
     </div>
+    <div id="content" style="background-color: lightgray;">
+        <div id="main-content"></div>
+        <div id="sidebar">
+            <ol>
+                <li class="sidebar-element">
+                    <button id="sb-profile">Profile</button>
+                </li>
+                <li class="sidebar-element">
+                    <button id="sb-friends">Friends</button>
+                </li>
+                <li class="sidebar-element">
+                    <button id="sb-recipes">Recipes</button>
+                </li>
+                <li class="sidebar-element">
+                    <button id="sb-ingredients">Ingredients</button>
+                </li>
+                <li class="sidebar-element">
+                    <button id="sb-intolerances">Intolerances</button>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    {% include "Toast.html" %}
+
+    <script src="../static/modules/account.js" type="module"></script>
 </body>
 
 </html>
