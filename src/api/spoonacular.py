@@ -475,6 +475,13 @@ def search_ingredients(
     return ingredients
 
 
+def get_or_default(dict, key, default):
+    try:
+        return dict[key]
+    except KeyError:
+        return default
+
+
 def get_recommended_recipes(
     offset: int = 0,
     limit: int = 10,
@@ -516,9 +523,13 @@ def get_recommended_recipes(
         return None
 
     result = []
-    for recipe in data:
+    for recipe in data["recipes"]:
         result.append(
-            {"id": recipe["id"], "name": recipe["name"], "image": recipe["image"]}
+            {
+                "id": recipe["id"],
+                "name": recipe["sourceName"],
+                "image": get_or_default(recipe, "image", ""),
+            }
         )
 
     return result

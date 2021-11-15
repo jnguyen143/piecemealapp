@@ -1,4 +1,10 @@
-function signupDefault() {
+import { encryptData } from './EncryptedRequests.js';
+
+alert("init signup");
+
+document.getElementById('signup-form').onsubmit(() => {
+    alert("signup");
+
     let username = document.getElementById("username").value;
     let email = document.getElementById("email").value;
     let givenName = document.getElementById("given_name").value;
@@ -31,4 +37,4 @@ function signupDefault() {
     }).catch(err => alert("ERROR: " + err));
 
     return false;
-}
+});
