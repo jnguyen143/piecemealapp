@@ -255,6 +255,9 @@ def list_to_comma_separated_string(lst: list) -> str:
 
 # Function to clean html formatted string within JSON response item
 def clean_summary(summary):
+    """
+    Returns a string clean of html prefixes
+    """
     clean_string = re.compile("<.*?>")
     summary = re.sub(clean_string, "", summary)
     return summary
@@ -262,6 +265,10 @@ def clean_summary(summary):
 
 # Function that extract two sentences from recipe's summary description
 def extract_sentence(summary):
+    """
+    Returns first sentence of recipe's summary so that it can be displayed
+    within the small item view
+    """
     summary = clean_summary(summary)
     sentences = [sentence + "." for sentence in summary.split(".")]
     return sentences[0]
@@ -338,18 +345,30 @@ def search_recipes(
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make recipe search request: {str(e)}")
 
-    # recipes = data
     recipes = []
     for recipe in data["results"]:
-        recipes.append(
-            {
-                "id": recipe["id"],
-                "name": recipe["title"],
-                "image": recipe["image"],
-                "summary": extract_sentence(recipe["summary"]),
-                "full_summary": clean_summary(recipe["summary"]),
-            }
-        )
+        dict = {}
+        try:
+            dict["id"] = recipe["id"]
+            dict["name"] = recipe["title"]
+            """
+            The following try/KeyError is meant to address issues regarding unavailable images 
+            and summary during the API in case we still need to show content. This ensures the 
+            found recipe is included instead of causing an empty return or dictionary keyerror
+            during html display
+            """
+            try:
+                dict["image"] = recipe["image"]
+                summary = get_recipe_summary(recipe["id"])
+                dict["summary"] = extract_sentence(summary)
+                dict["full_summary"] = clean_summary(summary)
+            except KeyError:
+                dict["image"] = "../static/noimage.jpg"
+                dict["summary"] = "Try this recipe to add variety into your diet!"
+                dict["full_summary"] = "Try this recipe to add variety into your diet!"
+        except KeyError:
+            print("Unable to extract recipe data")
+        recipes.append(dict)
 
     return recipes
 
@@ -423,11 +442,132 @@ def get_similar_recipes(id: int) -> list:
 
     result = []
     for recipe in data:
-        result.append(
-            {"id": recipe["id"], "name": recipe["name"], "image": recipe["image"]}
-        )
+        dict = {}
+        try:
+            dict["id"] = recipe["id"]
+            dict["name"] = recipe["name"]
+            """
+            The following try/KeyError is meant to address issues regarding unavailable images 
+            and summary during the API in case we still need to show content. This ensures the 
+            found recipe is included instead of causing an empty return or dictionary keyerror
+            during html display
+            """
+            try:
+                dict["image"] = recipe["image"]
+                summary = get_recipe_summary(recipe["id"])
+                dict["summary"] = extract_sentence(summary)
+                dict["full_summary"] = clean_summary(summary)
+            except KeyError:
+                dict["image"] = "../static/noimage.jpg"
+                dict["summary"] = "Try this recipe to add variety into your diet!"
+                dict["full_summary"] = "Try this recipe to add variety into your diet!"
+        except KeyError:
+            print("Error: Unable to retrieve recipe data")
+        result.append(dict)
 
     return result
+
+
+def get_recommended_recipes(
+    offset: int = 0,
+    limit: int = 10,
+) -> list:
+    """
+    Returns a list of randomly recommended recipes.
+
+    Args:
+        "number" for representing the maximum amount of recipes
+
+    Returns:
+        A list of JSON-encoded recipes.
+        Each recipe object consists of the following values:
+            - id (int): The ID of the recipe.
+            - name (str): The display name of the recipe.
+            - image (str): The URL of the image for the recipe.
+
+    Raises:
+        UndefinedApiKeyException: If the Spoonacular API key is undefined.
+        SpoonacularApiException: If there was a problem completing the request.
+    """
+
+    params = {"apiKey": get_api_key()}
+    params["offset"] = offset
+    params["number"] = limit
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/random?",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as e:
+        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
+
+    if not data:
+        return None
+
+    result = []
+    for recipe in data["recipes"]:
+        dict = {}
+        try:
+            dict["id"] = recipe["id"]
+            dict["name"] = recipe["title"]
+            """
+            The following try/KeyError is meant to address issues regarding unavailable images 
+            and summary during the API in case we still need to show content. This ensures the 
+            found recipe is included instead of causing an empty return or dictionary keyerror
+            during html display
+            """
+            try:
+                dict["image"] = recipe["image"]
+                dict["full_summary"] = clean_summary(recipe["summary"])
+                dict["summary"] = extract_sentence(recipe["summary"])
+            except KeyError:
+                dict["image"] = "../static/noimage.jpg"
+                dict[
+                    "full_summary"
+                ] = "Add some variety to you diet by trying this recipe!"
+                dict["summary"] = "Add some variety to you diet by trying this recipe!"
+        except KeyError:
+            print("Error: Unable to retrieve recipe data")
+
+        result.append(dict)
+
+    return result
+
+
+def get_recipe_summary(recipe_id: int) -> str:
+    """
+    Returns a `Recipe's summary as an object associated with the specified ID.
+
+    Args:
+        id (int) - The ID of the recipe to get a summary for.
+
+    Returns:
+        A string object as a full summary which matches the specified ID, or `None` if no recipe matches.
+
+    Raises:
+        UndefinedApiKeyException: If the Spoonacular API key is undefined.
+        SpoonacularApiException: If there was a problem completing the request.
+    """
+
+    params = {"apiKey": get_api_key()}
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/{recipe_id}/summary",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as e:
+        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
+
+    if not data:
+        return None
+
+    return data["summary"]
 
 
 def search_ingredients(
@@ -494,77 +634,6 @@ def search_ingredients(
         )
 
     return ingredients
-
-
-def get_or_default(dict, key, default):
-    try:
-        return dict[key]
-    except KeyError:
-        return default
-
-
-def get_recommended_recipes(
-    offset: int = 0,
-    limit: int = 10,
-) -> list:
-    """
-    Returns a list of randomly recommended recipes.
-
-    Args:
-        "number" for representing the maximum amount of recipes
-
-    Returns:
-        A list of JSON-encoded recipes.
-        Each recipe object consists of the following values:
-            - id (int): The ID of the recipe.
-            - name (str): The display name of the recipe.
-            - image (str): The URL of the image for the recipe.
-
-    Raises:
-        UndefinedApiKeyException: If the Spoonacular API key is undefined.
-        SpoonacularApiException: If there was a problem completing the request.
-    """
-
-    params = {"apiKey": get_api_key()}
-    params["offset"] = offset
-    params["number"] = limit
-
-    data = None
-    try:
-        data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/random?",
-            headers={"Content-Type": "application/json"},
-            params=params,
-        )
-    except (RequestException, MalformedResponseException) as e:
-        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
-
-    if not data:
-        return None
-
-    result = []
-    for recipe in data["recipes"]:
-        dict = {}
-        summary = []
-        try:
-            dict["id"] = recipe["id"]
-            dict["name"] = recipe["title"]
-            try:
-                dict["image"] = recipe["image"]
-                dict["full_summary"] = clean_summary(recipe["summary"])
-                dict["summary"] = extract_sentence(recipe["summary"])
-            except KeyError:
-                dict["image"] = "../static/assets/noimage.jpg"
-                dict[
-                    "full_summary"
-                ] = "Add some variety to you diet by trying this recipe!"
-                dict["summary"] = "Add some variety to you diet by trying this recipe!"
-        except KeyError:
-            print("Error: Unable to retrieve recipe data")
-
-        result.append(dict)
-
-    return result
 
 
 def get_ingredient(id: int) -> Ingredient:

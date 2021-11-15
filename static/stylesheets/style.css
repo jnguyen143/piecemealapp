@@ -10,7 +10,7 @@ body {
   background-attachment: fixed;
   font-family: Arial;
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row;
 }
 
 /*Center container styling for login*/
@@ -28,7 +28,6 @@ body {
   position: absolute;
   border-radius: 10px;
   text-align: center;
-  overflow: auto;
 }
 
 /*Sub-container for login*/
@@ -36,6 +35,8 @@ body {
 .login-sub-container {
   background-color: #ffe6d3f1;
   border-top-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   width: 700px;
   height: 550px;
   display: flex;
@@ -53,12 +54,10 @@ body {
   left: 0;
   right: 0;
   width: 700px;
-  height: 600px;
+  height: 650px;
   margin: auto;
   position: absolute;
-  border-radius: 10px;
   text-align: center;
-  overflow: auto;
 }
 
 /*Sub-container for signup*/
@@ -66,8 +65,10 @@ body {
 .signup-sub-container {
   background-color: #ffe6d3f1;
   border-top-right-radius: 10px;
-  width: 700px;
-  height: 600px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   flex-flow: row;
@@ -85,6 +86,7 @@ body {
 .nav_menu {
   border-top-right-radius: 10px;
   text-align: center;
+  min-width: 100vw;
 }
 
 .nav_menu a {
@@ -117,8 +119,7 @@ body {
 
 .left-container {
   height: 100vh;
-  min-width: 320px;
-  max-width: 30%;
+  width: 320px;
   top: 8px;
   z-index: 0;
   left: 0;
@@ -136,9 +137,23 @@ body {
 /*Right side container for search results formatting*/
 
 .right-container {
+  min-width: 65%;
+  width: 65%;
+  font-weight: bold;
+  text-align: center;
+  margin-left: 10px;
+  margin: 0 auto;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-flow: column;
+}
+
+/*Right side container for search results formatting*/
+
+.right-sub-container {
   background-color: #ffe6d3f1;
-  min-width: 350px;
-  width: 60%;
+  min-width: 100%;
   font-weight: bold;
   text-align: center;
   margin-left: 10px;
@@ -365,7 +380,12 @@ input[type=submit] {
   background-image: url("../static/btn_google_signin_light_pressed_web.png");
 }
 
-.select {
+select {
+  background: white;
+  margin: auto;
+  padding: 5px;
+  width:150px;
+  border: none;
   font-family: Arial;
   border-radius: 4px;
 }
