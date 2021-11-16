@@ -6,6 +6,7 @@ You must run this file from this directory. The tests rely on relative paths to 
 
 import unittest
 from default_recommended_recipes import DefaultRecommendedRecipesTest
+from recommended_ingredients import DefaultRecommendedIngredientsTest
 
 
 def suite():
@@ -13,6 +14,7 @@ def suite():
     suite.addTests(
         [
             DefaultRecommendedRecipesTest(),
+            DefaultRecommendedIngredientsTest(),
         ]
     )
     return suite
