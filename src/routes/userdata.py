@@ -554,7 +554,8 @@ def start_login():
                 return jsonify({"success": True})
             else:
                 return jsonify({"success": False})
-        except:
+        except Exception as E:
+            print(E)
             return jsonify({"success": False})
     else:
         return jsonify({"success": False})
