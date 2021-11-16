@@ -187,7 +187,8 @@ class Database:
         user = None
         try:
             user = session.query(User).filter_by(id=id).first()
-        except:
+        except Exception as E:
+            print(E)
             session.rollback()
             raise DatabaseException("Failed to perform query")
         finally:
