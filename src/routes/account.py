@@ -45,6 +45,7 @@ def account():
     userdata["friends"] = [
         x.to_json() for x in int__db.get_relationships_for_user(current_user.id)
     ]
+
     return render_template("account.html", userdata=current_user.to_json())
 
 
