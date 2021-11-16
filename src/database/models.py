@@ -133,6 +133,13 @@ class SavedRecipe(db.Model):
             return {"user_id": self.user_id, "recipe_id": self.recipe_id}
         return {"user_id": self.user_id, "recipe": self.recipe.to_json()}
 
+    def __repr__(self):
+        return "<SavedRecipe id: %r, user_id: %r, recipe_id: %r>" % (
+            self.id,
+            self.user_id,
+            self.recipe_id,
+        )
+
 
 class SavedIngredient(db.Model):
     __tablename__ = "saved_ingredients"

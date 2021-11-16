@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template
 from flask_login import current_user
-
+from random import sample, choice
 from api.spoonacular import SpoonacularApiException
 from . import util
 from flask_login import current_user
-from api.spoonacular import get_recommended_recipes
+from api.spoonacular import get_recommended_recipes, get_similar_recipes
 from database.models import SavedRecipe
 
 index_blueprint = Blueprint(
@@ -29,16 +29,23 @@ def get_blueprint():
 
 @index_blueprint.route("/")
 def index():
+    recipes = []
     # If user is authenticated, get user recommendations based on saved ingredients and recipes
     if current_user.is_authenticated:
-        recipes = []
+        print("The user passed authentication")
         saved_recipes = SavedRecipe.query.filter_by(user_id=current_user.id).all()
         if saved_recipes:
-            print("Saved recipes are: ", saved_recipes)
-            print("What is to json: ", current_user.to_json())
-            has_recipes = True
+            # Select one of the recipes from user's profile randomly
+            recipe_sample = choice(saved_recipes)
+            recipe_sample = recipe_sample.recipe_id
+            # Get similar recipes based on selected sample
+            try:
+                recipes = get_similar_recipes(recipe_sample)
+            except SpoonacularApiException:
+                pass
+
             return render_template(
-                "index.html",
+                "index2.html",
                 recipes=recipes,
                 len=len(recipes),
                 has_recipes=True,
@@ -59,7 +66,7 @@ def index():
             )
 
     # Else if user not authorized, get dummy data/random recommendations
-    recipes = []
+    print("The user sucks")
     try:
         recipes = get_recommended_recipes()
     except SpoonacularApiException:
