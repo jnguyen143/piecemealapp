@@ -4,7 +4,7 @@ This file defines all of the endpoints relating to user data, such as saving rec
 All of the endpoints defined in this file are API endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
 
-from flask import Blueprint, request, redirect, url_for
+from flask import Blueprint, request, redirect
 from flask.json import jsonify
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
 from database.database import (

@@ -195,6 +195,7 @@ class Database:
             session.close()
         return user
 
+    # def user_exists(self, id: str) -> bool:
     def user_exists(self, id: str) -> bool:
         """
         Returns true if the user with the specified ID exists.
