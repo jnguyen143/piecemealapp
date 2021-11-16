@@ -1,7 +1,13 @@
 from flask import Blueprint, render_template
 from flask_login import current_user
 from . import util
-from api.spoonacular import SpoonacularApiException, get_recommended_recipes
+from api.spoonacular import (
+    SpoonacularApiException,
+    get_recommended_recipes,
+    get_similar_recipes,
+)
+from database import database
+from random import choice
 
 index_blueprint = Blueprint(
     "bp_index",
@@ -9,6 +15,20 @@ index_blueprint = Blueprint(
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),
 )
+
+# For internal use only
+int__db: database.Database = None
+
+
+def init(db: database.Database):
+    """
+    Initializes this module using the provided arguments.
+
+    Args:
+        db (Database): The database object to use.
+    """
+    global int__db
+    int__db = db
 
 
 def get_blueprint():
@@ -37,15 +57,54 @@ def get_recommended_recipes_from_spoonacular():
     return get_recommended_recipes()
 
 
+def get_similar_recipes_from_spoonacular(recipe_id):
+    return get_similar_recipes(recipe_id)
+
+
+def is_user_authenticated():
+    return current_user.is_authenticated
+
+
 @index_blueprint.route("/")
 def index():
-    # If user is authenticated, get user recommendations based on saved ingredients and recipes
-    user = get_current_user()
-    if user is not None and user.is_authenticated:
-        return render_template("index2.html", userdata=user.to_json())
-    # return render_template("index2.html", userdata=current_user.to_json())
-    # Else, get dummy data/random recommendations
     recipes = []
+    # If user is authenticated, get user recommendations based on saved ingredients and recipes
+    if is_user_authenticated():
+        print("The user passed authentication")
+        saved_recipes = int__db.get_saved_recipes(get_current_user().id)
+        if saved_recipes:
+            # Select one of the recipes from user's profile randomly
+            recipe_sample = choice(saved_recipes)
+            recipe_sample = recipe_sample.recipe_id
+            # Get similar recipes based on selected sample
+            try:
+                recipes = get_similar_recipes_from_spoonacular(recipe_sample)
+            except SpoonacularApiException:
+                pass
+
+            return render_template(
+                "index2.html",
+                recipes=recipes,
+                len=len(recipes),
+                has_recipes=True,
+                userdata=current_user.to_json(),
+            )
+        # If user has no recipes saved, display randomly recommended recipes for user to add
+        else:
+            try:
+                recipes = get_recommended_recipes_from_spoonacular()
+            except SpoonacularApiException:
+                pass
+
+            return render_template(
+                "index2.html",
+                recipes=recipes,
+                len=len(recipes),
+                userdata=current_user.to_json(),
+            )
+
+    # Else if user not authorized, get dummy data/random recommendations
+    print("The user sucks")
     try:
         recipes = get_recommended_recipes_from_spoonacular()
     except SpoonacularApiException:
