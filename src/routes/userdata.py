@@ -722,7 +722,8 @@ def validate_signup():
         response = validate_with_google(google_provider, code)
         login_handler_client.parse_request_body_response(json.dumps(response))
         userinfo = get_google_user_info(google_provider)
-    except Exception:
+    except Exception as E:
+        print("Error1", E)
         return redirect("/signup")
 
     user = None
@@ -734,7 +735,8 @@ def validate_signup():
             family_name=userinfo["family_name"],
             profile_image=userinfo["image"],
         )
-    except DatabaseException:
+    except DatabaseException as E:
+        print("Error2", E)
         return redirect("/signup")
 
     login_user(user)
