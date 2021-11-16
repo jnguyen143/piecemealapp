@@ -147,7 +147,7 @@ body {
   float: left;
   color: white;
   text-align: center;
-  padding: 14px 68px;
+  padding: 14px 14px;
   text-decoration: none;
   font-size: 17px;
   border-radius: 10px;
@@ -350,6 +350,24 @@ input[type=submit] {
 }
 
 .add-button:hover {
+  color: white;
+  background: #FB8C00;
+}
+
+/*Delete button styling*/
+
+.delete-button {
+  margin: 5px auto;
+  padding: 5px;
+  background: #ffe6d3f1;
+  font-size: 14px;
+  color: #c46d04;
+  border: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-button:hover {
   color: white;
   background: #FB8C00;
 }

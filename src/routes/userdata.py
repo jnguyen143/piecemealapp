@@ -4,7 +4,7 @@ This file defines all of the endpoints relating to user data, such as saving rec
 All of the endpoints defined in this file are API endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
 
-from flask import Blueprint, request, redirect, url_for
+from flask import Blueprint, request, redirect
 from flask.json import jsonify
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
 from database.database import (
@@ -117,6 +117,8 @@ def save_recipe():
         id = data["id"]
         name = data["name"]
         image = data["image"]
+        summary = data["summary"]
+        full_summary = data["full_summary"]
     except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
@@ -126,11 +128,11 @@ def save_recipe():
     if not recipe_exists(id):
         # Cache the recipe
         try:
-            int__db.add_recipe(id, name, image)
+            int__db.add_recipe(id, name, image, summary, full_summary)
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_recipe(user.id, id)
+        int__db.add_saved_recipe(user.id, id, name, image, summary, full_summary)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -188,7 +190,12 @@ def save_ingredient():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_ingredient(user.id, id)
+        int__db.add_saved_ingredient(
+            user.id,
+            id,
+            name,
+            image,
+        )
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -218,7 +225,11 @@ def delete_recipe():
     RESPONSE_ERR_DELETE_FAIL = 2
     RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
+    try:
+        data = request.get_json()
+        id = data["id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     if id == None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
@@ -260,7 +271,11 @@ def delete_ingredient():
     RESPONSE_ERR_DELETE_FAIL = 2
     RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
+    try:
+        data = request.get_json()
+        id = data["id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     if id == None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
