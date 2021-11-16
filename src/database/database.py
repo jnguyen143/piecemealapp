@@ -1884,3 +1884,231 @@ class Database:
         finally:
             session.close()
         return result
+
+    def add_recipes(self, recipes: list):
+        """
+        This is a convenience function for adding recipes in bulk.
+        This is the same as making repeated calls to `add_recipe`, but this function is faster.
+
+        Args:
+            recipes (list): The list of recipes to add. Each recipe must be a JSON object containing the following values:
+                id (int): The ID of the recipe.
+                name (str): The name of the recipe.
+                image (str): The image URL of the recipe.
+                summary (str): The summary of the recipe. This value is optional.
+                full_summary (str): The full summary of the recipe. This value is optional.
+        """
+
+        from database.models import Recipe
+
+        actual_recipes = []
+
+        for recipe in recipes:
+            if self.get_recipe(recipe["id"]) != None:
+                raise DuplicateRecipeException(recipe["id"])
+            summary = ""
+            full_summary = ""
+            if "summary" in recipe.keys():
+                summary = recipe["summary"]
+            if "full_summary" in recipe.keys():
+                full_summary = recipe["full_summary"]
+
+            actual_recipes.append(
+                Recipe(
+                    id=recipe["id"],
+                    name=recipe["name"],
+                    image=recipe["image"],
+                    summary=summary,
+                    full_summary=full_summary,
+                )
+            )
+
+        session = self.int__Session()
+        try:
+            session.add_all(actual_recipes)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add recipes")
+        finally:
+            session.close()
+
+    def add_ingredients(self, ingredients: list):
+        """
+        This is a convenience function for adding ingredients in bulk.
+        This is the same as making repeated calls to `add_ingredient`, but this function is faster.
+
+        Args:
+            ingredients (list): The list of ingredients to add. Each ingredient must be a JSON object containing the following values:
+                id (int): The ID of the ingredient.
+                name (str): The name of the ingredient.
+                image (str): The image URL of the ingredient.
+        """
+
+        from database.models import Ingredient
+
+        actual_ingredients = []
+
+        for ingredient in ingredients:
+            if self.get_ingredient(ingredient["id"]) != None:
+                raise DuplicateIngredientException(ingredient["id"])
+
+            actual_ingredients.append(
+                Ingredient(
+                    id=ingredient["id"],
+                    name=ingredient["name"],
+                    image=ingredient["image"],
+                )
+            )
+
+        session = self.int__Session()
+        try:
+            session.add_all(actual_ingredients)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add ingredients")
+        finally:
+            session.close()
+
+    def add_google_users(self, users: list):
+        """
+        This is a convenience function for adding Google-authenticated users in bulk.
+        This is the same as making repeated calls to `add_google_user`, but this function is faster.
+
+        Args:
+            users (list): The list of users to add. Each user must be a JSON object containing the following values:
+                id (str): The ID of the user. This value must be unique across all users.
+                email (str): The user's email. This field is not checked for validity.
+                username (str): The user's username. This value must be unique across all users and must be at least three characters.
+                    If the username is not provided or is `None`, then a new one will be randomly generated based on the user's given name.
+                given_name (str): The user's given name. This value is optional.
+                family_name (str): The user's family name. This value is optional.
+                profile_image (str): The URL for the user's profile picture. This value is optional.
+        """
+
+        from database.models import User
+
+        actual_users = []
+
+        for user in users:
+            username = user["username"] if "username" in user else None
+            given_name = user["given_name"] if "given_name" in user else ""
+            family_name = user["family_name"] if "family_name" in user else ""
+            profile_image = user["profile_image"] if "profile_image" in user else ""
+
+            if self.user_exists(user["id"]):
+                raise DuplicateUserException(user["id"])
+            if username != None and self.username_exists(username):
+                raise DuplicateUserException(username)
+
+            # If the username is None, generate a new one
+            if username == None:
+                username = self.generate_username(given_name + " " + family_name)
+
+            # If the username is too short, raise an exception
+            if len(username) < 3:
+                raise DatabaseException(
+                    f'The specified username "{username}" is too short'
+                )
+
+            # If the username contains invalid characters, raise an exception
+            if not self.username_is_valid(username):
+                raise DatabaseException(
+                    f'The specified username "{username}" contains invalid characters'
+                )
+
+            actual_users.append(
+                User(
+                    id=user["id"],
+                    email=user["email"],
+                    given_name=given_name,
+                    family_name=family_name,
+                    profile_image=profile_image,
+                    username=username,
+                    authentication=UserAuthentication.Google.value,
+                    status=UserStatus.Verified.value,
+                )
+            )
+
+        session = self.int__Session()
+        try:
+            session.add_all(actual_users)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add users")
+        finally:
+            session.close()
+
+    def add_saved_recipes(self, saved_recipes):
+        """
+        This is a convenience function for adding saved recipes in bulk.
+        This is the same as making repeated calls to `add_saved_recipe`, but this function is faster.
+
+        Args:
+            saved_recipes (list): The list of saved recipes to add. Each recipe must be a JSON object containing the following values:
+                user_id (str): The ID of the user.
+                recipe_id (int): The ID of the recipe.
+        """
+
+        actual_recipes = []
+
+        from database.models import SavedRecipe
+
+        for recipe in saved_recipes:
+            user_id = recipe["user_id"]
+            recipe_id = recipe["recipe_id"]
+            if not self.user_exists(user_id):
+                raise NoUserException(user_id)
+
+            if self.get_recipe(recipe_id) == None:
+                raise NoRecipeException(recipe_id)
+            actual_recipes.append(SavedRecipe(user_id=user_id, recipe_id=recipe_id))
+
+        session = self.int__Session()
+        try:
+            session.add_all(actual_recipes)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add recipes")
+        finally:
+            session.close()
+
+    def add_saved_ingredients(self, saved_ingredients):
+        """
+        This is a convenience function for adding saved ingredients in bulk.
+        This is the same as making repeated calls to `add_saved_ingredient`, but this function is faster.
+
+        Args:
+            saved_ingredients (list): The list of saved ingredients to add. Each ingredient must be a JSON object containing the following values:
+                user_id (str): The ID of the user.
+                ingredient_id (int): The ID of the ingredient.
+        """
+
+        actual_ingredients = []
+
+        from database.models import SavedIngredient
+
+        for ingredient in saved_ingredients:
+            user_id = ingredient["user_id"]
+            ingredient_id = ingredient["ingredient_id"]
+            if not self.user_exists(user_id):
+                raise NoUserException(user_id)
+
+            if self.get_ingredient(ingredient_id) == None:
+                raise NoIngredientException(ingredient_id)
+            actual_ingredients.append(
+                SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
+            )
+
+        session = self.int__Session()
+        try:
+            session.add_all(actual_ingredients)
+            session.commit()
+        except:
+            session.rollback()
+            raise DatabaseException("Failed to add ingredients")
+        finally:
+            session.close()
