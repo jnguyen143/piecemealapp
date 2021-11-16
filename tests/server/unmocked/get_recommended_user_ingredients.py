@@ -166,16 +166,10 @@ class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
                 f"\033[0;33m----- Executing test {current_test_index + 1} of {total_test_amount} -----\033[0m"
             )
             print("Injecting test data...")
-            for ingredient in test[INPUT]["ingredients"].values():
-                app.db.add_ingredient(
-                    ingredient["id"], ingredient["name"], ingredient["image"]
-                )
-            for user in test[INPUT]["users"].values():
-                app.db.add_google_user(user["id"], user["email"])
-            for saved_ingredient in test[INPUT]["saved_ingredients"]:
-                app.db.add_saved_ingredient(
-                    saved_ingredient["user_id"], saved_ingredient["ingredient_id"]
-                )
+            app.db.add_ingredients(test[INPUT]["ingredients"].values())
+            app.db.add_google_users(test[INPUT]["users"].values())
+            app.db.add_saved_ingredients(test[INPUT]["saved_ingredients"])
+
             validation = False
             try:
                 print("Validating...")
