@@ -63,19 +63,11 @@
   </div>
 
   <div class="right-container">
-    {%if authenticated%}
-    <div class="nav_menu">
-      <a href="/">Home</a>
-      <a href="/profile">Profile</a>
-      <a href="/logout">Logout</a>
-    </div>
-    {%else%}
     <div class="nav_menu">
       <a href="/">Home</a>
       <a href="/login">Login</a>
       <a href="/signup">Register</a>
     </div>
-    {%endif%}
 
     <div class="right-sub-container">
       <!-- If incoming data is from search route, display within right sub-container -->
@@ -131,17 +123,14 @@
       {%endif%}
 
       {%endif%}
+
       <!-- If incoming data is from index route, display based on if user is authorized -->
       {%else%}
+
       <div class="header">
-        {%if authenticated%}
-        <h1>Recipes & Ingredients</h1>
-        <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
-        {%else%}
         <h1>Welcome to pieceMeal</h1>
         <p>Rediscover your appetite by exploring more than 1,000,000+ recipes. You can start by
           checking out some of our most popular recipes below</p>
-        {%endif%}
 
         {%if not recipes%}
         <div style="text-align: center;">

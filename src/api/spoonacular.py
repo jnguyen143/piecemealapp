@@ -363,7 +363,7 @@ def search_recipes(
                 dict["summary"] = extract_sentence(summary)
                 dict["full_summary"] = clean_summary(summary)
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict["summary"] = "Try this recipe to add variety into your diet!"
                 dict["full_summary"] = "Try this recipe to add variety into your diet!"
         except KeyError:
@@ -458,7 +458,7 @@ def get_similar_recipes(id: int) -> list:
                 dict["summary"] = extract_sentence(summary)
                 dict["full_summary"] = clean_summary(summary)
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict["summary"] = "Try this recipe to add variety into your diet!"
                 dict["full_summary"] = "Try this recipe to add variety into your diet!"
         except KeyError:
@@ -524,7 +524,7 @@ def get_recommended_recipes(
                 dict["full_summary"] = clean_summary(recipe["summary"])
                 dict["summary"] = extract_sentence(recipe["summary"])
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict[
                     "full_summary"
                 ] = "Add some variety to you diet by trying this recipe!"

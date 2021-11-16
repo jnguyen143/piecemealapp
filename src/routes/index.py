@@ -36,12 +36,15 @@ def index():
         if saved_recipes:
             print("Saved recipes are: ", saved_recipes)
             print("What is to json: ", current_user.to_json())
+            has_recipes = True
             return render_template(
                 "index.html",
                 recipes=recipes,
                 len=len(recipes),
+                has_recipes=True,
                 userdata=current_user.to_json(),
             )
+        # If user has no recipes saved, display randomly recommended recipes for user to add
         else:
             try:
                 recipes = get_recommended_recipes()
@@ -55,7 +58,7 @@ def index():
                 userdata=current_user.to_json(),
             )
 
-    # Else, get dummy data/random recommendations
+    # Else if user not authorized, get dummy data/random recommendations
     recipes = []
     try:
         recipes = get_recommended_recipes()
