@@ -47,6 +47,8 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
     - name: Run tests
+      env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
         cd tests/server/mocked
         python -m pytest run_mocked.py
@@ -89,6 +91,8 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
     - name: Run tests
+      env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
         cd tests/client/mocked
         python -m pytest run_mocked.py
