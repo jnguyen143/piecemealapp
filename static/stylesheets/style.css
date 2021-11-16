@@ -457,3 +457,27 @@ select {
 .accountPageList{
   list-style-type: none;
 }
+
+.deleteAccountButton {
+  padding: 6px 10px;
+  width: 200px;
+  display:inline-block;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 100px;
+  margin-right: 100px;
+  background: red;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+
+.accountPageButtons:hover {
+  background: #c46d04;
+}
+
+.navbar{
+  margin-left:15px;
+}
