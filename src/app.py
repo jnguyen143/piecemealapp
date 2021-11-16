@@ -41,9 +41,8 @@ def init_app():
 
     # Load the environment file
     env_path = dotenv.find_dotenv()
-    if env_path == "":
-        raise Exception("Failed to load environment file")
-    dotenv.load_dotenv(env_path)
+    if env_path != "":
+        dotenv.load_dotenv(env_path)
 
     # Create the application
     app = flask.Flask(__name__, static_folder=util.get_static_folder())
