@@ -3,6 +3,7 @@ import dotenv
 import os
 from database import database
 import routes.util as util
+import routes.index as index
 
 
 # Before anything else, make sure we have 3.9 or greater
@@ -41,9 +42,8 @@ def init_app():
 
     # Load the environment file
     env_path = dotenv.find_dotenv()
-    if env_path == "":
-        raise Exception("Failed to load environment file")
-    dotenv.load_dotenv(env_path)
+    if env_path != "":
+        dotenv.load_dotenv(env_path)
 
     # Create the application
     app = flask.Flask(__name__, static_folder=util.get_static_folder())
@@ -59,13 +59,13 @@ def init_app():
         raise Exception(f"Failed to initialize database ({str(e)})")
 
     # Register the blueprints
-    import routes.index, routes.login, routes.signup, routes.profile, routes.search, routes.userdata, routes.account, routes.logout
+    import routes.login, routes.signup, routes.profile, routes.search, routes.userdata, routes.account, routes.logout
 
     routes.userdata.init(db)
     routes.login.init(app, db)
     routes.account.init(db)
 
-    app.register_blueprint(routes.index.get_blueprint())
+    app.register_blueprint(index.get_blueprint())
     app.register_blueprint(routes.login.get_blueprint())
     app.register_blueprint(routes.signup.get_blueprint())
     app.register_blueprint(routes.userdata.get_blueprint())
@@ -76,6 +76,14 @@ def init_app():
 
     # Register the teardown context
     app.teardown_appcontext(shutdown_session)
+
+
+def get_index_module():
+    return index
+
+
+def get_app():
+    return app
 
 
 def start_app():

@@ -39,7 +39,7 @@ def generate_recipe():
 def generate_recipes(seedval):
     seed(seedval)
     result = {}
-    for _ in range(0, randint(0, 100)):
+    for _ in range(0, randint(0, 10)):
         recipe = generate_recipe()
         if recipe["id"] in result:
             continue
@@ -56,7 +56,7 @@ def generate_user():
 def generate_users(seedval):
     seed(seedval)
     result = {}
-    for _ in range(0, randint(0, 100)):
+    for _ in range(0, randint(0, 10)):
         user = generate_user()
         if user["id"] in result:
             continue
@@ -126,7 +126,7 @@ def validate_input(actual_output, expected_output):
 class GetRecommendedUserRecipesTestCase(unittest.TestCase):
     def setUp(self):
         self.test_success_params = []
-        for _ in range(0, 10):
+        for _ in range(0, 5):
             seedval = randint(0, 100)
             recipes = generate_recipes(seedval)
             users = generate_users(seedval)
@@ -155,7 +155,11 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
         import app  # pyright: reportMissingImports=false
 
         app.init_app()
-        for test in self.test_success_params:
+        total_test_amount = len(self.test_success_params)
+        for current_test_index in range(0, len(self.test_success_params)):
+            test = self.test_success_params[current_test_index]
+            print(f"Executing test {current_test_index + 1} of {total_test_amount}")
+            print("Injecting test data...")
             for recipe in test[INPUT]["recipes"].values():
                 app.db.add_recipe(recipe["id"], recipe["name"], recipe["image"])
             for user in test[INPUT]["users"].values():
@@ -166,6 +170,7 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 )
             validation = False
             try:
+                print("Validating...")
                 validation = validate_input(
                     app.db.get_recommended_recipes_from_user(
                         test[INPUT]["user_id"], test[INPUT]["limit"]
@@ -175,6 +180,7 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
             except:
                 pass
             finally:
+                print("Deleting test data...")
                 for user in test[INPUT]["users"].keys():
                     app.db.delete_user(user)
                 for recipe in test[INPUT]["recipes"].keys():
@@ -184,6 +190,7 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 validation,
                 f"Assertion failed for input with seed {test[INPUT]['seedval']}",
             )
+            print(f"Test {current_test_index + 1} of {total_test_amount}: PASS")
 
 
 if __name__ == "__main__":
