@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request
+from flask_login import current_user
 from werkzeug.datastructures import ImmutableHeadersMixin
 import routes.util as util
 from api.spoonacular import Cuisine, search_recipes, search_ingredients
@@ -34,10 +35,11 @@ def searchByingredients():
         if returnedDict == []:
             print("No ingredients produced by API call")
         return render_template(
-            "index.html",
+            "index2.html" if current_user.is_authenticated else "index.html",
             ingredients=returnedDict,
             keyword=keyword,
             search=True,
+            userdata=current_user.to_json() if current_user.is_authenticated else None,
         )
     return render_template("index.html")
 
@@ -53,10 +55,11 @@ def searchByrecipes():
         if returnedDict == []:
             print("No recipes produced by API call")
         return render_template(
-            "index.html",
+            "index2.html" if current_user.is_authenticated else "index.html",
             recipes=returnedDict,
             keyword=keyword,
             search=True,
             recipe_search=True,
+            userdata=current_user.to_json() if current_user.is_authenticated else None,
         )
     return render_template("index.html")

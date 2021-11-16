@@ -103,38 +103,37 @@ def save_recipe():
                 3: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
         }
     """
-    if request.method == "POST":
+    RESPONSE_OK = 0
+    RESPONSE_ERR_CORRUPT_INPUT = 1
+    RESPONSE_ERR_SAVE_FAIL = 2
+    RESPONSE_ERR_NO_USER = 3
 
-        RESPONSE_OK = 0
-        RESPONSE_ERR_CORRUPT_INPUT = 1
-        RESPONSE_ERR_SAVE_FAIL = 2
-        RESPONSE_ERR_NO_USER = 3
+    id = None
+    name = None
+    image = None
 
-        id = request.args.get("id", type=int)
-        name = request.args.get("name", type=str)
-        image = request.args.get("image", type=str)
+    try:
+        data = request.get_json()
+        id = data["id"]
+        name = data["name"]
+        image = data["image"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
-        if id == None or name == None or image == None:
-            return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
-
-        user = get_current_user()
-
-        if user == None:
-            return jsonify({"result": RESPONSE_ERR_NO_USER})
-
-        if not recipe_exists(id):
-            # Cache the recipe
-            try:
-                int__db.add_recipe(id, name, image)
-            except DatabaseException:
-                return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
+    user = get_current_user()
+    if user == None:
+        return jsonify({"result": RESPONSE_ERR_NO_USER})
+    if not recipe_exists(id):
+        # Cache the recipe
         try:
-            int__db.add_saved_recipe(user.id, id)
+            int__db.add_recipe(id, name, image)
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
-        return jsonify({"result": RESPONSE_OK})
+    try:
+        int__db.add_saved_recipe(user.id, id)
+    except DatabaseException:
+        return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
+    return jsonify({"result": RESPONSE_OK})
 
 
 @userdata_blueprint.route("/api/save-ingredient", methods=["POST"])
@@ -164,35 +163,35 @@ def save_ingredient():
     RESPONSE_OK = 0
     RESPONSE_ERR_CORRUPT_INPUT = 1
     RESPONSE_ERR_SAVE_FAIL = 2
-    # RESPONSE_ERR_NO_USER = 3
+    RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
-    name = request.args.get("name", type=str)
-    image = request.args.get("image", type=str)
+    id = None
+    name = None
+    image = None
 
-    if id == None or name == None or image == None:
+    try:
+        data = request.get_json()
+        id = data["id"]
+        name = data["name"]
+        image = data["image"]
+    except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
+    if user == None:
+        return jsonify({"result": RESPONSE_ERR_NO_USER})
 
-    if user.is_authenticated():
-
-        # if user == None:
-        #     return jsonify({"result": RESPONSE_ERR_NO_USER})
-
-        if not ingredient_exists(id):
-            # Cache the ingredient
-            try:
-                int__db.add_ingredient(id, name, image)
-            except DatabaseException:
-                return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
+    if not ingredient_exists(id):
+        # Cache the ingredient
         try:
-            int__db.add_saved_ingredient(user.id, id)
+            int__db.add_ingredient(id, name, image)
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
-        return jsonify({"result": RESPONSE_OK})
+    try:
+        int__db.add_saved_ingredient(user.id, id)
+    except DatabaseException:
+        return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
+    return jsonify({"result": RESPONSE_OK})
 
 
 @userdata_blueprint.route("/api/delete-recipe", methods=["POST"])

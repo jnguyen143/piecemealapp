@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import current_user
+
+from api.spoonacular import SpoonacularApiException
 from . import util
 from flask_login import current_user
 from api.spoonacular import get_recommended_recipes
@@ -31,6 +33,10 @@ def index():
         return render_template("index2.html", userdata=current_user.to_json())
     # return render_template("index2.html", userdata=current_user.to_json())
     # Else, get dummy data/random recommendations
-    recipes = get_recommended_recipes()
+    recipes = []
+    try:
+        recipes = get_recommended_recipes()
+    except SpoonacularApiException:
+        pass
 
     return render_template("index.html", recipes=recipes, len=len(recipes))
