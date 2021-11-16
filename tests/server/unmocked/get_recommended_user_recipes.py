@@ -156,6 +156,7 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
 
         app.init_app()
         for test in self.test_success_params:
+            print("testing")
             for recipe in test[INPUT]["recipes"].values():
                 app.db.add_recipe(recipe["id"], recipe["name"], recipe["image"])
             for user in test[INPUT]["users"].values():

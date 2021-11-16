@@ -422,6 +422,8 @@ class Database:
         uname = prefix + str(format_string % suffix_number).strip()
         tries = 1
         while self.username_exists(uname):
+            if(tries > 100):
+                raise DatabaseException("could not generate username")
             # The algorithm will try up to suffix_digits number of times to generate a username.
             # If it still fails to generate a unique username after this point, the number of digits in the suffix will increase by 1 and the process will begin again.
             suffix_number = randint(0, 10 ** suffix_digits - 1)
