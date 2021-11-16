@@ -1,7 +1,7 @@
 """
-This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
+This file tests the functionality of `database.Database.get_recommended_user_ingredients()`.
 
-This file injects a random number of randomly generated users, recipes, and saved recipes, then tests to ensure that `get_recommended_user_recipes()` returns the expected result given the ID of a user from the list of dummy users.
+This file injects a random number of randomly generated users, ingredients, and saved ingredients, then tests to ensure that `get_recommended_user_ingredients()` returns the expected result given the ID of a user from the list of dummy users.
 """
 
 import unittest
@@ -29,29 +29,21 @@ def generate_prefixed_string(prefix):
     return result
 
 
-def generate_recipe():
+def generate_ingredient():
     id = randint(0, 100000)
-    name = generate_prefixed_string("saved_recipe_")
+    name = generate_prefixed_string("saved_ingredient_")
     image = generate_prefixed_string("image_")
-    summary = generate_prefixed_string("summary_")
-    full_summary = generate_prefixed_string("full_summary_")
-    return {
-        "id": id,
-        "name": name,
-        "image": image,
-        "summary": summary,
-        "full_summary": full_summary,
-    }
+    return {"id": id, "name": name, "image": image}
 
 
-def generate_recipes(seedval):
+def generate_ingredients(seedval):
     seed(seedval)
     result = {}
     for _ in range(0, randint(0, 10)):
-        recipe = generate_recipe()
-        if recipe["id"] in result:
+        ingredient = generate_ingredient()
+        if ingredient["id"] in result:
             continue
-        result[recipe["id"]] = recipe
+        result[ingredient["id"]] = ingredient
     return result
 
 
@@ -72,19 +64,22 @@ def generate_users(seedval):
     return result
 
 
-def generate_saved_recipe(users, recipes):
+def generate_saved_ingredient(users, ingredients):
     user_ids = list(users.keys())
-    recipe_ids = list(recipes.keys())
+    ingredient_ids = list(ingredients.keys())
     user_id_idx = randrange(0, len(users))
-    recipe_id_idx = randrange(0, len(recipes))
-    return {"user_id": user_ids[user_id_idx], "recipe_id": recipe_ids[recipe_id_idx]}
+    ingredient_id_idx = randrange(0, len(ingredients))
+    return {
+        "user_id": user_ids[user_id_idx],
+        "ingredient_id": ingredient_ids[ingredient_id_idx],
+    }
 
 
-def generate_saved_recipes(seedval, users, recipes):
+def generate_saved_ingredients(seedval, users, ingredients):
     seed(seedval)
     result = []
-    for _ in range(0, randint(1, len(recipes))):
-        result.append(generate_saved_recipe(users, recipes))
+    for _ in range(0, randint(1, len(ingredients))):
+        result.append(generate_saved_ingredient(users, ingredients))
     return result
 
 
@@ -100,67 +95,65 @@ def generate_limit(seedval):
     return randint(1, 10)
 
 
-def get_expected_output(user_id, saved_recipes, recipes, limit):
-    actual_recipes = []
-    for saved_recipe in saved_recipes:
-        if saved_recipe["user_id"] == user_id:
-            actual_recipes.append(recipes[saved_recipe["recipe_id"]])
+def get_expected_output(user_id, saved_ingredients, ingredients, limit):
+    actual_ingredients = []
+    for saved_ingredient in saved_ingredients:
+        if saved_ingredient["user_id"] == user_id:
+            actual_ingredients.append(ingredients[saved_ingredient["ingredient_id"]])
 
-    return actual_recipes[-limit:]
+    return actual_ingredients[-limit:]
 
 
-def recipes_match(mock_recipe, db_recipe):
+def ingredients_match(mock_ingredient, db_ingredient):
     return (
-        db_recipe.id == mock_recipe["id"]
-        and db_recipe.name == mock_recipe["name"]
-        and db_recipe.image == mock_recipe["image"]
-        and db_recipe.summary == mock_recipe["summary"]
-        and db_recipe.full_summary == mock_recipe["full_summary"]
+        db_ingredient.id == mock_ingredient["id"]
+        and db_ingredient.name == mock_ingredient["name"]
+        and db_ingredient.image == mock_ingredient["image"]
     )
 
 
-def contains_recipe(expected_output, target):
-    for recipe in expected_output:
-        if recipes_match(recipe, target):
+def contains_ingredient(expected_output, target):
+    for ingredient in expected_output:
+        if ingredients_match(ingredient, target):
             return True
     return False
 
 
 def validate_input(actual_output, expected_output):
     for output in actual_output:
-        if not contains_recipe(expected_output, output):
+        if not contains_ingredient(expected_output, output):
             return False
     return True
 
 
-class GetRecommendedUserRecipesTestCase(unittest.TestCase):
+class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
     def setUp(self):
         self.test_success_params = []
         for _ in range(0, 5):
             seedval = randint(0, 100)
-            recipes = generate_recipes(seedval)
+            ingredients = generate_ingredients(seedval)
             users = generate_users(seedval)
-            saved_recipes = generate_saved_recipes(seedval, users, recipes)
+            saved_ingredients = generate_saved_ingredients(seedval, users, ingredients)
             user_id = generate_user_id(seedval, users)
             limit = generate_limit(seedval)
             self.test_success_params.append(
                 {
                     INPUT: {
                         "seedval": seedval,
-                        "recipes": recipes,
+                        "ingredients": ingredients,
                         "users": users,
-                        "saved_recipes": saved_recipes,
+                        "saved_ingredients": saved_ingredients,
                         "user_id": user_id,
                         "limit": limit,
                     },
                     EXPECTED_OUTPUT: get_expected_output(
-                        user_id, saved_recipes, recipes, limit
+                        user_id, saved_ingredients, ingredients, limit
                     ),
                 }
             )
 
     def runTest(self):
-        print("\033[0;33m===== TEST: GetRecommendedUserRecipes =====\033[0m")
+        print("\033[0;33m===== TEST: GetRecommendedUserIngredients =====\033[0m")
         init_app_module_dir()
         # If the below comment is not present, pylance will generate an import warning. We know the import is valid because the above function call injects the required module directory.
         import app  # pyright: reportMissingImports=false
@@ -173,15 +166,15 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 f"\033[0;33m----- Executing test {current_test_index + 1} of {total_test_amount} -----\033[0m"
             )
             print("Injecting test data...")
-            app.db.add_recipes(test[INPUT]["recipes"].values())
+            app.db.add_ingredients(test[INPUT]["ingredients"].values())
             app.db.add_google_users(test[INPUT]["users"].values())
-            app.db.add_saved_recipes(test[INPUT]["saved_recipes"])
+            app.db.add_saved_ingredients(test[INPUT]["saved_ingredients"])
 
             validation = False
             try:
                 print("Validating...")
                 validation = validate_input(
-                    app.db.get_recommended_recipes_from_user(
+                    app.db.get_recommended_ingredients_from_user(
                         test[INPUT]["user_id"], test[INPUT]["limit"]
                     ),
                     test[EXPECTED_OUTPUT],
@@ -192,8 +185,8 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 print("Deleting test data...")
                 for user in test[INPUT]["users"].keys():
                     app.db.delete_user(user)
-                for recipe in test[INPUT]["recipes"].keys():
-                    app.db.delete_recipe(recipe)
+                for ingredient in test[INPUT]["ingredients"].keys():
+                    app.db.delete_ingredient(ingredient)
 
             if validation:
                 print("Result: \033[92mPASS\033[0m")
