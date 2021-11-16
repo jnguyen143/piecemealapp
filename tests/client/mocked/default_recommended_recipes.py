@@ -31,8 +31,6 @@ def generate_prefixed_string(prefix):
 
 def validate_page(recipes, page: str):
     for recipe in recipes:
-        if page.find(recipe["id"]) == -1:
-            return False
         if page.find(recipe["name"]) == -1:
             return False
         if page.find(recipe["image"]) == -1:

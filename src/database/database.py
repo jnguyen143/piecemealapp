@@ -265,7 +265,7 @@ class Database:
 
     def get_saved_recipes(self, user_id: str) -> list:
         """
-        Returns the list of saved recipes for the user with the specified ID.
+        Returns the list of actual recipe objects associated with the user with the specified ID.
 
         Args:
             user_id (str): The ID of the target user.
@@ -298,7 +298,7 @@ class Database:
 
     def get_saved_ingredients(self, user_id: str) -> list[int]:
         """
-        Returns the list of saved ingredients for the user with the specified ID.
+        Returns the list of actual ingredient objects associated with the user with the specified ID.
 
         Args:
             user_id (str): The ID of the target user.
@@ -786,7 +786,7 @@ class Database:
             session.close()
 
     def add_recipe(
-        self, id: int, name: str, image: str, summary: str, full_summary: str
+        self, id: int, name: str, image: str, summary: str = "", full_summary: str = ""
     ):
         """
         Creates a new recipe with the specified information and adds it to the database, then returns the created recipe.
@@ -795,6 +795,8 @@ class Database:
             id (int): The ID of the recipe. This value must be unique across all recipes.
             name (str): The name of the recipe.
             image (str): The URL for the recipe image.
+            summary (str): The summary for the recipe. This value is optional.
+            full_summary (str): The full summary for the recipe. This value is optional.
 
         Returns:
             The newly created `Recipe` object.
@@ -863,10 +865,6 @@ class Database:
         self,
         user_id: str,
         recipe_id: int,
-        name: str,
-        image: str,
-        summary: str,
-        full_summary: str,
     ):
         """
         Adds the recipe with the specified ID to the specified user's list of saved recipes.
@@ -889,14 +887,7 @@ class Database:
 
         from database.models import SavedRecipe
 
-        recipe = SavedRecipe(
-            user_id=user_id,
-            recipe_id=recipe_id,
-            name=name,
-            image=image,
-            summary=summary,
-            full_summary=full_summary,
-        )
+        recipe = SavedRecipe(user_id=user_id, recipe_id=recipe_id)
 
         session = self.int__Session()
         try:
@@ -908,9 +899,7 @@ class Database:
         finally:
             session.close()
 
-    def add_saved_ingredient(
-        self, user_id: str, ingredient_id: int, name: str, image: str
-    ):
+    def add_saved_ingredient(self, user_id: str, ingredient_id: int):
         """
         Adds the ingredient with the specified ID to the specified user's list of saved ingredients.
 
@@ -932,9 +921,7 @@ class Database:
 
         from database.models import SavedIngredient
 
-        ingredient = SavedIngredient(
-            user_id=user_id, ingredient_id=ingredient_id, name=name, image=image
-        )
+        ingredient = SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
 
         session = self.int__Session()
         try:

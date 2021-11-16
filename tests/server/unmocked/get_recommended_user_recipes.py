@@ -33,7 +33,15 @@ def generate_recipe():
     id = randint(0, 100000)
     name = generate_prefixed_string("saved_recipe_")
     image = generate_prefixed_string("image_")
-    return {"id": id, "name": name, "image": image}
+    summary = generate_prefixed_string("summary_")
+    full_summary = generate_prefixed_string("full_summary_")
+    return {
+        "id": id,
+        "name": name,
+        "image": image,
+        "summary": summary,
+        "full_summary": full_summary,
+    }
 
 
 def generate_recipes(seedval):
@@ -106,6 +114,8 @@ def recipes_match(mock_recipe, db_recipe):
         db_recipe.id == mock_recipe["id"]
         and db_recipe.name == mock_recipe["name"]
         and db_recipe.image == mock_recipe["image"]
+        and db_recipe.summary == mock_recipe["summary"]
+        and db_recipe.full_summary == mock_recipe["full_summary"]
     )
 
 
@@ -164,7 +174,13 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
             )
             print("Injecting test data...")
             for recipe in test[INPUT]["recipes"].values():
-                app.db.add_recipe(recipe["id"], recipe["name"], recipe["image"])
+                app.db.add_recipe(
+                    recipe["id"],
+                    recipe["name"],
+                    recipe["image"],
+                    recipe["summary"],
+                    recipe["full_summary"],
+                )
             for user in test[INPUT]["users"].values():
                 app.db.add_google_user(user["id"], user["email"])
             for saved_recipe in test[INPUT]["saved_recipes"]:

@@ -62,7 +62,7 @@ def get_similar_recipes_from_spoonacular(recipe_id):
 
 
 def is_user_authenticated():
-    return current_user is not None and current_user.is_authenticated
+    return current_user != None and current_user.is_authenticated
 
 
 @index_blueprint.route("/")
