@@ -20,7 +20,6 @@ def init_app_module_dir():
 
 
 INPUT = "input"
-EXPECTED_OUTPUT = "expected"
 
 
 def generate_prefixed_string(prefix):
@@ -30,68 +29,40 @@ def generate_prefixed_string(prefix):
     return result
 
 
-class MockedSavedRecipe:
-    def __init__(self, id, name, image):
-        self.id = id
-        self.name = name
-        self.image = image
-
-    def __repr__(self):
-        return f"id={self.id}, name={self.name}, image={self.image}"
-
-
-def generate_saved_recipe():
-    id = randint(0, 100000)
-    name = generate_prefixed_string("saved_recipe_")
-    image = generate_prefixed_string("image_")
-    return MockedSavedRecipe(id, name, image)
-
-
-def get_saved_recipes_mock(seedval):
-    # Return a list of recipe objects, which amounts to a dict of id, name, and image
-    # Return between 0 and 100 recipes
-    seed(seedval)
-    result = []
-    for _ in range(0, randint(0, 100)):
-        result.append(generate_saved_recipe())
-    return result
-
-
-def get_user_id_mock(seedval):
-    seed(seedval)
-    return generate_prefixed_string("user_")
-
-
-def get_limit_mock(seedval):
-    seed(seedval)
-    return randint(1, 10)
-
-
-def get_expected_output(seedval):
-    saved_recipes = get_saved_recipes_mock(seedval)
-    limit = get_limit_mock(seedval)
-    return saved_recipes[-limit:]
-
-
-def recipes_match(a, b):
-    try:
-        return a.id == b.id and a.name == b.name and a.image == b.image
-    except:
-        return False
-
-
-def contains_recipe(src, target):
-    for recipe in src:
-        if recipes_match(recipe, target):
-            return True
-    return False
-
-
-def validate_input(recipes, expected_output):
+def validate_page(recipes, page: str):
     for recipe in recipes:
-        if not contains_recipe(expected_output, recipe):
+        if page.find(recipe["id"]) == -1:
+            return False
+        if page.find(recipe["name"]) == -1:
+            return False
+        if page.find(recipe["image"]) == -1:
+            return False
+        if page.find(recipe["summary"]) == -1:
             return False
     return True
+
+
+def generate_recipe():
+    id = generate_prefixed_string("id_")
+    name = generate_prefixed_string("name_")
+    image = generate_prefixed_string("image_")
+    full_summary = generate_prefixed_string("full_summary_")
+    summary = generate_prefixed_string("summary_")
+    return {
+        "id": id,
+        "name": name,
+        "image": image,
+        "full_summary": full_summary,
+        "summary": summary,
+    }
+
+
+def generate_recommended_recipes(seedval):
+    seed(seedval)
+    result = []
+    for _ in range(0, randint(0, 10)):
+        result.append(generate_recipe())
+    return result
 
 
 class DefaultRecommendedRecipesTest(unittest.TestCase):
@@ -103,11 +74,8 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
                 {
                     INPUT: {
                         "seedval": seedval,
-                        "saved_recipes": get_saved_recipes_mock(seedval),
-                        "user_id": get_user_id_mock(seedval),
-                        "limit": get_limit_mock(seedval),
-                    },
-                    EXPECTED_OUTPUT: get_expected_output(seedval),
+                        "recommended_recipes": generate_recommended_recipes(seedval),
+                    }
                 }
             )
 
@@ -117,21 +85,33 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
         import app  # pyright: reportMissingImports=false
 
         app.init_app()
+
         for test in self.test_success_params:
-            with patch(
-                "database.database.Database.get_saved_recipes"
-            ) as db_get_saved_recipes:
-                db_get_saved_recipes.return_value = test[INPUT]["saved_recipes"]
-                validation = validate_input(
-                    app.db.get_recommended_recipes_from_user(
-                        test[INPUT]["user_id"], test[INPUT]["limit"]
-                    ),
-                    test[EXPECTED_OUTPUT],
-                )
-                self.assertTrue(
-                    validation,
-                    f"Assertion failed for input with seed {test[INPUT]['seedval']}",
-                )
+            with patch("routes.index.get_current_user") as index_get_current_user:
+                with patch(
+                    "routes.index.get_recommended_recipes_from_spoonacular"
+                ) as get_recommended_recipes_from_spoonacular:
+                    # Mock out the values
+                    index_get_current_user.return_value = None
+                    get_recommended_recipes_from_spoonacular.return_value = test[INPUT][
+                        "recommended_recipes"
+                    ]
+
+                    from routes import index
+
+                    # Render page
+                    page_content = ""
+                    with app.get_app().app_context():
+                        page_content: str = index.index()
+
+                    # Validate page
+                    result = validate_page(
+                        test[INPUT]["recommended_recipes"], page_content
+                    )
+                    self.assertTrue(
+                        result,
+                        f"Assertion failed for input with seed {test[INPUT]['seedval']}",
+                    )
 
 
 if __name__ == "__main__":
