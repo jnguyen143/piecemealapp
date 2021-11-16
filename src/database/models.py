@@ -5,12 +5,10 @@ Prior to importing this file anywhere in the application, `database.init()` must
 """
 
 from sqlalchemy.orm import relationship
-from database.database import DatabaseException, Database
+from database.database import DatabaseException
 from datetime import datetime
 from flask_login import UserMixin
 import builtins
-from flask_login import UserMixin
-from app import app
 
 db = builtins.piecemeal_db_obj.get_db_obj()
 
@@ -65,8 +63,8 @@ class Recipe(db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     image = db.Column(db.String(255))
-    summary = db.Column(db.String(255))
-    full_summary = db.Column(db.String(255))
+    summary = db.Column(db.Text)
+    full_summary = db.Column(db.Text)
 
     def to_json(self):
         """
@@ -76,7 +74,13 @@ class Recipe(db.Model):
         Returns:
             This row instance as a JSON object.
         """
-        return {"id": self.id, "name": self.name, "image": self.image}
+        return {
+            "id": self.id,
+            "name": self.name,
+            "image": self.image,
+            "summary": self.summary,
+            "full_summary": self.full_summary,
+        }
 
     def __repr__(self):
         return "<Recipe id: %r, name: %r, image: %r, summary: %r, full_summary: %r>" % (
@@ -127,10 +131,6 @@ class SavedRecipe(db.Model):
         db.ForeignKey("recipes.id", onupdate="CASCADE", ondelete="NO ACTION"),
         nullable=False,
     )
-    name = db.Column(db.String(255), nullable=False)
-    image = db.Column(db.String(255))
-    summary = db.Column(db.String(255))
-    full_summary = db.Column(db.String(255))
     recipe = relationship(Recipe, foreign_keys=[recipe_id])
 
     def to_json(self, shallow: bool = True):
@@ -170,8 +170,6 @@ class SavedIngredient(db.Model):
         db.ForeignKey("ingredients.id", onupdate="CASCADE", ondelete="NO ACTION"),
         nullable=False,
     )
-    name = db.Column(db.String(255), nullable=False)
-    image = db.Column(db.String(255))
     ingredient = relationship(Ingredient, foreign_keys=[ingredient_id])
 
     def to_json(self, shallow: bool = True):
@@ -307,6 +305,3 @@ class FriendRequest(db.Model):
             return {"src": self.src, "target": self.target}
 
         return {"src": self.src_obj.to_json(), "target": self.target_obj.to_json()}
-
-
-db.create_all()
