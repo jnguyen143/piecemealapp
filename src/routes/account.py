@@ -111,24 +111,26 @@ def search_users():
 
     users = []
     if search_by == "name":
-        users = [
-            {
-                "id": user.id,
-                "username": user.username,
-                "given_name": user.given_name,
-                "family_name": user.family_name,
-            }
-            for user in int__db.search_users_by_name(query)
-        ]
+        for user in int__db.search_users_by_name(query):
+            if user.id != current_user.id:
+                users.append(
+                    {
+                        "id": user.id,
+                        "username": user.username,
+                        "given_name": user.given_name,
+                        "family_name": user.family_name,
+                    }
+                )
     elif search_by == "username":
-        users = [
-            {
-                "id": user.id,
-                "username": user.username,
-                "given_name": user.given_name,
-                "family_name": user.family_name,
-            }
-            for user in int__db.search_users_by_username(query)
-        ]
+        for user in int__db.search_users_by_username(query):
+            if user.id != current_user.id:
+                users.append(
+                    {
+                        "id": user.id,
+                        "username": user.username,
+                        "given_name": user.given_name,
+                        "family_name": user.family_name,
+                    }
+                )
 
     return render_template("account/search_users.html", search_results=users)

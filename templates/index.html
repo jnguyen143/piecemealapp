@@ -99,8 +99,7 @@
         <div class="recipe">
           <div class="image">
             <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-            <button onclick=add_recipe('{{current_user.is_authenticated}}') id="add-recipe" type="submit"
-              class="add-button">ADD</button>
+            <button type="submit" class="add-button">ADD</button>
           </div>
           <div class="description">
             <h2>{{recipe["name"]}}</h2>
@@ -123,8 +122,7 @@
         <div class="recipe">
           <div class="image">
             <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
-            <button onclick=add_recipe('{{current_user.is_authenticated}}') id="add-recipe" type="submit"
-              class="add-button">ADD</button>
+            <button type="submit" class="add-button">ADD</button>
           </div>
           <div class="description">
             <h2>{{ingredient["name"]}}</h2>
@@ -162,8 +160,7 @@
                 image="{{recipe['image']}}" method='POST'>
                 <button type="submit" class="add-button">ADD</button>
               </form> -->
-              <button onclick=add_recipe('{{current_user.is_authenticated}}') id="add-recipe" type="submit"
-                class="add-button">ADD</button>
+              <button type="submit" class="add-button">ADD</button>
             </div>
             <div class="description">
               <h2>{{recipe["name"]}}</h2>
@@ -177,15 +174,9 @@
       {%endif%}
     </div>
 
-    <script>
-      function add_recipe(user_status) {
-        if (user_status == true) {
-          console.log("Test")
-        } else {
-          console.log(user_status)
-        }
-      }
-    </script>
+    {% include "Toast.html" %}
+
+    <script src="../static/modules/index.js" type="module"></script>
 
 
 </body>
