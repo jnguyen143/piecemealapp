@@ -502,7 +502,6 @@ def start_login():
     try:
         message = request.get_data()
     except:
-        print("test1")
         return jsonify({"success": False})
 
     from Crypto.Cipher import PKCS1_OAEP
@@ -516,7 +515,6 @@ def start_login():
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
-        print("test2")
         return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
@@ -541,14 +539,11 @@ def start_login():
                 login_user(user)
                 return jsonify({"success": True})
             else:
-                print("test3")
                 return jsonify({"success": False})
         except Exception as E:
             print(E)
-            print("test4")
             return jsonify({"success": False})
     else:
-        print("test5")
         return jsonify({"success": False})
 
 
