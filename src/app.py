@@ -64,6 +64,7 @@ def init_app():
     routes.userdata.init(db)
     routes.login.init(app, db)
     routes.account.init(db)
+    index.init(db)
 
     app.register_blueprint(index.get_blueprint())
     app.register_blueprint(routes.login.get_blueprint())
