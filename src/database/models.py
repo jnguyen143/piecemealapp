@@ -51,6 +51,15 @@ class User(db.Model, UserMixin):
 
 
 class Recipe(db.Model):
+    """
+    The Recipe table allows the app to check if recipe data is already saved and available
+    when an user attemps to add a recipe. If the recipe data is already on the Recipe
+    table, it will use said data and add it into the SavedRecipe table together with the corresponding
+    user ID. In this way, an API call to Spoonacular is no longer necessary as long as the recipe data
+    is already in Recipe table, consequently, reducing the number of API calls placed (Spoonacular
+    is a pay-per-call API)
+    """
+
     __tablename__ = "recipes"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -68,6 +77,15 @@ class Recipe(db.Model):
 
 
 class Ingredient(db.Model):
+    """
+    The Ingredient table allows the app to check if ingredient data is already saved and available
+    when an user attemps to add an ingredient. If the ingredient data is already on the Ingredient
+    table, it will use said data and add it into the SavedIngredient table together with the corresponding
+    user ID. In this way, an API call to Spoonacular is no longer necessary as long as the ingredient data
+    is already in Ingredient table, consequently, reducing the number of API calls placed (Spoonacular
+    is a pay-per-call API)
+    """
+
     __tablename__ = "ingredients"
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     name = db.Column(db.String(255), nullable=False)

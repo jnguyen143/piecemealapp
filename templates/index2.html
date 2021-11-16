@@ -2,191 +2,191 @@
 <html>
 
 <head>
-    <title>PieceMeal</title>
-    <link rel="stylesheet" type="text/css" href='../static/stylesheets/style.css'>
+  <title>PieceMeal</title>
+  <link rel="stylesheet" type="text/css" href='../static/stylesheets/style.css'>
 </head>
 
 <body>
-    <div class="main-container">
+  <div class="main-container">
 
-        <div class="left-container">
+    <div class="left-container">
 
-            <img class="logo" src="../static/assets/logo.svg" />
+      <img class="logo" src="../static/assets/logo.svg" />
 
-            <div>Hi, {{userdata['given_name']}}</div>
-            <br />
-            <a href="/account">My Account</a>
-            <br /><br />
-            <a href="/logout">Log Out</a>
-
-            <div class="nav_menu">
-
-            </div>
-            <form class="recipes" action="/search_recipes" method="POST">
-                <p>Search for Recipes</p>
-
-                <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
-
-                <div class="filters">
-                    <p>Filter by:</p>
-                </div>
-
-                <select id="cuisine" name="cuisine">
-                    <option value="">Select Cuisine Type</option>
-                    <option value="African">African</option>
-                    <option value="American">American</option>
-                    <option value="British"> British </option>
-                    <option value="Cajun"> Cajun </option>
-                    <option value="Caribbean"> Caribbean </option>
-                    <option value="Chinese"> Chinese </option>
-                    <option value="EasternEuropean"> EasternEuropean </option>
-                    <option value="European"> European </option>
-                    <option value="French"> French </option>
-                    <option value="German"> German </option>
-                    <option value="Greek"> Greek </option>
-                    <option value="Indian"> Indian </option>
-                    <option value="Irish"> Irish </option>
-                    <option value="Italian"> Italian </option>
-                    <option value="Japanese"> Japanese </option>
-                    <option value="Jewish"> Jewish </option>
-                    <option value="Korean"> Korean </option>
-                    <option value="LatinAmerican"> Latin American </option>
-                    <option value="Mediterranean"> Mediterranean </option>
-                    <option value="Mexican"> Mexican </option>
-                    <option value="MiddleEastern"> Middle Eastern </option>
-                    <option value="Nordic"> Nordic </option>
-                    <option value="Southern"> Southern </option>
-                    <option value="Spanish"> Spanish </option>
-                    <option value="Thai"> Thai </option>
-                    <option value="Vietnamese"> Vietnamese </option>
-                </select>
-                <button type="submit" class="search-button">Search</button>
-            </form>
-
-            <form class="ingredients" action="/search_ingredients" method="POST">
-                <p>Search for Ingredients</p>
-                <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
-                <button type="submit" class="search-button">Search</button>
-            </form>
-        </div>
+      < <div>Hi, {{userdata['given_name']}}
     </div>
+    <br />
+    <a href="/account">My Account</a>
+    <br /><br />
+    <a href="/logout">Log Out</a>
 
-    <div class="right-container">
+    <div class="nav_menu">
+
+    </div>
+    <form class="recipes" action="/search_recipes" method="POST">
+      <p>Search for Recipes</p>
+
+      <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
+
+      <div class="filters">
+        <p>Filter by:</p>
+      </div>
+
+      <select id="cuisine" name="cuisine">
+        <option value="">Select Cuisine Type</option>
+        <option value="African">African</option>
+        <option value="American">American</option>
+        <option value="British"> British </option>
+        <option value="Cajun"> Cajun </option>
+        <option value="Caribbean"> Caribbean </option>
+        <option value="Chinese"> Chinese </option>
+        <option value="EasternEuropean"> EasternEuropean </option>
+        <option value="European"> European </option>
+        <option value="French"> French </option>
+        <option value="German"> German </option>
+        <option value="Greek"> Greek </option>
+        <option value="Indian"> Indian </option>
+        <option value="Irish"> Irish </option>
+        <option value="Italian"> Italian </option>
+        <option value="Japanese"> Japanese </option>
+        <option value="Jewish"> Jewish </option>
+        <option value="Korean"> Korean </option>
+        <option value="LatinAmerican"> Latin American </option>
+        <option value="Mediterranean"> Mediterranean </option>
+        <option value="Mexican"> Mexican </option>
+        <option value="MiddleEastern"> Middle Eastern </option>
+        <option value="Nordic"> Nordic </option>
+        <option value="Southern"> Southern </option>
+        <option value="Spanish"> Spanish </option>
+        <option value="Thai"> Thai </option>
+        <option value="Vietnamese"> Vietnamese </option>
+      </select>
+      <button type="submit" class="search-button">Search</button>
+    </form>
+
+    <form class="ingredients" action="/search_ingredients" method="POST">
+      <p>Search for Ingredients</p>
+      <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
+      <button type="submit" class="search-button">Search</button>
+    </form>
+  </div>
+  </div>
+
+  <div class="right-container">
+    {%if authenticated%}
+    <div class="nav_menu">
+      <a href="/">Home</a>
+      <a href="/profile">Profile</a>
+      <a href="/logout">Logout</a>
+    </div>
+    {%else%}
+    <div class="nav_menu">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+      <a href="/signup">Register</a>
+    </div>
+    {%endif%}
+
+    <div class="right-sub-container">
+      <!-- If incoming data is from search route, display within right sub-container -->
+      {%if search%}
+      <div class="header">
+        <h1>Search results for "{{keyword}}"</h1>
+      </div>
+
+      {%if recipe_search%}
+
+      {%if not recipes%}
+      <div style="text-align: center;">
+        <p>Oops! Unable to display recipes at this time</p>
+      </div>
+      {%else%}
+      <div class="content">
+        {%for recipe in recipes%}
+        <div class="recipe">
+          <div class="image">
+            <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+            <button type="submit" class="add-button" recipe-id="{{recipe['id']}}" recipe-name="{{recipe['name']}}"
+              recipe-image="{{recipe['image']}}">ADD</button>
+          </div>
+          <div class="description">
+            <h2>{{recipe["name"]}}</h2>
+            <p>{{recipe["summary"]}}</p>
+          </div>
+        </div>
+        {%endfor%}
+      </div>
+      {%endif%}
+
+      {%else%}
+
+      {%if not ingredients%}
+      <div style="text-align: center;">
+        <p>Oops! Unable to display ingredients at this time</p>
+      </div>
+      {%else%}
+      <div class="content">
+        {%for ingredient in ingredients%}
+        <div class="recipe">
+          <div class="image">
+            <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
+            <button type="submit" class="add-button" ingredient-id="{{ingredient['id']}}"
+              ingredient-name="{{ingredient['name']}}" ingredient-image="{{ingredient['image']}}">ADD</button>
+          </div>
+          <div class="description">
+            <h2>{{ingredient["name"]}}</h2>
+            <p>{{ingredient["summary"]}}</p>
+          </div>
+        </div>
+        {%endfor%}
+      </div>
+      {%endif%}
+
+      {%endif%}
+      <!-- If incoming data is from index route, display based on if user is authorized -->
+      {%else%}
+      <div class="header">
         {%if authenticated%}
-        <div class="nav_menu">
-            <a href="/">Home</a>
-            <a href="/profile">Profile</a>
-            <a href="/logout">Logout</a>
-        </div>
+        <h1>Recipes & Ingredients</h1>
+        <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
         {%else%}
-        <div class="nav_menu">
-            <a href="/">Home</a>
-            <a href="/login">Login</a>
-            <a href="/signup">Register</a>
-        </div>
+        <h1>Welcome to pieceMeal</h1>
+        <p>Rediscover your appetite by exploring more than 1,000,000+ recipes. You can start by
+          checking out some of our most popular recipes below</p>
         {%endif%}
 
-        <div class="right-sub-container">
-            <!-- If incoming data is from search route, display within right sub-container -->
-            {%if search%}
-            <div class="header">
-                <h1>Search results for "{{keyword}}"</h1>
-            </div>
-
-            {%if recipe_search%}
-
-            {%if not recipes%}
-            <div style="text-align: center;">
-                <p>Oops! Unable to display recipes at this time</p>
-            </div>
-            {%else%}
-            <div class="content">
-                {%for recipe in recipes%}
-                <div class="recipe">
-                    <div class="image">
-                        <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-                        <button type="submit" class="add-button" recipe-id="{{recipe['id']}}"
-                            recipe-name="{{recipe['name']}}" recipe-image="{{recipe['image']}}">ADD</button>
-                    </div>
-                    <div class="description">
-                        <h2>{{recipe["name"]}}</h2>
-                        <p>{{recipe["summary"]}}</p>
-                    </div>
-                </div>
-                {%endfor%}
-            </div>
-            {%endif%}
-
-            {%else%}
-
-            {%if not ingredients%}
-            <div style="text-align: center;">
-                <p>Oops! Unable to display ingredients at this time</p>
-            </div>
-            {%else%}
-            <div class="content">
-                {%for ingredient in ingredients%}
-                <div class="recipe">
-                    <div class="image">
-                        <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
-                        <button type="submit" class="add-button" ingredient-id="{{ingredient['id']}}"
-                            ingredient-name="{{ingredient['name']}}"
-                            ingredient-image="{{ingredient['image']}}">ADD</button>
-                    </div>
-                    <div class="description">
-                        <h2>{{ingredient["name"]}}</h2>
-                        <p>{{ingredient["summary"]}}</p>
-                    </div>
-                </div>
-                {%endfor%}
-            </div>
-            {%endif%}
-
-            {%endif%}
-            <!-- If incoming data is from index route, display based on if user is authorized -->
-            {%else%}
-            <div class="header">
-                {%if authenticated%}
-                <h1>Recipes & Ingredients</h1>
-                <p>Rediscover your appetite by exploring more than 1,000,000+ recipes</p>
-                {%else%}
-                <h1>Welcome to pieceMeal</h1>
-                <p>Rediscover your appetite by exploring more than 1,000,000+ recipes. You can start by
-                    checking out some of our most popular recipes below</p>
-                {%endif%}
-
-                {%if not recipes%}
-                <div style="text-align: center;">
-                    <p>Oops! Unable to display recipes at this time</p>
-                </div>
-                {%else%}
-                <div class="content">
-                    {%for recipe in recipes%}
-                    <div class="recipe">
-                        <div class="image">
-                            <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-                            <!-- <form action="/api/save-recipe" id="{{recipe['id']}}" name="{{recipe['name']}}"
+        {%if not recipes%}
+        <div style="text-align: center;">
+          <p>Oops! Unable to display recipes at this time</p>
+        </div>
+        {%else%}
+        <div class="content">
+          {%for recipe in recipes%}
+          <div class="recipe">
+            <div class="image">
+              <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+              <!-- <form action="/api/save-recipe" id="{{recipe['id']}}" name="{{recipe['name']}}"
                 image="{{recipe['image']}}" method='POST'>
                 <button type="submit" class="add-button">ADD</button>
               </form> -->
-                            <button type="submit" class="add-button" recipe-id="{{recipe['id']}}"
-                                recipe-name="{{recipe['name']}}" recipe-image="{{recipe['image']}}">ADD</button>
-                        </div>
-                        <div class="description">
-                            <h2>{{recipe["name"]}}</h2>
-                            <p>{{recipe["summary"]}}</p>
-                        </div>
-                    </div>
-                    {%endfor%}
-                </div>
-                {%endif%}
+              <button type="submit" class="add-button" recipe-id="{{recipe['id']}}" recipe-name="{{recipe['name']}}"
+                recipe-image="{{recipe['image']}}">ADD</button>
             </div>
-            {%endif%}
+            <div class="description">
+              <h2>{{recipe["name"]}}</h2>
+              <p>{{recipe["summary"]}}</p>
+            </div>
+          </div>
+          {%endfor%}
         </div>
+        {%endif%}
+      </div>
+      {%endif%}
+    </div>
 
-        {% include "Toast.html" %}
+    {% include "Toast.html" %}
 
-        <script src="../static/modules/index2.js" type="module"></script>
+    <script src="../static/modules/index2.js" type="module"></script>
 </body>
 
 </html>

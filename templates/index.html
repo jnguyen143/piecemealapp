@@ -13,9 +13,6 @@
 
       <img class="logo" src="../static/assets/logo.svg" />
 
-      <div class="nav_menu">
-
-      </div>
       <form class="recipes" action="/search_recipes" method="POST">
         <p>Search for Recipes</p>
 
@@ -156,10 +153,6 @@
           <div class="recipe">
             <div class="image">
               <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-              <!-- <form action="/api/save-recipe" id="{{recipe['id']}}" name="{{recipe['name']}}"
-                image="{{recipe['image']}}" method='POST'>
-                <button type="submit" class="add-button">ADD</button>
-              </form> -->
               <button type="submit" class="add-button">ADD</button>
             </div>
             <div class="description">
