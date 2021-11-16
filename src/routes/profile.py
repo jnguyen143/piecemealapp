@@ -2,7 +2,7 @@ from flask import Blueprint, render_template
 from flask_login import current_user
 from flask_login.utils import login_required
 import routes.util as util
-from database.models import SavedRecipe, Recipe
+from database.models import SavedRecipe, SavedIngredient
 from api.spoonacular import get_recommended_recipes, SpoonacularApiException
 
 
@@ -30,7 +30,7 @@ def get_blueprint():
 @login_required
 def profile():
     recipes = SavedRecipe.query.filter_by(user_id=current_user.id).all()
-    ingredients = SavedRecipe.query.filter_by(user_id=current_user.id).all()
+    ingredients = SavedIngredient.query.filter_by(user_id=current_user.id).all()
     has_recipes = False
     has_ingredients = False
 
@@ -56,10 +56,3 @@ def profile():
         has_ingredients=has_ingredients,
         userdata=current_user.to_json(),
     )
-
-    # return render_template(
-    #     "profile.html",
-    #     recipes=recipes,
-    #     len=len(recipes),
-    #     userdata=current_user.to_json(),
-    # )

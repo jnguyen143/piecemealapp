@@ -190,7 +190,12 @@ def save_ingredient():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_ingredient(user.id, id)
+        int__db.add_saved_ingredient(
+            user.id,
+            id,
+            name,
+            image,
+        )
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -220,7 +225,11 @@ def delete_recipe():
     RESPONSE_ERR_DELETE_FAIL = 2
     RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
+    try:
+        data = request.get_json()
+        id = data["id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     if id == None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
@@ -262,7 +271,11 @@ def delete_ingredient():
     RESPONSE_ERR_DELETE_FAIL = 2
     RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
+    try:
+        data = request.get_json()
+        id = data["id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     if id == None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})

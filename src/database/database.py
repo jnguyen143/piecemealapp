@@ -908,7 +908,9 @@ class Database:
         finally:
             session.close()
 
-    def add_saved_ingredient(self, user_id: str, ingredient_id: int):
+    def add_saved_ingredient(
+        self, user_id: str, ingredient_id: int, name: str, image: str
+    ):
         """
         Adds the ingredient with the specified ID to the specified user's list of saved ingredients.
 
@@ -930,7 +932,9 @@ class Database:
 
         from database.models import SavedIngredient
 
-        ingredient = SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
+        ingredient = SavedIngredient(
+            user_id=user_id, ingredient_id=ingredient_id, name=name, image=image
+        )
 
         session = self.int__Session()
         try:
@@ -1080,9 +1084,7 @@ class Database:
 
         session = self.int__Session()
         try:
-            session.query(SavedRecipe).filter_by(
-                user_id=user_id, recipe_id=recipe_id
-            ).delete()
+            session.query(SavedRecipe).filter_by(user_id=user_id, id=recipe_id).delete()
             session.commit()
         except:
             session.rollback()
@@ -1110,9 +1112,15 @@ class Database:
         from database.models import SavedIngredient
 
         session = self.int__Session()
+
         try:
+            print(
+                session.query(SavedIngredient)
+                .filter_by(user_id=user_id, id=ingredient_id)
+                .all()
+            )
             session.query(SavedIngredient).filter_by(
-                user_id=user_id, ingredient_id=ingredient_id
+                user_id=user_id, id=ingredient_id
             ).delete()
             session.commit()
         except:

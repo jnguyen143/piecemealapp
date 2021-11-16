@@ -354,6 +354,24 @@ input[type=submit] {
   background: #FB8C00;
 }
 
+/*Delete button styling*/
+
+.delete-button {
+  margin: 5px auto;
+  padding: 5px;
+  background: #ffe6d3f1;
+  font-size: 14px;
+  color: #c46d04;
+  border: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-button:hover {
+  color: white;
+  background: #FB8C00;
+}
+
 /*Login and Signup button styling*/
 
 .account-button {

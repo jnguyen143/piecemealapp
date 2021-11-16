@@ -170,6 +170,8 @@ class SavedIngredient(db.Model):
         db.ForeignKey("ingredients.id", onupdate="CASCADE", ondelete="NO ACTION"),
         nullable=False,
     )
+    name = db.Column(db.String(255), nullable=False)
+    image = db.Column(db.String(255))
     ingredient = relationship(Ingredient, foreign_keys=[ingredient_id])
 
     def to_json(self, shallow: bool = True):
@@ -305,3 +307,6 @@ class FriendRequest(db.Model):
             return {"src": self.src, "target": self.target}
 
         return {"src": self.src_obj.to_json(), "target": self.target_obj.to_json()}
+
+
+db.create_all()
