@@ -3,7 +3,6 @@
 body {
   background-image: url("../assets/img3.jpg");
   background-color: rgb(48, 44, 44);
-  height: 100vh;
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -86,7 +85,7 @@ body {
 .nav_menu {
   border-top-right-radius: 10px;
   text-align: center;
-  min-width: 100vw;
+  min-width: 400px;
 }
 
 .nav_menu a {
@@ -130,39 +129,61 @@ body {
   display: flex;
   flex-flow: column;
   align-items: center;
-  overflow-x: hidden;
-  /*Disables horizontal scroll*/
+  overflow-x: hidden; /*Disables horizontal scroll*/
 }
 
-/*Right side container for search results formatting*/
+/*User div styling*/
+
+.user {
+  background: white;
+  border-radius: 10px;
+}
+
+/*Account settings styling button*/
+
+.user a {
+  background: rgb(251, 140, 0);
+  background: linear-gradient(60deg, rgba(251, 140, 0, 1) 50%, rgba(255, 206, 143, 1) 100%);
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 14px 14px;
+  text-decoration: none;
+  font-size: 17px;
+  border-radius: 10px;
+}
+
+.user a:hover {
+  background: #c46d04;
+  color: white;
+}
+
+/*Right side container for all content type formatting*/
 
 .right-container {
-  min-width: 65%;
-  width: 65%;
+  min-width: 600px;
+  max-width: 65%;
   font-weight: bold;
   text-align: center;
-  margin-left: 10px;
   margin: 0 auto;
   text-align: center;
-  min-height: 100vh;
   display: flex;
   flex-flow: column;
+  overflow-x: hidden; 
 }
 
-/*Right side container for search results formatting*/
+/*Right side sub-container for all content type formatting*/
 
 .right-sub-container {
-  background-color: #ffe6d3f1;
   min-width: 100%;
-  /* min-height: 100vh; */
+  background-color: #ffe6d3f1;
   font-weight: bold;
   text-align: center;
   margin: 0 auto;
-  padding: 10px;
-  text-align: center;
   border-top-right-radius: 10px;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+  overflow-x: hidden; 
 }
 
 /*Right side container header*/
@@ -176,7 +197,6 @@ body {
 /*Content div for index.html random recipes and search results*/
 
 .content {
-  margin: auto;
   padding: 10px;
   text-align: center;
   display: flex;
@@ -238,6 +258,7 @@ body {
 /*All forms styling*/
 
 form {
+  margin-top: 20px;
   margin-bottom: 40px;
   display: flex;
   flex-flow: column;
@@ -333,6 +354,24 @@ input[type=submit] {
   background: #FB8C00;
 }
 
+/*Delete button styling*/
+
+.delete-button {
+  margin: 5px auto;
+  padding: 5px;
+  background: #ffe6d3f1;
+  font-size: 14px;
+  color: #c46d04;
+  border: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-button:hover {
+  color: white;
+  background: #FB8C00;
+}
+
 /*Login and Signup button styling*/
 
 .account-button {
@@ -422,7 +461,7 @@ select {
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  display:fit;
+  display:inline-block;
   text-align:center;
   width:75%;
   margin-bottom:3px;
@@ -432,6 +471,9 @@ select {
 
 .account>*{
   margin-top:8px;
+  margin-bottom:8px;
+  margin-left: 10px;
+  margin-right:10px;
 }
 
 .accountPageButtons {
@@ -470,7 +512,7 @@ select {
   font-size: 17px;
   border: none;
   cursor: pointer;
-  border-radius: 20px;
+  /* border-radius: 20px; */
 }
 
 
@@ -480,4 +522,17 @@ select {
 
 .navbar{
   margin-left:15px;
+}
+
+.accountSetting{
+  background-color: #ffe6d3f1;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  display:inline-block;
+  text-align:center;
+  width:150px;
+  margin-bottom:3px;
+  height:450px;
 }

@@ -6,7 +6,7 @@ Given a set of dummy default recommended recipes, this file ensures that the rec
 
 import unittest
 from unittest.mock import patch
-from random import seed, randint
+from random import randrange, seed, randint
 
 
 def init_app_module_dir():
@@ -29,8 +29,10 @@ def generate_prefixed_string(prefix):
     return result
 
 
-def validate_page(recipes, page: str):
-    for recipe in recipes:
+def validate_page(similarRecipes, page: str):
+    for recipe in similarRecipes:
+        if page.find(recipe["id"]) == -1:
+            return False
         if page.find(recipe["name"]) == -1:
             return False
         if page.find(recipe["image"]) == -1:
@@ -55,7 +57,7 @@ def generate_recipe():
     }
 
 
-def generate_recommended_recipes(seedval):
+def generate_similar_recipes(seedval):
     seed(seedval)
     result = []
     for _ in range(0, randint(0, 10)):
@@ -63,16 +65,20 @@ def generate_recommended_recipes(seedval):
     return result
 
 
-class DefaultRecommendedRecipesTest(unittest.TestCase):
+class GetSimilarRecipesTest(unittest.TestCase):
     def setUp(self):
         self.test_success_params = []
+        recipeIDs = [632660, 209128, 31868]
         for _ in range(0, 10):
-            seedval = randint(0, 100)
+            randomIndex = randrange(0, 3)
+            seedval = recipeIDs[randomIndex]
+            print(seedval)
+            #  seedval = "73420"
             self.test_success_params.append(
                 {
                     INPUT: {
                         "seedval": seedval,
-                        "recommended_recipes": generate_recommended_recipes(seedval),
+                        "similar_recipes": generate_similar_recipes(seedval),
                     }
                 }
             )
@@ -87,12 +93,12 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
         for test in self.test_success_params:
             with patch("routes.index.get_current_user") as index_get_current_user:
                 with patch(
-                    "routes.index.get_recommended_recipes_from_spoonacular"
-                ) as get_recommended_recipes_from_spoonacular:
+                    "routes.index.get_similar_recipes_from_spoonacular"
+                ) as get_similar_recipes_from_spoonacular:
                     # Mock out the values
                     index_get_current_user.return_value = None
-                    get_recommended_recipes_from_spoonacular.return_value = test[INPUT][
-                        "recommended_recipes"
+                    get_similar_recipes_from_spoonacular.return_value = test[INPUT][
+                        "similar_recipes"
                     ]
 
                     from routes import index
@@ -103,9 +109,7 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
                         page_content: str = index.index()
 
                     # Validate page
-                    result = validate_page(
-                        test[INPUT]["recommended_recipes"], page_content
-                    )
+                    result = validate_page(test[INPUT]["similar_recipes"], page_content)
                     self.assertTrue(
                         result,
                         f"Assertion failed for input with seed {test[INPUT]['seedval']}",

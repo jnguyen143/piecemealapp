@@ -4,7 +4,7 @@ This file defines all of the endpoints relating to user data, such as saving rec
 All of the endpoints defined in this file are API endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
 
-from flask import Blueprint, request, redirect, url_for
+from flask import Blueprint, request, redirect
 from flask.json import jsonify
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
 from database.database import (
@@ -103,38 +103,39 @@ def save_recipe():
                 3: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
         }
     """
-    if request.method == "POST":
+    RESPONSE_OK = 0
+    RESPONSE_ERR_CORRUPT_INPUT = 1
+    RESPONSE_ERR_SAVE_FAIL = 2
+    RESPONSE_ERR_NO_USER = 3
 
-        RESPONSE_OK = 0
-        RESPONSE_ERR_CORRUPT_INPUT = 1
-        RESPONSE_ERR_SAVE_FAIL = 2
-        RESPONSE_ERR_NO_USER = 3
+    id = None
+    name = None
+    image = None
 
-        id = request.args.get("id", type=int)
-        name = request.args.get("name", type=str)
-        image = request.args.get("image", type=str)
+    try:
+        data = request.get_json()
+        id = data["id"]
+        name = data["name"]
+        image = data["image"]
+        summary = data["summary"]
+        full_summary = data["full_summary"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
-        if id == None or name == None or image == None:
-            return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
-
-        user = get_current_user()
-
-        if user == None:
-            return jsonify({"result": RESPONSE_ERR_NO_USER})
-
-        if not recipe_exists(id):
-            # Cache the recipe
-            try:
-                int__db.add_recipe(id, name, image)
-            except DatabaseException:
-                return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
+    user = get_current_user()
+    if user == None:
+        return jsonify({"result": RESPONSE_ERR_NO_USER})
+    if not recipe_exists(id):
+        # Cache the recipe
         try:
-            int__db.add_saved_recipe(user.id, id)
+            int__db.add_recipe(id, name, image, summary, full_summary)
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
-        return jsonify({"result": RESPONSE_OK})
+    try:
+        int__db.add_saved_recipe(user.id, id, name, image, summary, full_summary)
+    except DatabaseException:
+        return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
+    return jsonify({"result": RESPONSE_OK})
 
 
 @userdata_blueprint.route("/api/save-ingredient", methods=["POST"])
@@ -164,35 +165,40 @@ def save_ingredient():
     RESPONSE_OK = 0
     RESPONSE_ERR_CORRUPT_INPUT = 1
     RESPONSE_ERR_SAVE_FAIL = 2
-    # RESPONSE_ERR_NO_USER = 3
+    RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
-    name = request.args.get("name", type=str)
-    image = request.args.get("image", type=str)
+    id = None
+    name = None
+    image = None
 
-    if id == None or name == None or image == None:
+    try:
+        data = request.get_json()
+        id = data["id"]
+        name = data["name"]
+        image = data["image"]
+    except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
+    if user == None:
+        return jsonify({"result": RESPONSE_ERR_NO_USER})
 
-    if user.is_authenticated():
-
-        # if user == None:
-        #     return jsonify({"result": RESPONSE_ERR_NO_USER})
-
-        if not ingredient_exists(id):
-            # Cache the ingredient
-            try:
-                int__db.add_ingredient(id, name, image)
-            except DatabaseException:
-                return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
+    if not ingredient_exists(id):
+        # Cache the ingredient
         try:
-            int__db.add_saved_ingredient(user.id, id)
+            int__db.add_ingredient(id, name, image)
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
-
-        return jsonify({"result": RESPONSE_OK})
+    try:
+        int__db.add_saved_ingredient(
+            user.id,
+            id,
+            name,
+            image,
+        )
+    except DatabaseException:
+        return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
+    return jsonify({"result": RESPONSE_OK})
 
 
 @userdata_blueprint.route("/api/delete-recipe", methods=["POST"])
@@ -219,7 +225,11 @@ def delete_recipe():
     RESPONSE_ERR_DELETE_FAIL = 2
     RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
+    try:
+        data = request.get_json()
+        id = data["id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     if id == None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
@@ -261,7 +271,11 @@ def delete_ingredient():
     RESPONSE_ERR_DELETE_FAIL = 2
     RESPONSE_ERR_NO_USER = 3
 
-    id = request.args.get("id", type=int)
+    try:
+        data = request.get_json()
+        id = data["id"]
+    except KeyError:
+        return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     if id == None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
@@ -729,7 +743,8 @@ def validate_signup():
         response = validate_with_google(google_provider, code)
         login_handler_client.parse_request_body_response(json.dumps(response))
         userinfo = get_google_user_info(google_provider)
-    except Exception:
+    except Exception as E:
+        print("Error1", E)
         return redirect("/signup")
 
     user = None
@@ -741,7 +756,8 @@ def validate_signup():
             family_name=userinfo["family_name"],
             profile_image=userinfo["image"],
         )
-    except DatabaseException:
+    except DatabaseException as E:
+        print("Error2", E)
         return redirect("/signup")
 
     login_user(user)

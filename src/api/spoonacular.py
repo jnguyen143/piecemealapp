@@ -140,6 +140,7 @@ class Recipe:
         whole30 (bool): Whether this recipe is Whole30.
         healthy (bool): Whether this recipe is considered healthy.
         popular (bool): Whether this recipe is considered popular.
+        summary (str): A string containing the summary description for the recipe
         ingredients (list): The list of ingredients (and their amounts) for this recipe.
             Each ingredient is a dictionary consisting of the following values:
                 - id (int): The ID of the ingredient.
@@ -165,6 +166,7 @@ class Recipe:
         self.whole30 = kwargs["whole30"]
         self.healthy = kwargs["veryHealthy"]
         self.popular = kwargs["veryPopular"]
+        self.summary = kwargs["summary"]
 
         ingredients = []
         for x in kwargs["extendedIngredients"]:
@@ -303,6 +305,8 @@ def search_recipes(
             - id (int): The ID of the recipe.
             - name (str): The display name of the recipe.
             - image (str): The URL of the image for the recipe.
+            - summary (str): First sentence of summary content.
+            - full_summary (str): Complete summary string for recipe.
 
     Raises:
         UndefinedApiKeyException: If the Spoonacular API key is undefined.
@@ -363,7 +367,7 @@ def search_recipes(
                 dict["summary"] = extract_sentence(summary)
                 dict["full_summary"] = clean_summary(summary)
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict["summary"] = "Try this recipe to add variety into your diet!"
                 dict["full_summary"] = "Try this recipe to add variety into your diet!"
         except KeyError:
@@ -406,6 +410,40 @@ def get_recipe(id: int) -> Recipe:
     return Recipe(data)
 
 
+def get_recipe_as_json(id: int) -> list:
+    """
+    Returns a list of JSON-encoded data associated with the specified ID.
+
+    Args:
+        id (int) - The ID of the recipe to get.
+
+    Returns:
+        A list of JSON-encoded recipes. If no recipes were found that matched the given
+        criteria, this function will return an empty list.
+
+    Raises:
+        UndefinedApiKeyException: If the Spoonacular API key is undefined.
+        SpoonacularApiException: If there was a problem completing the request.
+    """
+
+    params = {"apiKey": get_api_key()}
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/{id}/information",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as e:
+        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}")
+
+    if not data:
+        return None
+
+    return data
+
+
 def get_similar_recipes(id: int) -> list:
     """
     Returns a list of recipes similar to the recipe with the specified ID.
@@ -442,10 +480,13 @@ def get_similar_recipes(id: int) -> list:
 
     result = []
     for recipe in data:
+        # We are using the get_recipe function because the similar_recipes endpoint
+        # does not produce the full content that is available for each recipe
+        extended_recipe = get_recipe_as_json(recipe["id"])
         dict = {}
         try:
-            dict["id"] = recipe["id"]
-            dict["name"] = recipe["name"]
+            dict["id"] = extended_recipe["id"]
+            dict["name"] = extended_recipe["title"]
             """
             The following try/KeyError is meant to address issues regarding unavailable images 
             and summary during the API in case we still need to show content. This ensures the 
@@ -453,12 +494,12 @@ def get_similar_recipes(id: int) -> list:
             during html display
             """
             try:
-                dict["image"] = recipe["image"]
-                summary = get_recipe_summary(recipe["id"])
+                dict["image"] = extended_recipe["image"]
+                summary = extended_recipe["summary"]
                 dict["summary"] = extract_sentence(summary)
                 dict["full_summary"] = clean_summary(summary)
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict["summary"] = "Try this recipe to add variety into your diet!"
                 dict["full_summary"] = "Try this recipe to add variety into your diet!"
         except KeyError:
@@ -524,7 +565,7 @@ def get_recommended_recipes(
                 dict["full_summary"] = clean_summary(recipe["summary"])
                 dict["summary"] = extract_sentence(recipe["summary"])
             except KeyError:
-                dict["image"] = "../static/noimage.jpg"
+                dict["image"] = "../static/assets/noimage.jpg"
                 dict[
                     "full_summary"
                 ] = "Add some variety to you diet by trying this recipe!"
