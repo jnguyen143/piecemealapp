@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template
 from flask_login import current_user
+
 from . import util
 from api.spoonacular import (
     SpoonacularApiException,
@@ -8,6 +9,7 @@ from api.spoonacular import (
 )
 from database import database
 from random import choice
+
 
 index_blueprint = Blueprint(
     "bp_index",
@@ -62,7 +64,7 @@ def get_similar_recipes_from_spoonacular(recipe_id):
 
 
 def is_user_authenticated():
-    return current_user.is_authenticated
+    return current_user is not None and current_user.is_authenticated
 
 
 @index_blueprint.route("/")
@@ -72,6 +74,7 @@ def index():
     if is_user_authenticated():
         print("The user passed authentication")
         saved_recipes = int__db.get_saved_recipes(get_current_user().id)
+
         if saved_recipes:
             # Select one of the recipes from user's profile randomly
             recipe_sample = choice(saved_recipes)
@@ -79,6 +82,7 @@ def index():
             # Get similar recipes based on selected sample
             try:
                 recipes = get_similar_recipes_from_spoonacular(recipe_sample)
+
             except SpoonacularApiException:
                 pass
 
@@ -93,6 +97,7 @@ def index():
         else:
             try:
                 recipes = get_recommended_recipes_from_spoonacular()
+
             except SpoonacularApiException:
                 pass
 
