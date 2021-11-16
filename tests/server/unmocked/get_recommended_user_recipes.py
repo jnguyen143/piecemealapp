@@ -166,6 +166,18 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
         import app  # pyright: reportMissingImports=false
 
         app.init_app()
+<<<<<<< HEAD
+        for test in self.test_success_params:
+            print("testing")
+            for recipe in test[INPUT]["recipes"].values():
+                app.db.add_recipe(recipe["id"], recipe["name"], recipe["image"])
+            for user in test[INPUT]["users"].values():
+                app.db.add_google_user(user["id"], user["email"])
+            for saved_recipe in test[INPUT]["saved_recipes"]:
+                app.db.add_saved_recipe(
+                    saved_recipe["user_id"], saved_recipe["recipe_id"]
+                )
+=======
         total_test_amount = len(self.test_success_params)
         for current_test_index in range(0, len(self.test_success_params)):
             test = self.test_success_params[current_test_index]
@@ -177,6 +189,7 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
             app.db.add_google_users(test[INPUT]["users"].values())
             app.db.add_saved_recipes(test[INPUT]["saved_recipes"])
 
+>>>>>>> a5366a6af2914df2d2040ed44d3a895ef2bc8bf0
             validation = False
             try:
                 print("Validating...")
