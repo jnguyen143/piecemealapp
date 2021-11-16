@@ -49,7 +49,6 @@ def index():
             return render_template(
                 "index2.html",
                 recipes=recipes,
-                len=len(recipes),
                 has_recipes=True,
                 userdata=current_user.to_json(),
             )
@@ -63,7 +62,6 @@ def index():
             return render_template(
                 "index2.html",
                 recipes=recipes,
-                len=len(recipes),
                 userdata=current_user.to_json(),
             )
 

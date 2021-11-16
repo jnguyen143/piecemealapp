@@ -2,7 +2,7 @@ from flask import Blueprint, render_template
 from flask_login import current_user
 from flask_login.utils import login_required
 import routes.util as util
-from database.models import SavedRecipe
+from database.models import SavedRecipe, Recipe
 from api.spoonacular import get_recommended_recipes, SpoonacularApiException
 
 
@@ -30,16 +30,13 @@ def get_blueprint():
 @login_required
 def profile():
     recipes = SavedRecipe.query.filter_by(user_id=current_user.id).all()
-    ingredients = []
-    print("Recipes are: ", recipes)
+    ingredients = SavedRecipe.query.filter_by(user_id=current_user.id).all()
+    has_recipes = False
+    has_ingredients = False
+
+    # If user has recipes, set has to true
     if recipes:
-        return render_template(
-            "profile.html",
-            recipes=recipes,
-            len=len(recipes),
-            has_recipes=True,
-            userdata=current_user.to_json(),
-        )
+        has_recipes = True
     # If user has no recipes saved, display randomly recommended recipes for user to add
     else:
         try:
@@ -47,9 +44,22 @@ def profile():
         except SpoonacularApiException:
             pass
 
-        return render_template(
-            "index2.html",
-            recipes=recipes,
-            len=len(recipes),
-            userdata=current_user.to_json(),
-        )
+    # if user has ingredients, set has to true
+    if ingredients:
+        has_ingredients = True
+
+    return render_template(
+        "profile.html",
+        recipes=recipes,
+        ingredients=ingredients,
+        has_recipes=has_recipes,
+        has_ingredients=has_ingredients,
+        userdata=current_user.to_json(),
+    )
+
+    # return render_template(
+    #     "profile.html",
+    #     recipes=recipes,
+    #     len=len(recipes),
+    #     userdata=current_user.to_json(),
+    # )

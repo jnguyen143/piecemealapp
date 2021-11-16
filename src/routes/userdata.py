@@ -117,6 +117,8 @@ def save_recipe():
         id = data["id"]
         name = data["name"]
         image = data["image"]
+        summary = data["summary"]
+        full_summary = data["full_summary"]
     except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
@@ -126,11 +128,11 @@ def save_recipe():
     if not recipe_exists(id):
         # Cache the recipe
         try:
-            int__db.add_recipe(id, name, image)
+            int__db.add_recipe(id, name, image, summary, full_summary)
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_recipe(user.id, id)
+        int__db.add_saved_recipe(user.id, id, name, image, summary, full_summary)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})

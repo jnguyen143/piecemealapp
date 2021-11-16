@@ -785,7 +785,9 @@ class Database:
         finally:
             session.close()
 
-    def add_recipe(self, id: int, name: str, image: str):
+    def add_recipe(
+        self, id: int, name: str, image: str, summary: str, full_summary: str
+    ):
         """
         Creates a new recipe with the specified information and adds it to the database, then returns the created recipe.
 
@@ -806,7 +808,9 @@ class Database:
         if self.get_recipe(id) != None:
             raise DuplicateRecipeException(id)
 
-        recipe = Recipe(id=id, name=name, image=image)
+        recipe = Recipe(
+            id=id, name=name, image=image, summary=summary, full_summary=full_summary
+        )
 
         session = self.int__Session()
         try:
@@ -855,7 +859,15 @@ class Database:
 
         return ingredient
 
-    def add_saved_recipe(self, user_id: str, recipe_id: int):
+    def add_saved_recipe(
+        self,
+        user_id: str,
+        recipe_id: int,
+        name: str,
+        image: str,
+        summary: str,
+        full_summary: str,
+    ):
         """
         Adds the recipe with the specified ID to the specified user's list of saved recipes.
 
@@ -877,7 +889,14 @@ class Database:
 
         from database.models import SavedRecipe
 
-        recipe = SavedRecipe(user_id=user_id, recipe_id=recipe_id)
+        recipe = SavedRecipe(
+            user_id=user_id,
+            recipe_id=recipe_id,
+            name=name,
+            image=image,
+            summary=summary,
+            full_summary=full_summary,
+        )
 
         session = self.int__Session()
         try:
