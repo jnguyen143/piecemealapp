@@ -1,16 +1,28 @@
-"""
-This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
-
-This file injects a random number of randomly generated users, recipes, and saved recipes, then tests to ensure that `get_recommended_user_recipes()` returns the expected result given the ID of a user from the list of dummy users.
-"""
-
+# pylint: disable=(C0114)
+# pylint: disable=(E0401)
+# disabled the above errors and error E0116
+# because
 import unittest
+import sys
+import pathlib
 from random import randrange, seed, randint
 
 
+# pylint: disable=(W0105)
+# disabled the above, error
+# was the comment below
+# was pointless, for
+# stating pupose of file
+"""
+This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
+
+This file injects a random number of randomly generated users, recipes, and saved recipes,
+then tests to ensure that `get_recommended_user_recipes()` returns the expected result given
+the ID of a user from the list of dummy users.
+"""
+
+# pylint: disable=(C0116)
 def init_app_module_dir():
-    import sys
-    import pathlib
 
     path = str(
         pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
@@ -21,7 +33,7 @@ def init_app_module_dir():
 INPUT = "input"
 EXPECTED_OUTPUT = "expected"
 
-
+# pylint: disable=(C0116)
 def generate_prefixed_string(prefix):
     result = prefix
     for _ in range(1, 10):
@@ -29,7 +41,14 @@ def generate_prefixed_string(prefix):
     return result
 
 
+# pylint: disable=(C0116)
 def generate_recipe():
+    # pylint: disable=(C0103)
+    # fixing snake case name error
+    # pylint: disable=(W0622)
+    # disabling redefined built
+    # error, as this does not
+    # affect code functionality
     id = randint(0, 100000)
     name = generate_prefixed_string("saved_recipe_")
     image = generate_prefixed_string("image_")
@@ -44,6 +63,7 @@ def generate_recipe():
     }
 
 
+# pylint: disable=(C0116)
 def generate_recipes(seedval):
     seed(seedval)
     result = {}
@@ -55,12 +75,19 @@ def generate_recipes(seedval):
     return result
 
 
+# pylint: disable=(C0116)
 def generate_user():
     email = generate_prefixed_string("email_")
+    # pylint: disable=(C0103)
+    # disabled snake case error
+    # pylint: disable=(W0622)
+    # disabling redefined
+    # built in error
     id = generate_prefixed_string("id_")
     return {"email": email, "id": id}
 
 
+# pylint: disable=(C0116)
 def generate_users(seedval):
     seed(seedval)
     result = {}
@@ -72,6 +99,7 @@ def generate_users(seedval):
     return result
 
 
+# pylint: disable=(C0116)
 def generate_saved_recipe(users, recipes):
     user_ids = list(users.keys())
     recipe_ids = list(recipes.keys())
@@ -80,6 +108,7 @@ def generate_saved_recipe(users, recipes):
     return {"user_id": user_ids[user_id_idx], "recipe_id": recipe_ids[recipe_id_idx]}
 
 
+# pylint: disable=(C0116)
 def generate_saved_recipes(seedval, users, recipes):
     seed(seedval)
     result = []
@@ -88,6 +117,7 @@ def generate_saved_recipes(seedval, users, recipes):
     return result
 
 
+# pylint: disable=(C0116)
 def generate_user_id(seedval, users):
     seed(seedval)
     user_ids = list(users.keys())
@@ -119,6 +149,7 @@ def recipes_match(mock_recipe, db_recipe):
     )
 
 
+# pylint: disable=(C0116)
 def contains_recipe(expected_output, target):
     for recipe in expected_output:
         if recipes_match(recipe, target):
@@ -126,6 +157,7 @@ def contains_recipe(expected_output, target):
     return False
 
 
+# pylint: disable=(C0115)
 def validate_input(actual_output, expected_output):
     for output in actual_output:
         if not contains_recipe(expected_output, output):
@@ -134,6 +166,7 @@ def validate_input(actual_output, expected_output):
 
 
 class GetRecommendedUserRecipesTestCase(unittest.TestCase):
+    # pylint: disable=(C0116)
     def setUp(self):
         self.test_success_params = []
         for _ in range(0, 5):
@@ -159,16 +192,36 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 }
             )
 
+    # pylint: disable=(C0116)
+    # pylint: disable=(C0103)
+    # disable snake case
+    # error menu and function
+    # error as it does not
+    # affect any code functionality
+
     def runTest(self):
         print("\033[0;33m===== TEST: GetRecommendedUserRecipes =====\033[0m")
         init_app_module_dir()
-        # If the below comment is not present, pylance will generate an import warning. We know the import is valid because the above function call injects the required module directory.
-        import app  # pyright: reportMissingImports=false
+        import app
+
+        # If the below comment is not present,
+        # pylance will generate an import warning.
+        # We know the import is valid because the
+        # above function call injects the required module directory.
+        # pyright: reportMissingImports=false
 
         app.init_app()
         total_test_amount = len(self.test_success_params)
+        # pylint: disable=(C0200)
+        # disabled consider using
+        # error
         for current_test_index in range(0, len(self.test_success_params)):
             test = self.test_success_params[current_test_index]
+            # pylint: disable=(C0301)
+            # the error above is regarding
+            # the print statement being too
+            # long, had to disable this
+            # feature
             print(
                 f"\033[0;33m----- Executing test {current_test_index + 1} of {total_test_amount} -----\033[0m"
             )
@@ -186,6 +239,8 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                     ),
                     test[EXPECTED_OUTPUT],
                 )
+            # pylint: disable=(W0702)
+            # disabled except error
             except:
                 pass
             finally:
