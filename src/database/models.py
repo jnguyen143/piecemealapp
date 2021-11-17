@@ -3,7 +3,12 @@
 This file defines the models for all of the tables in the database.
 Prior to importing this file anywhere in the application, `database.init()` must have already been called.
 """
-import builtins
+
+from sqlalchemy.orm import relationship
+
+# This import works
+# pylint: disable=import-error
+from database.database import DatabaseException
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
@@ -13,6 +18,8 @@ from flask_login import UserMixin
 from database.database import DatabaseException
 
 
+# This member is present
+# pylint: disable=no-member
 db = builtins.piecemeal_db_obj.get_db_obj()
 
 if db is None:
