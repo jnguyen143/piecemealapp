@@ -7,6 +7,9 @@ import builtins
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
+
+# pylint: disable=import-error
+# This import is valid
 from database.database import DatabaseException
 
 

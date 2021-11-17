@@ -11,6 +11,9 @@ from flask.json import jsonify
 import requests
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
 from flask_login import login_required, current_user, login_user, logout_user
+
+# pylint: disable=import-error
+# This import is valid
 from database.database import (
     DuplicateUserException,
     UserAuthentication,
