@@ -1,17 +1,21 @@
-# pylint: disable=import-error
-# This import is valid
+"""
+Python app.py file containing the app initiation, calling of the database object, 
+and routes registration
+"""
 import os
+import sys
 import flask
 import dotenv
+
+# pylint: disable=import-error
+# This import is valid
 from database import database
 import routes.util as util
 import routes.index as index
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-# Before anything else, make sure we have 3.9 or greater
-import sys
-
+# Before anything else, make sure we have python3.9 or greater
 MIN_PYTHON_VERSION = (3, 9)
 if sys.version_info < MIN_PYTHON_VERSION:
     sys.exit(
@@ -19,8 +23,11 @@ if sys.version_info < MIN_PYTHON_VERSION:
         % MIN_PYTHON_VERSION
     )
 
-app = None
+APP = None
 db: database.Database = None
+
+# pylint: disable=W0613
+"""Function that shuts down database session"""
 
 
 def shutdown_session(exception=None):
@@ -38,8 +45,10 @@ def init_app():
     - Registers the application blueprints
 
     Raises:
-        Exception: If there was a problem initializing the application or any of its related components.
+        Exception: If there was a problem initializing the application or
+        any of its related components.
     """
+    # pylint: disable=W0603, C0103, W0601
     global app
     global db
 
@@ -52,17 +61,23 @@ def init_app():
     app = flask.Flask(__name__, static_folder=util.get_static_folder())
     app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-    # XXX: This is for debugging only!
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     # Initialize the database
     try:
-        db = database.Database(app)
+        DB = database.Database(app)
     except database.DatabaseException as e:
         raise Exception(f"Failed to initialize database ({str(e)})")
 
+    # pylint: disable=C0415
     # Register the blueprints
-    import routes.login, routes.signup, routes.profile, routes.search, routes.userdata, routes.account, routes.logout
+    import routes.login
+    import routes.signup
+    import routes.profile
+    import routes.search
+    import routes.userdata
+    import routes.account
+    import routes.logout
 
     routes.userdata.init(db)
     routes.login.init(app, db)
@@ -83,14 +98,17 @@ def init_app():
     app.teardown_appcontext(shutdown_session)
 
 
+# Function that returns index module
 def get_index_module():
     return index
 
 
+# Function that returns app object/variable
 def get_app():
     return app
 
 
+# Function that starts application and allows for it to run on specified port
 def start_app():
     """
     Starts the application.
@@ -102,7 +120,8 @@ def start_app():
     """
     if app == None:
         raise Exception("Application not initialized")
-
+    # Disabling because os.getenv is retrieving a port and not a string
+    # pylint: disable=W1508
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
 
 

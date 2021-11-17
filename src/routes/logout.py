@@ -2,7 +2,7 @@ from flask import Blueprint, redirect
 from flask_login import logout_user
 from . import util
 
-
+# pylint: disable=C0103
 logout_blueprint = Blueprint(
     "bp_logout",
     __name__,

@@ -1,8 +1,17 @@
 from flask import Blueprint, render_template
 from flask_login import current_user
 from flask_login.utils import login_required
+
+# pylint: disable=import-error
+# This import is valid
 import routes.util as util
+
+# pylint: disable=import-error
+# This import is valid
 from api.spoonacular import get_recommended_recipes, SpoonacularApiException
+
+# pylint: disable=import-error
+# This import is valid
 from database import database
 
 
