@@ -132,7 +132,7 @@ def save_recipe():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_recipe(user.id, id, name, image, summary, full_summary)
+        int__db.add_saved_recipe(user.id, id)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -190,12 +190,7 @@ def save_ingredient():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_ingredient(
-            user.id,
-            id,
-            name,
-            image,
-        )
+        int__db.add_saved_ingredient(user.id, id)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})

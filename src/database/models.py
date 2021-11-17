@@ -78,8 +78,8 @@ class Recipe(db.Model):
             "id": self.id,
             "name": self.name,
             "image": self.image,
-            "summary": self.summary,
-            "full_summary": self.full_summary,
+            "summary": "" if self.summary == None else self.summary,
+            "full_summary": "" if self.full_summary == None else self.full_summary,
         }
 
     def __repr__(self):

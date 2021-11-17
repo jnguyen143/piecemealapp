@@ -2,8 +2,8 @@ from flask import Blueprint, render_template
 from flask_login import current_user
 from flask_login.utils import login_required
 import routes.util as util
-from database.models import SavedRecipe, SavedIngredient
 from api.spoonacular import get_recommended_recipes, SpoonacularApiException
+from database import database
 
 
 profile_blueprint = Blueprint(
@@ -26,11 +26,31 @@ def get_blueprint():
     return profile_blueprint
 
 
+# For internal use only
+int__db: database.Database = None
+
+
+def init(db: database.Database):
+    """
+    Initializes this module using the provided arguments.
+
+    Args:
+        db (Database): The database object to use.
+    """
+    global int__db
+    int__db = db
+
+
 @profile_blueprint.route("/profile")
 @login_required
 def profile():
-    recipes = SavedRecipe.query.filter_by(user_id=current_user.id).all()
-    ingredients = SavedIngredient.query.filter_by(user_id=current_user.id).all()
+    recipes = [
+        recipe.to_json() for recipe in int__db.get_saved_recipes(current_user.id)
+    ]
+    ingredients = [
+        ingredient.to_json()
+        for ingredient in int__db.get_saved_ingredients(current_user.id)
+    ]
     has_recipes = False
     has_ingredients = False
 
