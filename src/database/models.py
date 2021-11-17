@@ -10,14 +10,19 @@ from sqlalchemy.orm import relationship
 # pylint: disable=import-error
 from database.database import DatabaseException
 from datetime import datetime
+from sqlalchemy.orm import relationship
 from flask_login import UserMixin
-import builtins
+
+# pylint: disable=import-error
+# This import is valid
+from database.database import DatabaseException
+
 
 # This member is present
 # pylint: disable=no-member
 db = builtins.piecemeal_db_obj.get_db_obj()
 
-if db == None:
+if db is None:
     raise DatabaseException("Database has not been initialized")
 
 
@@ -83,8 +88,8 @@ class Recipe(db.Model):
             "id": self.id,
             "name": self.name,
             "image": self.image,
-            "summary": "" if self.summary == None else self.summary,
-            "full_summary": "" if self.full_summary == None else self.full_summary,
+            "summary": "" if self.summary is None else self.summary,
+            "full_summary": "" if self.full_summary is None else self.full_summary,
         }
 
     def __repr__(self):
