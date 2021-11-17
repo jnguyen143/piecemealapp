@@ -1,5 +1,5 @@
 # App URL
-https://sheltered-spire-46940.herokuapp.com/
+http://piecemealapp.herokuapp.com/
 # Overview
 This documentation describes the functionality of the pieceMeal app as well as the technical specifications required to run the app.
 ## Description
