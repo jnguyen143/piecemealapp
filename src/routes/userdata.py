@@ -4,10 +4,14 @@ This file defines all of the endpoints relating to user data, such as saving rec
 ingredients, deleting users, and more. All of the endpoints defined in this file are API
 endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
-
+import os
+import json
+import dotenv
 from flask import Blueprint, request, redirect
 from flask.json import jsonify
+import requests
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
+from flask_login import login_required, current_user, login_user, logout_user
 
 # pylint: disable=import-error
 # This import is valid
@@ -18,15 +22,10 @@ from database.database import (
     Database,
     NoUserException,
 )
-from . import util
-from flask_login import login_required, current_user, login_user, logout_user
-import os
-import requests
-import json
-
-# pylint: disable=import-error
-# This import is valid
 import keystore as keystore
+from . import util
+
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 GOOGLE_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -138,7 +137,7 @@ def save_recipe():
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
     if not recipe_exists(id):
         # Cache the recipe
@@ -251,7 +250,7 @@ def delete_recipe():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -295,12 +294,12 @@ def delete_ingredient():
     except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
-    if id == None:
+    if id is None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -353,7 +352,7 @@ def delete_user():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -401,12 +400,12 @@ def update_username():
     except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
-    if new_username == None:
+    if new_username is None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -467,9 +466,9 @@ def search_users():
         query = data["query"]
 
         if (
-            query == None
-            or criteria == None
-            or (criteria != CRITERIA_NAME and criteria != CRITERIA_USERNAME)
+            query is None
+            or criteria is None
+            or (criteria != CRITERIA_NAME, CRITERIA_USERNAME)
         ):
             return jsonify({})
     except KeyError:
@@ -605,7 +604,7 @@ def validate_with_google(google_provider, code):
     if not response.ok:
         raise Exception("Invalid response")
     response_json = response.json()
-    if response_json == None:
+    if response_json is None:
         raise Exception("Invalid response")
     return response_json
 
@@ -621,7 +620,7 @@ def get_google_user_info(google_provider):
     if not response.ok:
         raise Exception("Invalid response")
     response_json = response.json()
-    if response_json == None:
+    if response_json is None:
         raise Exception("Invalid response")
 
     if not response_json.get("email_verified"):
@@ -665,7 +664,7 @@ def validate_login():
 
     user = int__db.get_user(userinfo["id"])
 
-    if user == None:
+    if user is None:
         return redirect("/login?login-auth-status=2")
 
     # With Google-authenticated accounts, Google controls the user's email and name. Therefore they need to be updated to reflect Google's changes
@@ -872,7 +871,7 @@ def update_password():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     try:
@@ -928,7 +927,7 @@ def delete_friend():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     try:
@@ -976,7 +975,7 @@ def send_friend_request():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     try:
@@ -1036,7 +1035,7 @@ def handle_friend_request():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     if action == ACTION_ACCEPT:
@@ -1046,8 +1045,8 @@ def handle_friend_request():
         except NoUserException:
             print("err1")
             return jsonify({"result": RESPONSE_NO_SRC_USER})
-        except Exception as e:
-            print(f"err2: {e}")
+        except Exception as exception:
+            print(f"err2: {exception}")
             return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
     elif action == ACTION_DENY:
         try:

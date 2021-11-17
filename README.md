@@ -11,7 +11,7 @@ The following APIs were utilized in the creation of the pieceMeal app:
 * Google Oauth2: The main provider of authentication, this API utilizes OpenID functionality to connect a Google account to the app and pull information that can be used to create an app profile for it.
 
 ## Note
-The credentials for the Google and Spoonacular API must be stored in a .env file, which cannoot be pushed to Github by creating a .gitignore file and adding ".env" to it for privacy reasons.
+The credentials for the Google and Spoonacular API must be stored in a .env file, which cannot be pushed to Github by creating a .gitignore file and adding ".env" to it for privacy reasons.
 
 ## Requirements
 The following packages are required to run the app, all of which are provided in the requirements.txt file:

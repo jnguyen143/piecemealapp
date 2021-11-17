@@ -12,6 +12,7 @@ class UndefinedApiKeyException(Exception):
     """
 
     def __init__(self, message=""):
+        super().__init__()
         self.message = message
 
 
@@ -21,6 +22,7 @@ class RequestException(Exception):
     """
 
     def __init__(self, message=""):
+        super().__init__()
         self.message = message
 
 
@@ -30,6 +32,7 @@ class MalformedResponseException(Exception):
     """
 
     def __init__(self, message=""):
+        super().__init__()
         self.message = message
 
 
@@ -47,14 +50,15 @@ def api_get_json(url: str, headers: dict = None, params: dict = None) -> dict:
 
     Raises:
         RequestException: If the request was unable to be completed.
-        MalformedResponseException: If the response did not return a valid status code or produced invalid JSON data.
+        MalformedResponseException: If the response did not return a valid status
+            code or produced invalid JSON data.
     """
 
     response = None
     try:
         response = requests.get(url, headers=headers, params=params)
     except Exception as e:
-        raise RequestException(f"Failed to make GET request: {str(e)}")
+        raise RequestException(f"Failed to make GET request: {str(e)}") from e
 
     if not response.ok:
         raise MalformedResponseException(
@@ -65,4 +69,4 @@ def api_get_json(url: str, headers: dict = None, params: dict = None) -> dict:
         result = response.json()
         return result
     except Exception as e:
-        raise MalformedResponseException(f"Malformed JSON; details: {str(e)}")
+        raise MalformedResponseException(f"Malformed JSON; details: {str(e)}") from e

@@ -13,6 +13,7 @@ from database import database
 import routes.util as util
 import routes.index as index
 
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 # Before anything else, make sure we have python3.9 or greater
 MIN_PYTHON_VERSION = (3, 9)
