@@ -51,7 +51,11 @@ def init(app: Flask, db: database.Database):
     login_manager.user_loader(load_user)
 
 
+def get_login_auth_status():
+    return request.args.get("login-auth-status", 0, type=int)
+
+
 @login_blueprint.route("/login")
 def login():
-    login_error = request.args.get("login-auth-status", 0, type=int)
+    login_error = get_login_auth_status()
     return render_template("login.html", login_error=login_error)

@@ -8,6 +8,7 @@ The tests rely on relative paths to resolve some imports.
 import unittest
 from default_recommended_recipes import DefaultRecommendedRecipesTest
 from get_similar_recipes import GetSimilarRecipesTest
+from login_test import DefaultLoginTest
 
 # pylint: disable=(C0116)
 def suite():
@@ -15,7 +16,13 @@ def suite():
     # disabled redefine error
     # as it does not affect code
     suite = unittest.TestSuite()
-    suite.addTests([DefaultRecommendedRecipesTest(), GetSimilarRecipesTest()])
+    suite.addTests(
+        [
+            DefaultRecommendedRecipesTest(),
+            DefaultLoginTest()
+            # GetSimilarRecipesTest()
+        ]
+    )
     return suite
 
 
