@@ -99,7 +99,7 @@ def start_app():
     if app == None:
         raise Exception("Application not initialized")
 
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
 
 
 if __name__ == "__main__":
