@@ -134,11 +134,44 @@
       <!-- If incoming data is from profile route, display based on if user has saved items to profile -->
       {%else%}
 
+      {%if has_recipes == False%}
       <div class="header">
         <h1>Your Saved Recipes</h1>
-        {%if has_recipes == False%}
         <p>Looks like you don't have any favorite recipes yet. Check out the suggested recipes below!</p>
-        {%endif%}
+      </div>
+      <div class="content">
+        {%for recipe in recipes%}
+        <div class="recipe">
+          <div class="image">
+            <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+            <button type="submit" class="add-button" recipe-id="{{recipe['id']}}" recipe-name="{{recipe['name']}}"
+              recipe-image="{{recipe['image']}}">ADD</button>
+          </div>
+          <div class="description">
+            <h2>{{recipe["name"]}}</h2>
+            <p>{{recipe["summary"]}}</p>
+          </div>
+        </div>
+        {%endfor%}
+      </div>
+      {%else%}
+      <div class="header">
+        <h1>Your Saved Recipes</h1>
+      </div>
+      <div class="content">
+        {%for recipe in recipes%}
+        <div class="recipe">
+          <div class="image">
+            <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+            <button type="submit" class="delete-button" recipe-id="{{recipe['id']}}" recipe-name="{{recipe['name']}}"
+              recipe-image="{{recipe['image']}}">DELETE</button>
+          </div>
+          <div class="description">
+            <h2>{{recipe["name"]}}</h2>
+            <p>{{recipe["summary"]}}</p>
+          </div>
+        </div>
+        {%endfor%}
       </div>
 
       {%if not recipes%}
