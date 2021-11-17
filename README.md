@@ -1,3 +1,5 @@
+# App URL
+http://piecemealapp.herokuapp.com/
 # Overview
 This documentation describes the functionality of the pieceMeal app as well as the technical specifications required to run the app.
 ## Description
@@ -20,3 +22,14 @@ The following packages are required to run the app, all of which are provided in
 * Requests: utilized for formatting data pulled from user
 * requests_oauthlib: connects the Google API functions to Flask in a more comprehensive form
 * pyOpenSSL: enables secure connection with https (required for bypassing warning)
+
+## Installation
+Run the command `pip3 install -r requirements.txt.` to install the dependencies required for running the app.
+
+The app utilizes 2048-bit RSA encryption to provide in-house authentication between the client and the server through the usage of two keys generated from two separate files, public_key.pem and private_key pem. To generate these files run the following commands in a Python terminal:
+```from Crypto.PublicKey import RSA
+keypair = RSA.generate(2048)
+with open("private_key.pem", "wb") as f:
+    f.write(keypair.exportKey())
+with open("public_key.pem", "wb") as f:
+    f.write(keypair.publickey().exportKey()) ```

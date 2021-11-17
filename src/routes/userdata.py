@@ -19,6 +19,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 import os
 import requests
 import json
+import keystore as keystore
 
 GOOGLE_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -132,7 +133,7 @@ def save_recipe():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_recipe(user.id, id, name, image, summary, full_summary)
+        int__db.add_saved_recipe(user.id, id)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -190,12 +191,7 @@ def save_ingredient():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_ingredient(
-            user.id,
-            id,
-            name,
-            image,
-        )
+        int__db.add_saved_ingredient(user.id, id)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -476,21 +472,6 @@ def search_users():
     return jsonify({"users": user_json})
 
 
-def get_private_key():
-    """
-    Returns the server's stored private key.
-
-    The private key must be stored in a file with the name "private_key.pem" in the application root directory.
-    """
-    import pathlib
-
-    root_dir = util.get_application_root_dir()
-    result = ""
-    with open(pathlib.Path(root_dir).joinpath("private_key.pem").resolve(), "r") as f:
-        result = f.read()
-    return result
-
-
 @userdata_blueprint.route("/api/start-login", methods=["POST"])
 def start_login():
     """
@@ -516,6 +497,7 @@ def start_login():
     try:
         message = request.get_data()
     except:
+        print("test1")
         return jsonify({"success": False})
 
     from Crypto.Cipher import PKCS1_OAEP
@@ -525,10 +507,11 @@ def start_login():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
+        print("test2")
         return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
@@ -553,10 +536,14 @@ def start_login():
                 login_user(user)
                 return jsonify({"success": True})
             else:
+                print("test3")
                 return jsonify({"success": False})
-        except:
+        except Exception as E:
+            print(E)
+            print("test4")
             return jsonify({"success": False})
     else:
+        print("test5")
         return jsonify({"success": False})
 
 
@@ -686,7 +673,7 @@ def start_signup():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
@@ -758,21 +745,6 @@ def validate_signup():
     return redirect("/")
 
 
-def get_public_key():
-    """
-    Returns the server's stored public key.
-
-    The public key must be stored in a file with the name "public_key.pem" in the application root directory.
-    """
-    import pathlib
-
-    root_dir = util.get_application_root_dir()
-    result = ""
-    with open(pathlib.Path(root_dir).joinpath("public_key.pem").resolve(), "r") as f:
-        result = f.read()
-    return result
-
-
 @userdata_blueprint.route("/api/get-public-key")
 def get_server_public_key():
     """
@@ -783,7 +755,7 @@ def get_server_public_key():
         key (str): The server's public key (as a string).
     }
     """
-    return jsonify({"key": get_public_key()})
+    return jsonify({"key": keystore.get_public_key()})
 
 
 @userdata_blueprint.route("/api/update-password", methods=["POST"])
@@ -828,7 +800,7 @@ def update_password():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:

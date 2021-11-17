@@ -424,6 +424,8 @@ class Database:
         uname = prefix + str(format_string % suffix_number).strip()
         tries = 1
         while self.username_exists(uname):
+            if(tries > 100):
+                raise DatabaseException("could not generate username")
             # The algorithm will try up to suffix_digits number of times to generate a username.
             # If it still fails to generate a unique username after this point, the number of digits in the suffix will increase by 1 and the process will begin again.
             suffix_number = randint(0, 10 ** suffix_digits - 1)
@@ -1488,7 +1490,8 @@ class Database:
             tries = 0
             while ingredients[index].id in result and tries <= MAX_TRIES:
                 # Increase the search range if it's still less than the length of the actual list
-                if current_range < ingredients_len:
+                if current_range < ingredient_count:
+                    # ingredients_len:
                     current_range += 1
                 index = randrange(ingredients_len - current_range, ingredients_len)
                 tries += 1

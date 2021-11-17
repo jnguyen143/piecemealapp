@@ -284,7 +284,7 @@ def search_recipes(
     max_prep_time: int = -1,
     sort_by: SortCriteria = None,
     offset: int = 0,
-    limit: int = 10,
+    limit: int = 12,
 ) -> list:
     """
     Searches for recipes using the specified criteria and returns a list of JSON-encoded recipes.
@@ -511,7 +511,7 @@ def get_similar_recipes(id: int) -> list:
 
 def get_recommended_recipes(
     offset: int = 0,
-    limit: int = 10,
+    limit: int = 12,
 ) -> list:
     """
     Returns a list of randomly recommended recipes.
@@ -616,7 +616,7 @@ def search_ingredients(
     intolerances: list[Intolerance] = None,
     sort_by: SortCriteria = None,
     offset: int = 0,
-    limit: int = 10,
+    limit: int = 12,
 ) -> list:
     """
     Searches for ingredients using the specified criteria and returns a list of JSON-encoded recipes.

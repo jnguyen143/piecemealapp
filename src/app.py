@@ -65,6 +65,7 @@ def init_app():
     routes.login.init(app, db)
     routes.account.init(db)
     index.init(db)
+    routes.profile.init(db)
 
     app.register_blueprint(index.get_blueprint())
     app.register_blueprint(routes.login.get_blueprint())
@@ -99,7 +100,7 @@ def start_app():
     if app == None:
         raise Exception("Application not initialized")
 
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
 
 
 if __name__ == "__main__":
