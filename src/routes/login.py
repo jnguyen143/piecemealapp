@@ -3,6 +3,7 @@ from . import util
 from database import database
 from flask_login import LoginManager, logout_user
 
+# pylint: disable=C0103
 login_blueprint = Blueprint(
     "bp_login",
     __name__,
@@ -33,6 +34,7 @@ def load_user(username):
     return int__db.get_user(username)
 
 
+# pylint: disable=C0103
 def init(app: Flask, db: database.Database):
     """
     Initializes this module using the provided arguments.
@@ -40,6 +42,7 @@ def init(app: Flask, db: database.Database):
         app (Flask): The application object.
         db (Database): The database object to use.
     """
+    # pylint: disable=C0103
     global int__db
     global login_manager
     int__db = db

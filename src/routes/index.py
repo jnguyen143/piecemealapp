@@ -3,6 +3,9 @@ from flask_login import current_user
 from random import choice
 from . import util
 from flask_login import current_user
+
+# pylint: disable=import-error
+# This import is valid
 from api.spoonacular import (
     get_recommended_recipes,
     get_similar_recipes,

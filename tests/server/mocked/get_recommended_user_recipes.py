@@ -1,19 +1,29 @@
-"""
-This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
-
-Given a dummy user with dummy saved recipes, this file tests to make sure that `get_recommended_user_recipes()` returns only the most recently liked recipes.
-
-This file tests `get_recommended_user_recipes()` with randomly generated dummy user data to ensure that it is robust enough to handle any kind of input data.
-"""
-
+# pylint: disable=(E0401)
+# pylint: disable=(C0114)
+# disabled missing module and import error
 import unittest
 from unittest.mock import patch
 from random import seed, randint
+import sys
+import pathlib
 
 
+# pylint: disable=(W0105)
+# disabled error for string
+# comment below
+# being declared as useless
+"""
+This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
+
+Given a dummy user with dummy saved recipes, this file tests to make sure that
+`get_recommended_user_recipes()` returns only the most recently liked recipes.
+
+This file tests `get_recommended_user_recipes()` with randomly generated dummy
+user data to ensure that it is robust enough to handle any kind of input data.
+"""
+
+# pylint: disable=(C0116)
 def init_app_module_dir():
-    import sys
-    import pathlib
 
     path = str(
         pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
@@ -24,7 +34,7 @@ def init_app_module_dir():
 INPUT = "input"
 EXPECTED_OUTPUT = "expected"
 
-
+# pylint: disable=(C0116)
 def generate_prefixed_string(prefix):
     result = prefix
     for _ in range(1, 10):
@@ -32,8 +42,13 @@ def generate_prefixed_string(prefix):
     return result
 
 
+# pylint: disable=(C0115)
 class MockedSavedRecipe:
+    # pylint: disable=(W0622)
+    # disabled built in error
     def __init__(self, id, name, image):
+        # pylint: disable=(C0103)
+        # disabled snake case error
         self.id = id
         self.name = name
         self.image = image
@@ -42,13 +57,19 @@ class MockedSavedRecipe:
         return f"id={self.id}, name={self.name}, image={self.image}"
 
 
+# pylint: disable=(C0116)
 def generate_saved_recipe():
+    # pylint: disable=(W0622)
+    # disabled built in error
+    # pylint: disable=(C0103)
+    # disabled snake case error
     id = randint(0, 100000)
     name = generate_prefixed_string("saved_recipe_")
     image = generate_prefixed_string("image_")
     return MockedSavedRecipe(id, name, image)
 
 
+# pylint: disable=(C0116)
 def get_saved_recipes_mock(seedval):
     # Return a list of recipe objects, which amounts to a dict of id, name, and image
     # Return between 0 and 100 recipes
@@ -59,25 +80,32 @@ def get_saved_recipes_mock(seedval):
     return result
 
 
+# pylint: disable=(C0116)
 def get_user_id_mock(seedval):
     seed(seedval)
     return generate_prefixed_string("user_")
 
 
+# pylint: disable=(C0116)
 def get_limit_mock(seedval):
     seed(seedval)
     return randint(1, 10)
 
 
+# pylint: disable=(C0116)
 def get_expected_output(seedval):
     saved_recipes = get_saved_recipes_mock(seedval)
     limit = get_limit_mock(seedval)
     return saved_recipes[-limit:]
 
 
+# pylint: disable=(C0103)
+# disabled snake case error
 def recipes_match(a, b):
     try:
         return a.id == b.id and a.name == b.name and a.image == b.image
+    # pylint: disable=(W0702)
+    # disabled except error
     except:
         return False
 
@@ -97,6 +125,7 @@ def validate_input(recipes, expected_output):
 
 
 class GetRecommendedUserRecipesTestCase(unittest.TestCase):
+    # pylint: disable=(C0116)
     def setUp(self):
         self.test_success_params = []
         for _ in range(0, 10):
@@ -114,9 +143,14 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
             )
 
     def runTest(self):
+
         init_app_module_dir()
-        # If the below comment is not present, pylance will generate an import warning. We know the import is valid because the above function call injects the required module directory.
-        import app  # pyright: reportMissingImports=false
+        import app
+
+        # If the below comment is not present, pylance will generate an
+        # import warning. We know the import is valid because the above
+        #  function call injects the required module directory.
+        # pyright: reportMissingImports=false
 
         app.init_app()
         for test in self.test_success_params:
