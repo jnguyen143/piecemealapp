@@ -19,6 +19,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 import os
 import requests
 import json
+from .. import keystore
 
 GOOGLE_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
@@ -471,21 +472,6 @@ def search_users():
     return jsonify({"users": user_json})
 
 
-def get_private_key():
-    """
-    Returns the server's stored private key.
-
-    The private key must be stored in a file with the name "private_key.pem" in the application root directory.
-    """
-    import pathlib
-
-    root_dir = util.get_application_root_dir()
-    result = ""
-    with open(pathlib.Path(root_dir).joinpath("private_key.pem").resolve(), "r") as f:
-        result = f.read()
-    return result
-
-
 @userdata_blueprint.route("/api/start-login", methods=["POST"])
 def start_login():
     """
@@ -521,7 +507,7 @@ def start_login():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
@@ -687,7 +673,7 @@ def start_signup():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
@@ -759,21 +745,6 @@ def validate_signup():
     return redirect("/")
 
 
-def get_public_key():
-    """
-    Returns the server's stored public key.
-
-    The public key must be stored in a file with the name "public_key.pem" in the application root directory.
-    """
-    import pathlib
-
-    root_dir = util.get_application_root_dir()
-    result = ""
-    with open(pathlib.Path(root_dir).joinpath("public_key.pem").resolve(), "r") as f:
-        result = f.read()
-    return result
-
-
 @userdata_blueprint.route("/api/get-public-key")
 def get_server_public_key():
     """
@@ -784,7 +755,7 @@ def get_server_public_key():
         key (str): The server's public key (as a string).
     }
     """
-    return jsonify({"key": get_public_key()})
+    return jsonify({"key": keystore.get_public_key()})
 
 
 @userdata_blueprint.route("/api/update-password", methods=["POST"])
@@ -829,7 +800,7 @@ def update_password():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:

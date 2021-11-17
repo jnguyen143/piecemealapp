@@ -45,10 +45,6 @@ def init_app():
     if env_path != "":
         dotenv.load_dotenv(env_path)
 
-    import gen_keys
-
-    gen_keys.generate_keys()
-
     # Create the application
     app = flask.Flask(__name__, static_folder=util.get_static_folder())
     app.secret_key = os.getenv("FLASK_SECRET_KEY")
