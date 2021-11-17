@@ -1,27 +1,36 @@
 <div>
-    <div id="main-content-title">My Profile</div>
+    <div id="main-content-title"><b>My Profile</b></div>
+    <br><br>
     <div id="profile-username">
-        <div>Username: {{userdata["username"]}}</div>
+        <div>Username: <b>{{userdata["username"]}}</b></div>
+        <br>
         <input type="text" id="profile-new-username-field" placeholder="New Username" />
-        <button type="button" id="profile-new-username-button" disabled>Submit</button>
+        <br>
+        <button type="button" class="accountPageButtons" id="profile-new-username-button" disabled>Submit</button>
         <div id="profile-new-username-error"></div>
     </div>
+    <br>
     <div id="profile-email">
-        <div>Email: {{userdata["email"]}}</div>
+        <div>Email: <b>{{userdata["email"]}}</b> </div>
         {% if userdata["authentication"] == 0 %}
         <input type="text" id="profile-new-email-field" placeholder="New Email" />
         <button type="button" id="profile-new-email-button" disabled>Submit</button>
         {% elif userdata["authentication"] == 1 %}
+        <br>
         <div id="profile-no-set-email">
             Your account is linked through Google, so you can't change your email here.
-            To view or change your account settings, <a href="https://myaccount.google.com/" target="_blank">do it
-                on Google</a>.
+            To view or change your account settings, <br><a href="https://myaccount.google.com/" target="_blank">do it
+                on
+                Google.</a>
         </div>
         {% endif %}
     </div>
+    <br>
     <div id="profile-name">
         Name: {{userdata["given_name"]}} {{userdata["family_name"]}}
     </div>
+    <br>
+    <br>
     <div id="profile-password">
         <div id="profile-new-password-title">New Password:</div>
         {% if userdata["authentication"] == 0 %}
@@ -29,14 +38,17 @@
         <input type="password" id="profile-new-password-field" placeholder="New Password" />
         <button type="button" id="profile-new-password-button" disabled>Submit</button>
         {% elif userdata["authentication"] == 1 %}
+        <br>
         <div id="profile-no-set-password">
             Your account is linked through Google and therefore does not have a password stored with PieceMeal.
-            To view or change your account settings, <a href="https://myaccount.google.com/" target="_blank">do it
-                on Google</a>.
+            To view or change your account settings, <br><a href="https://myaccount.google.com/" target="_blank">do it
+                on
+                Google.</a>
         </div>
         {% endif %}
     </div>
+    <br>
     <div id="profile-delete-account">
-        <button id="profile-delete-account-button">Delete Account</button>
+        <button class="deleteAccountButton" id="profile-delete-account-button">Delete Account</button>
     </div>
 </div>

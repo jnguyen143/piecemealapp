@@ -52,17 +52,14 @@ def validate_page(recipes, page: str):
 
 
 def generate_recipe():
-    # pylint: disable=(W0622)
-    # disabled redefined built in error
-    # pylint: disable=(C0103)
-    # disabled snake case error
-    id = generate_prefixed_string("id_")
+
+    recipe_id = generate_prefixed_string("id_")
     name = generate_prefixed_string("name_")
     image = generate_prefixed_string("image_")
     full_summary = generate_prefixed_string("full_summary_")
     summary = generate_prefixed_string("summary_")
     return {
-        "id": id,
+        "id": recipe_id,
         "name": name,
         "image": image,
         "full_summary": full_summary,
@@ -100,13 +97,13 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
     def runTest(self):
 
         init_app_module_dir()
-        import app
 
         # If the below comment is not present,
         # pylance will generate an import warning.
         # We know the import is valid because the
         # above function call injects the required module directory.
         # pyright: reportMissingImports=false
+
 
         app.init_app()
         from routes import index

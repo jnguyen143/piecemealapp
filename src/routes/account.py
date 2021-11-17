@@ -1,8 +1,12 @@
+from flask_login import current_user
 from flask import Blueprint, render_template, request
 from flask.json import jsonify
 from . import util
+# pylint: disable=import-error
+        # This import is valid
 from database import database
-from flask_login import current_user
+from . import util
+
 
 account_blueprint = Blueprint(
     "bp_account",
@@ -45,6 +49,7 @@ def account():
     userdata["friends"] = [
         x.to_json() for x in int__db.get_relationships_for_user(current_user.id)
     ]
+
     return render_template("account.html", userdata=current_user.to_json())
 
 

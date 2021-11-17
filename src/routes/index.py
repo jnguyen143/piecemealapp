@@ -3,6 +3,9 @@ from flask_login import current_user
 from random import choice
 from . import util
 from flask_login import current_user
+
+# pylint: disable=import-error
+# This import is valid
 from api.spoonacular import (
     get_recommended_recipes,
     get_similar_recipes,
@@ -74,7 +77,7 @@ def index():
         if saved_recipes:
             # Select one of the recipes from user's profile randomly
             recipe_sample = choice(saved_recipes)
-            recipe_sample = recipe_sample.recipe_id
+            # recipe_sample = recipe_sample.recipe_id
             # Get similar recipes based on selected sample
             try:
                 recipes = get_similar_recipes_from_spoonacular(recipe_sample)
