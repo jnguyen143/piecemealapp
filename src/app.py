@@ -1,10 +1,13 @@
+# pylint: disable=import-error
+# This import is valid
+import os
 import flask
 import dotenv
-import os
 from database import database
 import routes.util as util
 import routes.index as index
 
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 # Before anything else, make sure we have 3.9 or greater
 import sys
