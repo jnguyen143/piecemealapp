@@ -97,13 +97,13 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
     def runTest(self):
 
         init_app_module_dir()
+        import app
 
         # If the below comment is not present,
         # pylance will generate an import warning.
         # We know the import is valid because the
         # above function call injects the required module directory.
         # pyright: reportMissingImports=false
-
 
         app.init_app()
         from routes import index

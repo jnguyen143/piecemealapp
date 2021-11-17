@@ -31,7 +31,8 @@ db: database.Database = None
 
 
 def shutdown_session(exception=None):
-    db.finalize()
+    if db is not None:
+        db.finalize()
 
 
 def init_app():
@@ -65,7 +66,7 @@ def init_app():
 
     # Initialize the database
     try:
-        DB = database.Database(app)
+        db = database.Database(app)
     except database.DatabaseException as e:
         raise Exception(f"Failed to initialize database ({str(e)})")
 

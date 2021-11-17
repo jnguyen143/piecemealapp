@@ -16,7 +16,7 @@ from flask_login import UserMixin
 # pylint: disable=import-error
 # This import is valid
 from database.database import DatabaseException
-
+import builtins
 
 # This member is present
 # pylint: disable=no-member
