@@ -5,11 +5,16 @@ Prior to importing this file anywhere in the application, `database.init()` must
 """
 
 from sqlalchemy.orm import relationship
+
+# This import works
+# pylint: disable=import-error
 from database.database import DatabaseException
 from datetime import datetime
 from flask_login import UserMixin
 import builtins
 
+# This member is present
+# pylint: disable=no-member
 db = builtins.piecemeal_db_obj.get_db_obj()
 
 if db == None:
