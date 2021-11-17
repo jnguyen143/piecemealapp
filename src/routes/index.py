@@ -78,6 +78,7 @@ def index():
             # Get similar recipes based on selected sample
             try:
                 recipes = get_similar_recipes_from_spoonacular(recipe_sample)
+                print(recipes)
             except SpoonacularApiException:
                 pass
 

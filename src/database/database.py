@@ -1488,7 +1488,8 @@ class Database:
             tries = 0
             while ingredients[index].id in result and tries <= MAX_TRIES:
                 # Increase the search range if it's still less than the length of the actual list
-                if current_range < ingredients_len:
+                if current_range < ingredient_count:
+                    # ingredients_len:
                     current_range += 1
                 index = randrange(ingredients_len - current_range, ingredients_len)
                 tries += 1
