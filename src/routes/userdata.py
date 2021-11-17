@@ -19,7 +19,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 import os
 import requests
 import json
-from .. import keystore
+import keystore as keystore
 
 GOOGLE_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
