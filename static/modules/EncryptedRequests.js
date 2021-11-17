@@ -1,7 +1,7 @@
 /**
 Returns the original data encrypted using the server's public key.
 */
-export default async function encryptData(original) {
+async function encryptData(original) {
   /* eslint-disable no-undef */
   let result = '';
   await fetch('/api/get-public-key').then((response) => response.json()).then((response) => {
@@ -14,3 +14,5 @@ export default async function encryptData(original) {
   });
   return result;
 }
+
+export { encryptData }; // eslint-disable-line

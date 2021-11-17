@@ -7,7 +7,7 @@ By including this module, you must also ensure that you include the associated
 /*
 Shows the specified message in a toast for the specified amount of milliseconds (3000 by default).
 */
-export default function showToast(message, duration = 3000) {
+function showToast(message, duration = 3000) {
   // Get the toast DIV
   const x = document.getElementById('toast-div');
   x.innerHTML = message;
@@ -24,3 +24,5 @@ export default function showToast(message, duration = 3000) {
   // After the specified duration, remove the show class from DIV
   setTimeout(() => { x.className = x.className.replace('toast-show', ''); }, duration);
 }
+
+export { showToast }; // eslint-disable-line
