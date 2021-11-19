@@ -5,18 +5,18 @@ The following document details the database API calls and types.
 - [Database API](#database-api)
   - [Table of Contents](#table-of-contents)
   - [Types](#types)
-    - [UserIntolerance](#userintolerance)
-    - [UserAuthentication](#userauthentication)
-    - [UserStatus](#userstatus)
-    - [DatabaseException](#databaseexception)
-    - [NoUserException](#nouserexception)
-    - [NoRecipeException](#norecipeexception)
-    - [NoIngredientException](#noingredientexception)
-    - [DuplicateUserException](#duplicateuserexception)
-    - [DuplicateRecipeException](#duplicaterecipeexception)
-    - [DuplicateIngredientException](#duplicateingredientexception)
-    - [InvalidArgumentException](#invalidargumentexception)
-    - [EncryptionException](#encryptionexception)
+    - [`UserIntolerance`](#userintolerance)
+    - [`UserAuthentication`](#userauthentication)
+    - [`UserStatus`](#userstatus)
+    - [`DatabaseException`](#databaseexception)
+    - [`NoUserException`](#nouserexception)
+    - [`NoRecipeException`](#norecipeexception)
+    - [`NoIngredientException`](#noingredientexception)
+    - [`DuplicateUserException`](#duplicateuserexception)
+    - [`DuplicateRecipeException`](#duplicaterecipeexception)
+    - [`DuplicateIngredientException`](#duplicateingredientexception)
+    - [`InvalidArgumentException`](#invalidargumentexception)
+    - [`EncryptionException`](#encryptionexception)
   - [Tables](#tables)
     - [Users](#users)
     - [Recipes](#recipes)
@@ -100,7 +100,7 @@ The following document details the database API calls and types.
       - [Set Family Name](#set-family-name)
 
 ## Types
-### UserIntolerance
+### `UserIntolerance`
 This type specifies the available intolerance types a user can have.
 
 |     ID      | Integral Value | Details                                |
@@ -118,7 +118,7 @@ This type specifies the available intolerance types a user can have.
 | `TREE_NUT`  |       10       | Any intolerance to tree nut products.  |
 |   `WHEAT`   |       11       | Any intolerance to wheat products.     |
 
-### UserAuthentication
+### `UserAuthentication`
 This type specifies all of the possible methods a user can use to authorize themselves.
 
 |    ID     | Integral Value | Details                                                                              |
@@ -126,7 +126,7 @@ This type specifies all of the possible methods a user can use to authorize them
 | `DEFAULT` |       0        | Default authentication. Users with this method authorize directly through PieceMeal. |
 | `GOOGLE`  |       1        | Google authentication. Users with this method authorize externally through Google.   |
 
-### UserStatus
+### `UserStatus`
 This type specifies all of the possible statuses a user can have.
 
 |      ID       | Integral Value | Details                                                                                                                                                                                                                             |
@@ -135,31 +135,31 @@ This type specifies all of the possible statuses a user can have.
 |  `VERIFIED`   |       1        | A verified user. Users with this status can log in as normal and perform any functions that a normal user should be able to perform.                                                                                                |
 | `DEACTIVATED` |       2        | A deactivated user. Users with this status cannot log in unless a system administrator changes their status manually. This status is here for when a user needs to be prevented from logging in, but not deleted from the database. |
 
-### DatabaseException
+### `DatabaseException`
 Raised when there is a general problem during a database access.
 
-### NoUserException
+### `NoUserException`
 Raised when the specified ID or username does not correspond to any user in the database.
 
-### NoRecipeException
+### `NoRecipeException`
 Raised when the specified ID does not correspond to any recipe in the database.
 
-### NoIngredientException
+### `NoIngredientException`
 Raised when the specified ID does not correspond to any ingredient in the database.
 
-### DuplicateUserException
+### `DuplicateUserException`
 Raised when the specified ID, username, or email already corresponds to a user in the database.
 
-### DuplicateRecipeException
+### `DuplicateRecipeException`
 Raised when the specified ID already corresponds to a recipe in the database.
 
-### DuplicateIngredientException
+### `DuplicateIngredientException`
 Raised when the specified ID already corresponds to an ingredient in the database.
 
-### InvalidArgumentException
+### `InvalidArgumentException`
 Raised when an argument to a database-related function is invalid.
 
-### EncryptionException
+### `EncryptionException`
 Raised when there is a problem ensuring the integrity of an encrypted piece of data in a database call.
 
 ## Tables
