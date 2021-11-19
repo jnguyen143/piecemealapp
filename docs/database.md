@@ -180,7 +180,7 @@ The following table details the columns in the `users` table:
 |     `status`     |     `int`      | The user's status. This value must be one of the values specified by `UserStatus`.                                                                                                                                                                                |
 
 The following code snippet details the exact function used to create the `users` table:
-```postgresql
+```sql
 CREATE TABLE users (
     id VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -210,7 +210,7 @@ The following table details the columns in the `recipes` table:
 | `full_summary` |     `text`     | The full summary for the recipe.                                                                                |
 
 The following code snippet details the exact function used to create the `recipes` table:
-```postgresql
+```sql
 CREATE TABLE recipes (
     id INT UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -234,7 +234,7 @@ The following table details the columns in the `ingredients` table:
 |   `image`   |     `text`     | The URL for the ingredient's image.                                                                                    |
 
 The following code snippet details the exact function used to create the `ingredients` table:
-```postgresql
+```sql
 CREATE TABLE ingredients (
     id INT UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -254,7 +254,7 @@ The following table details the columns in the `saved_recipes` table:
 | `recipe_id` |     `int`      | The ID of the associated recipe.                                   |
 
 The following code snippet details the exact function used to create the `saved_recipes` table:
-```postgresql
+```sql
 CREATE TABLE saved_recipes (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     user_id VARCHAR(255) NOT NULL,
@@ -276,7 +276,7 @@ The following table details the columns in the `saved_ingredients` table:
 | `ingredient_id` |     `int`      | The ID of the associated ingredient.                                   |
 
 The following code snippet details the exact function used to create the `saved_ingredients` table:
-```postgresql
+```sql
 CREATE TABLE saved_ingredients (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     user_id VARCHAR(255) NOT NULL,
@@ -298,7 +298,7 @@ The following table details the columns in the `intolerances` table:
 | `intolerance` |     `int`      | The associated intolerance. This value must be one of the values specified by the `UserIntolerance` type. |
 
 The following code snippet details the exact function used to create the `intolerance` table:
-```postgresql
+```sql
 CREATE TABLE intolerances (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     user_id VARCHAR(255) NOT NULL,
@@ -319,7 +319,7 @@ The following table details the columns in the `passwords` table:
 |  `phrase`   |     `text`     | The encrypted password phrase.                                       |
 
 The following code snippet details the exact function used to create the `passwords` table:
-```postgresql
+```sql
 CREATE TABLE passwords (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     user_id VARCHAR(255) NOT NULL,
@@ -340,7 +340,7 @@ The following table details the columns in the `friends` table:
 |   `user2`   | `varchar(255)` | The ID of the second user in the relation entry.                     |
 
 The following code snippet details the exact function used to create the `friends` table:
-```postgresql
+```sql
 CREATE TABLE friends (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     user1 VARCHAR(255) NOT NULL,
@@ -362,7 +362,7 @@ The following table details the columns in the `friend_requests` table:
 |  `target`   | `varchar(255)` | The ID of the target user (i.e. the user who is receiving the request) in the request entry. |
 
 The following code snippet details the exact function used to create the `friend_requests` table:
-```postgresql
+```sql
 CREATE TABLE friends (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     src VARCHAR(255) NOT NULL,
