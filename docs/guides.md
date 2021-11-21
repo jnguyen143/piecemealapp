@@ -15,6 +15,7 @@ This is not a user guide; this is a developer guide. This means this document wi
     - [Implementing Routes](#implementing-routes)
       - [Extracting Input Data](#extracting-input-data)
       - [Handling Database Calls](#handling-database-calls)
+      - [Retrieving User Data](#retrieving-user-data)
 
 ## Endpoints
 This guide describes what endpoints (i.e. routes) are, the kinds of endpoints PieceMeal has, and how to make an endpoint.
@@ -214,3 +215,18 @@ This example assumes that a database instance has been defined using the global 
 Note how multiple exceptions are caught. The `get_recipe_info` function has the possibility of raising multiple kinds of errors, so it's important to make sure that you handle all of them.
 
 Also note the order in which the exceptions are handled. **This is important**: all exceptions raised by database calls are subclasses of the `DatabaseException` class. This means that technically for a call like the one above, you don't need to handle `NoRecipeException` explicitly because it would be covered under the handle for `DatabaseException`, however you may want to handle the errors separately because you may want to return more nuanced error information. If you want to handle the errors separately, you need to make sure you place the handler for `DatabaseException` **last**. If it is placed first, then all database errors will go to it rather than the more specific ones. As a general rule for exception handling, it's good practice to handle the more specific ones first and the more general ones last.
+
+#### Retrieving User Data
+If you want to get the current user inside of a route function, `/routes/routing_util.py` provides a function to get it. Calling `get_current_user()` will return the user object for the currently logged in user, or it will raise a `NoCurrentUserException` if no user is logged in. A typical case for using this function is in database calls, such as in the following example:
+
+```python
+try:
+    user = get_current_user()
+    recipes = DATABASE.get_recipes(user.id)
+except NoCurrentUserException:
+    return error_response(1, "Not logged in")
+except DatabaseException:
+    return error_response(0, "Database error")
+```
+
+Notice that we need to handle the case where the user is not logged in (`NoCurrentUserException`) and the case for when there is an error retrieving the user's recipes (`DatabaseException`). Also note that `NoCurrentUserException` is not a subclass of `DatabaseException`, so it must be handled separately.
