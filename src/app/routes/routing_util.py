@@ -26,9 +26,9 @@ class NoCurrentUserException(Exception):
         super().__init__("No user is currently logged in")
 
 
-def get_post_json(request) -> dict:
+def get_json_data(request) -> dict:
     """
-    Returns a JSON object for the provided request.
+    Returns a JSON object representing the data in the provided request.
 
     If the request does not have JSON data, this function raises an exception.
     """

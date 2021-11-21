@@ -13,7 +13,7 @@ from ... import util
 from ..routing_util import (
     NoCurrentUserException,
     get_current_user,
-    get_post_json,
+    get_json_data,
     success_response,
     error_response,
     InvalidEndpointArgsException,
@@ -94,7 +94,7 @@ def get_friends():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         pass
 
@@ -151,7 +151,7 @@ def send_friend_request():
     ]
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         target = util.get_or_raise(data, "target", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
@@ -207,7 +207,7 @@ def handle_friend_request():
     ]
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         src = util.get_or_raise(data, "src", InvalidEndpointArgsException())
         action = util.get_or_raise(data, "action", InvalidEndpointArgsException())
 
@@ -273,7 +273,7 @@ def get_sent_requests():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         pass
 
@@ -337,7 +337,7 @@ def get_received_requests():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         pass
 

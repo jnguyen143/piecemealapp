@@ -14,7 +14,7 @@ from ...database.database2 import (
 )
 from ... import util
 from ..routing_util import (
-    get_post_json,
+    get_json_data,
     success_response,
     error_response,
     get_current_user,
@@ -109,7 +109,7 @@ def get_user_recipes():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         pass  # If no data was passed, that's okay; all of the fields are optional.
 
@@ -167,7 +167,7 @@ def add_user_recipe():
     ]
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         recipe = util.get_or_raise(data, "recipe", InvalidEndpointArgsException())
 
         validate_recipe_object(recipe)
@@ -215,7 +215,7 @@ def delete_user_recipe():
     ]
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         recipe_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
@@ -268,7 +268,7 @@ def get_user_top_recipes():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         pass
 
@@ -329,7 +329,7 @@ def get_friend_top_recipes():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         pass
 
@@ -424,7 +424,7 @@ def get_recommended_recipes():
     limit = 10
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         sources = util.get_or_default(
             data,
             "sources",

@@ -12,7 +12,7 @@ from ...database.database2 import (
 )
 from ... import util
 from ..routing_util import (
-    get_post_json,
+    get_json_data,
     success_response,
     error_response,
     InvalidEndpointArgsException,
@@ -88,7 +88,7 @@ def get_recipe_info():
 
     recipe_id = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         recipe_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
     except InvalidEndpointArgsException:
         return error_response(1, response_error_messages[1])
@@ -147,7 +147,7 @@ def search_recipes():
     filters = {}
     sort_by = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         query = util.get_or_raise(data, "query", InvalidEndpointArgsException())
         filters["intolerances"] = parse_intolerances(data)
         filters["cuisines"] = parse_cuisines(data)
@@ -279,7 +279,7 @@ def get_similar_recipes():
     recipe_id = None
     limit = 0
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         recipe_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
         limit = util.get_or_default(data, "limit", 10)
     except InvalidEndpointArgsException:
@@ -337,7 +337,7 @@ def get_random_recipes():
     source = "cache"
     limit = 10
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         source = util.get_or_default(data, "source", "cache")
         limit = util.get_or_default(data, "limit", 10)
     except InvalidEndpointArgsException:

@@ -10,7 +10,7 @@ from ...database.database2 import (
 )
 from ... import util
 from ..routing_util import (
-    get_post_json,
+    get_json_data,
     success_response,
     error_response,
     InvalidEndpointArgsException,
@@ -91,7 +91,7 @@ def search_users():
     ]
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         query = util.get_or_raise(data, "query", InvalidEndpointArgsException())
         search_by = util.get_or_raise(data, "search_by", InvalidEndpointArgsException())
         offset = util.get_or_default(data, "offset", 0)
@@ -151,7 +151,7 @@ def get_user():
     ]
 
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
         query = util.get_or_raise(data, "query", InvalidEndpointArgsException())
         get_by = util.get_or_raise(data, "by", InvalidEndpointArgsException())
 

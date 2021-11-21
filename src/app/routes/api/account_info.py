@@ -17,7 +17,7 @@ from ...database.database2 import (
 )
 from ... import util, keystore
 from ..routing_util import (
-    get_post_json,
+    get_json_data,
     success_response,
     error_response,
     get_current_user,
@@ -246,7 +246,7 @@ def update_account():
 
     data = None
     try:
-        data = get_post_json(request)
+        data = get_json_data(request)
     except InvalidEndpointArgsException:
         # If no data was passed, that's okay; all of the fields are optional.
         return success_response()
