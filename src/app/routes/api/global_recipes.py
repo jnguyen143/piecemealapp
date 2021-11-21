@@ -6,6 +6,7 @@ from flask import Blueprint, request, Flask
 from ...database.database2 import (
     Database,
     DatabaseException,
+    InvalidArgumentException,
     NoRecipeException,
     UserIntolerance,
 )
@@ -297,5 +298,77 @@ def get_similar_recipes():
         spoonacular.SpoonacularApiException,
         UndefinedApiKeyException,
         DatabaseException,
+    ):
+        return error_response(0, response_error_messages[0])
+
+
+@blueprint.route("/api/recipe-info/get-random")
+def get_random_recipes():
+    """
+    Returns a random list of recipes.
+
+    Args:
+        source (str): Where to get the recipes.
+            This value is optional (by default it is cache) and must be one of the following:
+            cache: Only look up recipes stored in PieceMeal's own database.
+            external: Only look up recipes from external sources (i.e. Spoonacular).
+                These results will then be cached.
+            mixed: Return a mixture (approximately half and half) of cached and external recipes.
+                Any external recipes will be cached once they have been retrieved.
+        limit (int): The maximum number of results to return.
+            This argument is optional and by default is 10.
+
+    Returns:
+        On success, a JSON object containing the following fields:
+            success (bool): Whether the request was successfully completed.
+            recipes: A list of Recipe objects.
+
+        On failure, the possible error codes are:
+            0 - A general exception occurred.
+            1 - The input arguments were missing or otherwise corrupted.
+    """
+
+    response_error_messages = [
+        "Unknown error",
+        "Corrupt input arguments",
+    ]
+
+    data = None
+    source = "cache"
+    limit = 10
+    try:
+        data = get_post_json(request)
+        source = util.get_or_default(data, "source", "cache")
+        limit = util.get_or_default(data, "limit", 10)
+    except InvalidEndpointArgsException:
+        pass  # If no data was passed, that's okay; all of the fields are optional.
+
+    try:
+        recipes = []
+        if source == "cache":
+            recipes = DATABASE.get_random_recipe_infos(limit)
+        elif source == "external":
+            recipes = spoonacular.get_random_recipes(limit)
+        elif source == "mixed":
+            # We have to do it this way because the values may have been truncated
+            limit_external = limit / 2
+            limit_cache = limit - limit_external
+
+            external_recipes = spoonacular.get_random_recipes(limit_external)
+            cached_recipes = DATABASE.get_random_recipe_infos(limit_cache)
+
+            for recipe in external_recipes:
+                recipes.append(recipe)
+            for recipe in cached_recipes:
+                recipes.append(recipe)
+        else:
+            return error_response(1, response_error_messages[1])
+        return success_response({"recipes": recipes})
+    except InvalidArgumentException:
+        return error_response(1, response_error_messages[1])
+    except (
+        DatabaseException,
+        spoonacular.SpoonacularApiException,
+        UndefinedApiKeyException,
     ):
         return error_response(0, response_error_messages[0])

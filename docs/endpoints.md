@@ -19,6 +19,7 @@ This file details the list of available endpoints for PieceMeal, including user-
       - [Get Recipe Info](#get-recipe-info)
       - [Search for Recipes](#search-for-recipes)
       - [Get Similar Recipes](#get-similar-recipes)
+      - [Get Random Recipes](#get-random-recipes)
     - [Global Ingredient Info](#global-ingredient-info)
       - [Get Ingredient Info](#get-ingredient-info)
       - [Search for Ingredients](#search-for-ingredients)
@@ -181,6 +182,26 @@ On failure, the possible error codes are:
 - 0 - A general exception occurred.
 - 1 - The input arguments were missing or otherwise corrupted.
 - 2 - The specified recipe does not exist.
+
+#### Get Random Recipes
+`GET /api/recipe-info/get-random` - Returns a random list of recipes.
+
+Args
+- `source (str)`: Where to get the recipes. This value is optional (by default it is `cache`) and must be one of the following:
+  - `cache`: Only look up recipes stored in PieceMeal's own database.
+  - `external`: Only look up recipes from external sources (i.e. Spoonacular). These results will then be cached.
+  - `mixed`: Return a mixture (approximately half and half) of cached and external recipes. Any external recipes will be cached once they have been retrieved.
+- `limit (int)`: The maximum number of results to return. This argument is optional and by default is 10.
+
+Returns
+
+On success, a JSON object containing the following fields:
+- `success (bool)`: Whether the request was successfully completed.
+- `recipes`: A list of [`Recipe`](#recipe) objects.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - The input arguments were missing or otherwise corrupted.
 
 ### Global Ingredient Info
 #### Get Ingredient Info

@@ -1,3 +1,6 @@
+# pylint: disable=too-many-lines
+# All of the Spoonacular calls need to go in here
+
 """
 ==================== SPOONACULAR API ====================
 This file defines the functions necessary to communicate with the Spoonacular API.
@@ -403,10 +406,13 @@ def search_recipes(
     total_results = data["totalResults"]
     recipes = []
 
-    for recipe in data["results"]:
-        recipes.append(
-            {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
-        )
+    try:
+        for recipe in data["results"]:
+            recipes.append(
+                {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
+            )
+    except KeyError as exc:
+        raise SpoonacularApiException("Malformed response") from exc
 
     return (recipes, total_results)
 
@@ -972,3 +978,39 @@ def get_ingredient(ingredient_id: int) -> Ingredient:
         return None
 
     return Ingredient(data)
+
+
+def get_random_recipes(limit: int = 10):
+    """
+    Returns a random list of recipes.
+    """
+
+    params = {"apiKey": get_api_key()}
+
+    if limit > 0:
+        params["number"] = limit
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + "recipes/random",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as exc:
+        raise SpoonacularApiException("Failed to make recipe request") from exc
+
+    if data is None:
+        raise SpoonacularApiException("Malformed response")
+
+    try:
+        result = []
+
+        for recipe in data["recipes"]:
+            result.append(
+                {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
+            )
+
+        return result
+    except KeyError as exc:
+        raise SpoonacularApiException("Malformed response") from exc

@@ -48,6 +48,7 @@ The following document details the database API calls and types.
       - [Add Multiple Recipe Infos](#add-multiple-recipe-infos)
       - [Get Multiple Recipe Infos](#get-multiple-recipe-infos)
       - [Delete Multiple Recipe Infos](#delete-multiple-recipe-infos)
+      - [Get Random Recipe Infos](#get-random-recipe-infos)
     - [Global Ingredient Info](#global-ingredient-info)
       - [Add Ingredient Info](#add-ingredient-info)
       - [Get Ingredient Info](#get-ingredient-info)
@@ -639,6 +640,20 @@ Args
 Raises
 - `DatabaseException`: If the function failed to query the database.
 - `NoRecipeException`: If any of the passed IDs do not correspond to a recipe in the database.
+
+#### Get Random Recipe Infos
+`get_random_recipe_infos(limit: int = 10) -> list[Recipe]` - Returns a random list of recipes.
+
+Args
+- `limit (int)`: The maximum number of results to return. This value is optional and is 10 by default.
+
+Returns
+
+A random list of `Recipe` objects, or an empty list if there are no recipe objects in the database.
+
+Raises
+- `DatabaseException`: If the function failed to query the database.
+- `InvalidArgumentException`: If the specified limit was less than 1.
 
 ### Global Ingredient Info
 #### Add Ingredient Info

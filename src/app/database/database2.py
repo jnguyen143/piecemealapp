@@ -13,7 +13,7 @@ import re
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import orm
-from sqlalchemy.sql.expression import and_, or_
+from sqlalchemy.sql.expression import and_, or_, func
 from argon2 import PasswordHasher
 from argon2.exceptions import (
     InvalidHash,
@@ -1145,23 +1145,24 @@ class Database:
             summary = get_or_default(info, "summary", "")
             full_summary = get_or_default(info, "full_summary", "")
 
-            unique = not (dict_list_contains(
-                processed_infos, "id", recipe_id
-            ) or self.recipe_info_exists(recipe_id))
+            unique = not (
+                dict_list_contains(processed_infos, "id", recipe_id)
+                or self.recipe_info_exists(recipe_id)
+            )
 
             if not unique and not ignore_duplicates:
                 raise DuplicateRecipeException(recipe_id)
-            
+
             if unique:
                 processed_infos.append(
-                {
-                    "id": recipe_id,
-                    "name": name,
-                    "image": image,
-                    "summary": summary,
-                    "full_summary": full_summary,
-                }
-            )
+                    {
+                        "id": recipe_id,
+                        "name": name,
+                        "image": image,
+                        "summary": summary,
+                        "full_summary": full_summary,
+                    }
+                )
 
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
@@ -1253,6 +1254,42 @@ class Database:
             raise exc
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
+
+    def get_random_recipe_infos(self, limit: int = 10):
+        """
+        Returns a random list of recipes.
+
+        Args:
+            limit (int): The maximum number of results to return.
+                This value is optional and is 10 by default.
+
+        Returns:
+            A random list of Recipe objects, or an empty list if there are
+            no recipe objects in the database.
+
+        Raises:
+            DatabaseException: If the function failed to query the database.
+            InvalidArgumentException: If the specified limit was less than 1.
+        """
+        if limit < 1:
+            raise InvalidArgumentException("expected limit > 0")
+        
+        # pylint: disable=import-outside-toplevel
+        # This must be imported in this function
+        from .models import Recipe
+
+        try:
+            recipes = None
+            with self.session_generator(expire_on_commit=False) as session:
+                recipes = session.query(Recipe).order_by(func.random()).limit(limit).all()
+            
+            if recipes is None:
+                return []
+
+            return [recipe.to_json() for recipe in recipes]
+        except Exception as exc:
+            raise DatabaseException("Failed to query database") from exc
+            
 
     # ===== GLOBAL INGREDIENT INFO ===== #
 
@@ -1425,21 +1462,22 @@ class Database:
                 info, "image", "/static/assets/default_ingredient_image.png"
             )
 
-            unique = not (dict_list_contains(
-                processed_infos, "id", ingredient_id
-            ) or self.ingredient_info_exists(ingredient_id))
+            unique = not (
+                dict_list_contains(processed_infos, "id", ingredient_id)
+                or self.ingredient_info_exists(ingredient_id)
+            )
 
             if not unique and not ignore_duplicates:
                 raise DuplicateIngredientException(ingredient_id)
-            
+
             if unique:
                 processed_infos.append(
-                {
-                    "id": ingredient_id,
-                    "name": name,
-                    "image": image,
-                }
-            )
+                    {
+                        "id": ingredient_id,
+                        "name": name,
+                        "image": image,
+                    }
+                )
 
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
