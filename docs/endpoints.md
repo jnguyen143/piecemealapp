@@ -346,11 +346,11 @@ This endpoint employs a set of algorithms to determine which recipes to retrieve
 - What the user's friends like: Chooses recipes from the most recently liked recipes of a subset of the user's friends.
 - Based on what the user's friends like: Chooses similar recipes to the most recently liked recipes from a subset of the user's friends.
 - Based on liked ingredients: Chooses recipes that include the user's most recently liked ingredients.
-- Try something new: Chooses recipes at random (the same as calling [`/api/recipe-info/get-random`](#get-random-recipes)).
+- Random: Chooses recipes at random (the same as calling [`/api/recipe-info/get-random`](#get-random-recipes)).
 
 Args
-- `sources (list[str])`: The list of sources from which the algorithm should generate recipes. This argument is optional and can only consist of one or more of the following strings:
-  - `recently_liked`: Chooses similar recipes to the user's most recently like recipes.
+- `sources (list[str])`: The list of sources from which the algorithm should generate recipes. This argument is optional and can contain one or more of the following strings:
+  - `recently_liked`: Chooses similar recipes to the user's most recently liked recipes.
   - `friends`: Chooses recipes from the most recently liked recipes of a subset of the user's friends.
   - `friends_similar`: Chooses similar recipes to the most recently liked recipes from a subset of the user's friends.
   - `ingredients`: Chooses recipes that include the user's most recently liked ingredients.
