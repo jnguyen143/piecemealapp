@@ -599,12 +599,13 @@ Raises
 - `DatabaseException`: If there was a problem querying the database.
 
 #### Add Multiple Recipe Infos
-`add_recipe_infos(infos: list[dict])` - Adds multiple recipes to the database whose data is specified in the list of recipe information.
+`add_recipe_infos(infos: list[dict], ignore_duplicates: bool = False)` - Adds multiple recipes to the database whose data is specified in the list of recipe information.
 
 This is a bulk operation, which means it is equivalent to calling `add_recipe_info()` repeatedly, but this function is faster because it batches all of the operations into a single database call.
 
 Args
 - `infos (list[dict])`: The list of recipe information dictionaries to use to create the recipes. The format of the dictionaries is specified under [`add_recipe_info()`](#add-recipe-info).
+- `ignore_duplicates (bool)`: Whether this function should skip over duplicate recipes instead of raising an error. This value is optional and is false by default.
 
 Raises
 - `DatabaseException`: If the function failed to add the recipes.
@@ -695,12 +696,13 @@ Raises
 - `DatabaseException`: If there was a problem querying the database.
 
 #### Add Multiple Ingredient Infos
-`add_ingredient_infos(infos: list[dict])` - Adds multiple ingredients to the database whose data is specified in the list of ingredient information.
+`add_ingredient_infos(infos: list[dict], ignore_duplicates: bool = False)` - Adds multiple ingredients to the database whose data is specified in the list of ingredient information.
 
 This is a bulk operation, which means it is equivalent to calling `add_ingredient_info()` repeatedly, but this function is faster because it batches all of the operations into a single database call.
 
 Args
 - `infos (list[dict])`: The list of ingredient information dictionaries to use to create the ingredients. The format of the dictionaries is specified under [`add_ingredient_info()`](#add-ingredient-info).
+- `ignore_duplicates (bool)`: Whether this function should skip over duplicate ingredients instead of raising an error. This value is optional and is false by default.
 
 Raises
 - `DatabaseException`: If the function failed to add the ingredients.

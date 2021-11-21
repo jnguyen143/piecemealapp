@@ -17,8 +17,11 @@ This file details the list of available endpoints for PieceMeal, including user-
   - [API Endpoints](#api-endpoints)
     - [Global Recipe Info](#global-recipe-info)
       - [Get Recipe Info](#get-recipe-info)
+      - [Search for Recipes](#search-for-recipes)
+      - [Get Similar Recipes](#get-similar-recipes)
     - [Global Ingredient Info](#global-ingredient-info)
       - [Get Ingredient Info](#get-ingredient-info)
+      - [Search for Ingredients](#search-for-ingredients)
     - [User-Saved Recipes](#user-saved-recipes)
       - [Get User Recipes](#get-user-recipes)
       - [Add User Recipe](#add-user-recipe)
@@ -136,6 +139,49 @@ On failure, the possible error codes are:
 - 1 - The input arguments were missing or otherwise corrupted.
 - 2 - No recipe exists with the provided ID.
 
+#### Search for Recipes
+`GET /api/recipe-info/search` - Returns a list of recipes which match the specified search query.
+
+Args
+- `query (str)`: The search query to use.
+- `intolerances (list[str])`: The list of intolerances to use as a filter. This argument is optional.
+- `cuisines (list[str])`: The list of cuisines to use as a filter. This argument is optional.
+- `diets (list[str])`: The list of diets to use as a filter. This argument is optional.
+- `ingredients (list[int])`: The list of [`Ingredient`](#ingredient) IDs to use as a filter. This argument is optional.
+- `max_prep_time (int)`: The maximum prep time for the recipes (in minutes). This argument is optional.
+- `sort_by (str)`: The criteria to use to sort the results. This argument is optional.
+- `offset (int)`: The offset into the results to start at. This argument is optional and by default is 0.
+- `limit (int)`: The maximum number of results to return. This argument is optional and by default is 10.
+
+Returns
+
+On success, a JSON object containing the following fields:
+- `success (bool)`: Whether the request was successfully completed.
+- `recipes`: A list of [`Recipe`](#recipe) objects.
+- `total_results`: An integer describing the maximum number of available results.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - The input arguments were missing or otherwise corrupted.
+
+#### Get Similar Recipes
+`GET /api/recipe-info/get-similar` - Returns a list of recipes which are similar to the specified recipe.
+
+Args
+- `id (int)`: The recipe ID to use as a reference for the recipes to retrieve.
+- `limit (int)`: The maximum number of results to return. This argument is optional and by default is 10.
+
+Returns
+
+On success, a JSON object containing the following fields:
+- `success (bool)`: Whether the request was successfully completed.
+- `recipes`: A list of [`Recipe`](#recipe) objects.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - The input arguments were missing or otherwise corrupted.
+- 2 - The specified recipe does not exist.
+
 ### Global Ingredient Info
 #### Get Ingredient Info
 `GET /api/ingredient-info/get` - Returns a JSON object containing the ingredient information for the ingredient with the specified ID.
@@ -153,6 +199,27 @@ On failure, the possible error codes are:
 - 0 - A general exception occurred.
 - 1 - The input arguments were missing or otherwise corrupted.
 - 2 - No ingredient exists with the provided ID.
+
+#### Search for Ingredients
+`GET /api/ingredient-info/search` - Returns a list of ingredients which match the specified search query.
+
+Args
+- `query (str)`: The search query to use.
+- `intolerances (list[str])`: The list of intolerances to use as a filter. This argument is optional.
+- `sort_by (str)`: The criteria to use to sort the results. This argument is optional.
+- `offset (int)`: The offset into the results to start at. This argument is optional and by default is 0.
+- `limit (int)`: The maximum number of results to return. This argument is optional and by default is 10.
+
+Returns
+
+On success, a JSON object containing the following fields:
+- `success (bool)`: Whether the request was successfully completed.
+- `ingredients`: A list of [`Ingredient`](#ingredient) objects.
+- `total_results`: An integer describing the maximum number of available results.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - The input arguments were missing or otherwise corrupted.
 
 ### User-Saved Recipes
 #### Get User Recipes

@@ -51,6 +51,12 @@ class UserIntolerance(Enum):
         self._value_ = value
         self.display_name = display_name
 
+    def get_display_name(self) -> str:
+        """
+        Returns the display name for this intolerance instance.
+        """
+        return self.display_name
+
     def to_json(self):
         """
         Returns a JSON representation of this intolerance instance.
@@ -1102,7 +1108,7 @@ class Database:
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def add_recipe_infos(self, infos: list[dict]):
+    def add_recipe_infos(self, infos: list[dict], ignore_duplicates: bool = False):
         """
         Adds multiple recipes to the database whose data is specified
         in the list of recipe information.
@@ -1115,6 +1121,8 @@ class Database:
             infos (list[dict]): The list of recipe information dictionaries
                 to use to create the recipes. The format of the dictionaries
                 is specified under `add_recipe_info()`.
+            ignore_duplicates (bool): Whether this function should skip over duplicate recipes
+                instead of raising an error. This value is optional and is false by default.
 
         Raises:
             DatabaseException: If the function failed to add the recipes.
@@ -1137,12 +1145,15 @@ class Database:
             summary = get_or_default(info, "summary", "")
             full_summary = get_or_default(info, "full_summary", "")
 
-            if self.recipe_info_exists(recipe_id) or dict_list_contains(
+            unique = not (dict_list_contains(
                 processed_infos, "id", recipe_id
-            ):
-                raise DuplicateRecipeException(recipe_id)
+            ) or self.recipe_info_exists(recipe_id))
 
-            processed_infos.append(
+            if not unique and not ignore_duplicates:
+                raise DuplicateRecipeException(recipe_id)
+            
+            if unique:
+                processed_infos.append(
                 {
                     "id": recipe_id,
                     "name": name,
@@ -1379,7 +1390,7 @@ class Database:
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def add_ingredient_infos(self, infos: list[dict]):
+    def add_ingredient_infos(self, infos: list[dict], ignore_duplicates: bool = False):
         """
         Adds multiple ingredients to the database whose data is specified
         in the list of ingredient information.
@@ -1392,6 +1403,8 @@ class Database:
             infos (list[dict]): The list of ingredient information dictionaries
                 to use to create the ingredients. The format of the dictionaries
                 is specified under `add_ingredient_info()`.
+            ignore_duplicates (bool): Whether this function should skip over duplicate ingredients
+                instead of raising an error. This value is optional and is false by default.
 
         Raises:
             DatabaseException: If the function failed to add the ingredients.
@@ -1412,12 +1425,15 @@ class Database:
                 info, "image", "/static/assets/default_ingredient_image.png"
             )
 
-            if self.ingredient_info_exists(ingredient_id) or dict_list_contains(
+            unique = not (dict_list_contains(
                 processed_infos, "id", ingredient_id
-            ):
-                raise DuplicateIngredientException(ingredient_id)
+            ) or self.ingredient_info_exists(ingredient_id))
 
-            processed_infos.append(
+            if not unique and not ignore_duplicates:
+                raise DuplicateIngredientException(ingredient_id)
+            
+            if unique:
+                processed_infos.append(
                 {
                     "id": ingredient_id,
                     "name": name,
