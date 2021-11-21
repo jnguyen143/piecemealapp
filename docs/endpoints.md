@@ -29,6 +29,7 @@ This file details the list of available endpoints for PieceMeal, including user-
       - [Delete User Recipe](#delete-user-recipe)
       - [Get Top User Recipes](#get-top-user-recipes)
       - [Get Top Friend Recipes](#get-top-friend-recipes)
+      - [Get Recommended Recipes](#get-recommended-recipes)
     - [User-Saved Ingredients](#user-saved-ingredients)
       - [Get User Ingredients](#get-user-ingredients)
       - [Add User Ingredient](#add-user-ingredient)
@@ -331,6 +332,37 @@ On success, a JSON object containing the following fields:
 - `friends`: A list of objects containing the following fields:
   - `friend`: A [`User`](#user) object describing the associated friend.
   - `recipes`: A list of [`Recipe`](#recipe) objects representing the friend's top recipes.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - There is no user currently logged in.
+- 2 - The input arguments were missing or otherwise corrupted.
+
+#### Get Recommended Recipes
+`GET /api/user-recipes/get-recommended` - Returns a list of recipe objects based on calculated recommendations for the current user.
+
+This endpoint employs a set of algorithms to determine which recipes to retrieve and from where. These include:
+- Based on recently liked: Chooses similar recipes to the user's most recently like recipes.
+- What the user's friends like: Chooses recipes from the most recently liked recipes of a subset of the user's friends.
+- Based on what the user's friends like: Chooses similar recipes to the most recently liked recipes from a subset of the user's friends.
+- Based on liked ingredients: Chooses recipes that include the user's most recently liked ingredients.
+- Try something new: Chooses recipes at random (the same as calling [`/api/recipe-info/get-random`](#get-random-recipes)).
+
+Args
+- `sources (list[str])`: The list of sources from which the algorithm should generate recipes. This argument is optional and can only consist of one or more of the following strings:
+  - `recently_liked`: Chooses similar recipes to the user's most recently like recipes.
+  - `friends`: Chooses recipes from the most recently liked recipes of a subset of the user's friends.
+  - `friends_similar`: Chooses similar recipes to the most recently liked recipes from a subset of the user's friends.
+  - `ingredients`: Chooses recipes that include the user's most recently liked ingredients.
+  - `random`: Chooses recipes at random (the same as calling [`/api/recipe-info/get-random`](#get-random-recipes)).
+- `distributions (list[int])`: The list of distributions for the amount of recipes that should be generated per source. This argument is optional and if present, the number of elements in this list must equal the number of elements in `sources`. If the limit is defined as -1, each distribution is an exact limit per source. Otherwise, each distribution represents a percentage of the overall limit.
+- `limit (int)`: The maximum number of recipes to return. This value is optional and is 10 by default. If the `distributions` list is also defined, then each distribution in the list represents a percentage of this value.
+
+Returns
+
+On success, a JSON object containing the following fields:
+- `success (bool)`: Whether the request was successfully completed.
+- `recipes`: A list of [`Recipe`](#recipe) objects. This list will be empty if the algorithm was unable to retrieve any recipes for the specified sources and distributions.
 
 On failure, the possible error codes are:
 - 0 - A general exception occurred.

@@ -1079,7 +1079,7 @@ A list of user/recipe list pairs generated based off of the liked recipes of the
 
 Each entry in the list is a dictionary containing the following entries:
 - `user (User)`: The `User` object for the associated friend.
-- `recipes (list[Recipe])`: The list of `Recipe` object retrieved from the associated friend's list of liked recipes. This list will be empty if the associated friend has no saved recipes.
+- `recipes (list[Recipe])`: The list of `Recipe` objects retrieved from the associated friend's list of liked recipes. This list will be empty if the associated friend has no saved recipes.
 
 Raises
 - `DatabaseException`: If there was a problem querying the database.
@@ -1219,7 +1219,7 @@ A list of user/ingredient list pairs generated based off of the liked ingredient
 
 Each entry in the list is a dictionary containing the following entries:
 - `user (User)`: The `User` object for the associated friend.
-- `ingredients (list[Ingredient])`: The list of `Ingredient` object retrieved from the associated friend's list of liked ingredients. This list will be empty if the associated friend has no saved ingredients.
+- `ingredients (list[Ingredient])`: The list of `Ingredient` objects retrieved from the associated friend's list of liked ingredients. This list will be empty if the associated friend has no saved ingredients.
 
 Raises
 - `DatabaseException`: If there was a problem querying the database.

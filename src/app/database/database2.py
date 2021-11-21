@@ -1273,7 +1273,7 @@ class Database:
         """
         if limit < 1:
             raise InvalidArgumentException("expected limit > 0")
-        
+
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
         from .models import Recipe
@@ -1281,15 +1281,16 @@ class Database:
         try:
             recipes = None
             with self.session_generator(expire_on_commit=False) as session:
-                recipes = session.query(Recipe).order_by(func.random()).limit(limit).all()
-            
+                recipes = (
+                    session.query(Recipe).order_by(func.random()).limit(limit).all()
+                )
+
             if recipes is None:
                 return []
 
             return [recipe.to_json() for recipe in recipes]
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
-            
 
     # ===== GLOBAL INGREDIENT INFO ===== #
 
@@ -2495,7 +2496,7 @@ class Database:
 
             Each entry in the list is a dictionary containing the following entries:
                 user (User): The User object for the associated friend.
-                recipes (list[Recipe]): The list of Recipe object retrieved from
+                recipes (list[Recipe]): The list of Recipe objects retrieved from
                     the associated friend's list of liked recipes.
                     This list will be empty if the associated friend has no saved recipes.
 
@@ -2917,7 +2918,7 @@ class Database:
 
             Each entry in the list is a dictionary containing the following entries:
                 user (User): The User object for the associated friend.
-                ingredients (list[Ingredient]): The list of Ingredient object retrieved from
+                ingredients (list[Ingredient]): The list of Ingredient objects retrieved from
                     the associated friend's list of liked ingredients.
                     This list will be empty if the associated friend has no saved ingredients.
 

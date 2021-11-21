@@ -11,6 +11,7 @@ you must ensure that the `SPOONACULAR_API_KEY` environment variable has been def
 from enum import Enum
 from os import getenv
 import re
+
 from .common import (
     api_get_json,
     RequestException,
@@ -1007,6 +1008,44 @@ def get_random_recipes(limit: int = 10):
         result = []
 
         for recipe in data["recipes"]:
+            result.append(
+                {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
+            )
+
+        return result
+    except KeyError as exc:
+        raise SpoonacularApiException("Malformed response") from exc
+
+
+def get_recipes_by_ingredients(ingredients: list[str], limit: int):
+    """
+    Returns a list of random recipes which include (up to) all of the specified ingredients.
+    """
+    params = {
+        "apiKey": get_api_key(),
+        "ingredients": list_to_comma_separated_string(ingredients),
+    }
+
+    if limit > 0:
+        params["number"] = limit
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + "recipes/findByIngredients",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException) as exc:
+        raise SpoonacularApiException("Failed to make recipe request") from exc
+
+    if data is None:
+        raise SpoonacularApiException("Malformed response")
+
+    try:
+        result = []
+
+        for recipe in data:
             result.append(
                 {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
             )
