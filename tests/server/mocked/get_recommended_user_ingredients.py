@@ -146,6 +146,8 @@ class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
     def runTest(self):
 
         init_app_module_dir()
+        # pylint: disable=import-outside-toplevel
+        # This import must occur after the above function runs.
         import app
 
         # If the below comment is not present, pylance will generate
