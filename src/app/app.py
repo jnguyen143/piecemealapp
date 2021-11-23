@@ -7,7 +7,7 @@ import sys
 import flask
 import dotenv
 from . import util
-from .database import database2
+from .database import database
 from .routes import routes
 
 dotenv.load_dotenv(dotenv.find_dotenv())
@@ -21,7 +21,7 @@ if sys.version_info < MIN_PYTHON_VERSION:
     )
 
 APP_OBJ = None
-DATABASE: database2.Database = None
+DATABASE: database.Database = None
 
 
 def init_app():
@@ -55,8 +55,8 @@ def init_app():
 
     # Initialize the database
     try:
-        DATABASE = database2.Database(APP_OBJ)
-    except database2.DatabaseException as exc:
+        DATABASE = database.Database(APP_OBJ)
+    except database.DatabaseException as exc:
         raise Exception("Failed to initialize database") from exc
 
     # Initialize the routes

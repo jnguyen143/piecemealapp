@@ -5,7 +5,7 @@ from flask import Flask, Blueprint, render_template, request
 from flask_login import LoginManager
 from flask_login.utils import login_required, logout_user
 from werkzeug.utils import redirect
-from ...database.database2 import (
+from ...database.database import (
     Database,
 )
 from ... import util

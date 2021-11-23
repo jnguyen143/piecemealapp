@@ -3,7 +3,7 @@ This file contains endpoints related to global recipe data.
 """
 from flask import Blueprint, request, Flask
 
-from ...database.database2 import (
+from ...database.database import (
     Database,
     DatabaseException,
     InvalidArgumentException,

@@ -2,7 +2,7 @@
 This file contains user-facing endpoints relating to signup pages.
 """
 from flask import Flask, Blueprint, render_template, request
-from ...database.database2 import (
+from ...database.database import (
     Database,
 )
 from ... import util

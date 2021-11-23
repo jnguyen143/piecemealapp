@@ -4,7 +4,7 @@ This file details the list of available endpoints for PieceMeal, including user-
 ## Table of Contents
 - [PieceMeal Endpoints](#piecemeal-endpoints)
   - [Table of Contents](#table-of-contents)
-  - [Direct Endpoints](#direct-endpoints)
+  - [HTML Endpoints](#html-endpoints)
     - [Homepage](#homepage)
     - [Login](#login)
     - [Signup](#signup)
@@ -58,8 +58,8 @@ This file details the list of available endpoints for PieceMeal, including user-
       - [Initiate Login Flow](#initiate-login-flow)
       - [Initiate Signup Flow](#initiate-signup-flow)
 
-## Direct Endpoints
-Direct endpoints are routes designed to be visited directly by the user.
+## HTML Endpoints
+HTML endpoints are routes designed to be visited directly by the user.
 These kinds of routes return raw HTML data to be rendered by the user's browser.
 
 ### Homepage

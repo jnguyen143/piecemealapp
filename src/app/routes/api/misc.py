@@ -12,7 +12,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 
-from ...database.database2 import (
+from ...database.database import (
     Database,
     DatabaseException,
     DuplicateUserException,

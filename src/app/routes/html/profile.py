@@ -1,20 +1,17 @@
 """
-This file contains user-facing endpoints relating to account pages.
+This file contains user-facing endpoints relating to profile pages.
 """
 from flask import Flask, Blueprint, render_template
 from flask_login import login_required
-from ...database.database2 import (
+from ...database.database import (
     Database,
-    DatabaseException,
 )
 from ... import util
-from ..routing_util import (
-    get_current_user,
-    NoCurrentUserException,
-)
+from ..routing_util import get_current_user
+from ...api import spoonacular
 
 blueprint = Blueprint(
-    "bp_direct_account",
+    "bp_direct_profile",
     __name__,
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),
@@ -53,21 +50,27 @@ def init(app: Flask, database: Database):
     app.register_blueprint(get_blueprint())
 
 
-@blueprint.route("/account")
+@blueprint.route("/profile")
 @login_required
-def account():
+def profile():
     """
-    Returns the account page.
+    Returns the profile page.
     """
-    try:
-        current_user = get_current_user()
-        userdata = current_user.to_json()
-        userdata["friends"] = [
-            x.to_json(shallow=True)
-            for x in DATABASE.get_relationships_for_user(current_user.id)
-        ]
-        return render_template("account.html", userdata=userdata)
-    except DatabaseException:
-        return None  # TODO: Handle exceptions
-    except NoCurrentUserException:
-        return None  # TODO: Handle exceptions
+    current_user = get_current_user()
+    (recipes, _) = DATABASE.get_recipes(current_user.id)
+    (ingredients, _) = DATABASE.get_ingredients(current_user.id)
+
+    if len(recipes) == 0:
+        try:
+            recipes = spoonacular.get_recommended_recipes()
+        except spoonacular.SpoonacularApiException:
+            pass
+
+    return render_template(
+        "profile.html",
+        recipes=[recipe.to_json() for recipe in recipes],
+        has_recipes=len(recipes) > 0,
+        ingredients=[ingredient.to_json() for ingredient in ingredients],
+        has_ingredient=len(ingredients) > 0,
+        userdata=current_user.to_json(shallow=True),
+    )

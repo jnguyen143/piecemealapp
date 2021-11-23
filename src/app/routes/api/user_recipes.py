@@ -7,7 +7,7 @@ from flask_login import login_required
 from app.api import spoonacular
 
 from app.api.spoonacular import SpoonacularApiException
-from ...database.database2 import (
+from ...database.database import (
     Database,
     DatabaseException,
     InvalidArgumentException,

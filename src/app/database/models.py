@@ -11,7 +11,7 @@ import builtins
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
-from .database2 import DatabaseException
+from .database import DatabaseException
 
 # This member is present
 # pylint: disable=no-member

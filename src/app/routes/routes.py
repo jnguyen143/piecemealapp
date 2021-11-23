@@ -4,9 +4,9 @@ routes into one file so the application need only
 call init() from this module.
 """
 from flask import Flask
-from ..database.database2 import Database
+from ..database.database import Database
 from .api import api_routes
-from .direct import direct_routes
+from .html import html_routes
 
 
 def init(app: Flask, database: Database):
@@ -14,4 +14,4 @@ def init(app: Flask, database: Database):
     Initializes all route modules.
     """
     api_routes.init(app, database)
-    direct_routes.init(app, database)
+    html_routes.init(app, database)

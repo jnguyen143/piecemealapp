@@ -5,7 +5,7 @@ call init() from this module.
 """
 
 from flask import Flask
-from ...database.database2 import Database
+from ...database.database import Database
 from . import (
     global_recipes,
     global_ingredients,

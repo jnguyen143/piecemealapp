@@ -3,7 +3,7 @@ This file contains endpoints related to user intolerance data.
 """
 from flask import Blueprint, request, Flask
 from flask_login import login_required
-from ...database.database2 import (
+from ...database.database import (
     Database,
     DatabaseException,
     InvalidArgumentException,
