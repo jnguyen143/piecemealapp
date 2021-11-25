@@ -14,7 +14,7 @@ from ..routing_util import (
 )
 
 blueprint = Blueprint(
-    "bp_direct_account",
+    "bp_html_account",
     __name__,
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),
@@ -64,7 +64,7 @@ def account():
         userdata = current_user.to_json()
         userdata["friends"] = [
             x.to_json(shallow=True)
-            for x in DATABASE.get_relationships_for_user(current_user.id)
+            for x in DATABASE.get_relationships_for_user(current_user.id)[0]
         ]
         return render_template("account.html", userdata=userdata)
     except DatabaseException:

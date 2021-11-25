@@ -72,6 +72,7 @@ class User(DATABASE.Model, UserMixin):
             result["authentication"] = self.authentication
             result["creation_date"] = self.creation_date
             result["status"] = self.status
+            result["display_creation_date"] = self.creation_date.strftime("%d %B, %Y")
 
         return result
 

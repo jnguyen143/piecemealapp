@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>@{{userdata["username"]}} - PieceMeal</title>
+</head>
+
+<body>
+    <div id="navbar">
+        <div id="nb-logo-div">
+            <img id="nb-logo-image" class="logo" src="../static/assets/logo.svg" />
+        </div>
+        {% if current_user.is_authenticated %}
+        <button id="nb-account" type="button">
+            <img id="nb-account-image" src="{{current_userdata['profile_image']}}" />
+            <div id="nb-account-username">
+                {{current_userdata["username"]}}
+            </div>
+        </button>
+        {% else %}
+        <div id="nb-signup">
+            <button id="nb-signup-button" type="button" onclick="window.location.href = '/signup';">Sign Up</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="content">
+        <div id="profile">
+            <img id="profile-image" src="{{userdata['profile_image']}}" />
+            <div id="profile-info">
+                <div id="profile-name">
+                    {{userdata["given_name"]}} {{userdata["family_name"]}} (@{{userdata["username"]}})
+                </div>
+                <div id="profile-member-since">
+                    Member since: {{userdata["display_creation_date"]}}
+                </div>
+            </div>
+        </div>
+
+        <div id="liked-items">
+            <div id="liked-items-tabs">
+                <button id="tab-recently-liked" type="button">
+                    Recently Liked
+                </button>
+                <button id="tab-liked-recipes" type="button">
+                    Liked Recipes
+                </button>
+                <button id="tab-liked-ingredients" type="button">
+                    Liked Ingredients
+                </button>
+            </div>
+            <div id="liked-items-content">
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #profile {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: row;
+        }
+
+        #profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #liked-items {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #liked-items-tabs {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #navbar {
+            flex: 0 1 auto;
+        }
+
+        #nb-logo-div {
+            float: left;
+        }
+
+        #nb-account {
+            float: right;
+            display: flex;
+            flex-direction: row;
+            border: none;
+        }
+
+        #nb-logo-image {
+            width: 300px;
+            height: 300px;
+        }
+
+        #profile-image {
+            width: 300px;
+            height: 300px;
+        }
+
+        #nb-account-image {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</body>
+
+</html>

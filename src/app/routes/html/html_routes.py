@@ -6,7 +6,7 @@ call init() from this module.
 
 from flask import Flask
 from ...database.database import Database
-from . import account, login, signup, index, profile
+from . import account, login, signup, index, profile, users, error
 
 
 def init(app: Flask, database: Database):
@@ -18,3 +18,5 @@ def init(app: Flask, database: Database):
     signup.init(app, database)
     index.init(app, database)
     profile.init(app, database)
+    users.init(app, database)
+    error.init(app)

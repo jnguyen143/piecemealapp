@@ -11,7 +11,7 @@ from ..routing_util import get_current_user
 from ...api import spoonacular
 
 blueprint = Blueprint(
-    "bp_direct_profile",
+    "bp_html_profile",
     __name__,
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),
