@@ -25,7 +25,7 @@ class UserStatus(Enum):
 
     @classmethod
     def has(cls, value):
-        return value in cls._value2member_map_
+        return value in cls
 
 
 class UserAuthentication(Enum):
@@ -44,7 +44,7 @@ class UserAuthentication(Enum):
 
     @classmethod
     def has(cls, value):
-        return value in cls._value2member_map_
+        return value in cls
 
 
 class DatabaseException(Exception):
@@ -53,6 +53,7 @@ class DatabaseException(Exception):
     """
 
     def __init__(self, message=""):
+        super().__init__()
         self.message = message
 
 
@@ -166,14 +167,16 @@ class Database:
         Finalizes the database by closing all currently open sessions.
         This function must be called after all database-related tasks are complete and before the application shuts down.
         """
+        # pylint: disable=no-member
+        # Scoped session has close_all
         self.int__db_obj.session.close_all()
 
-    def get_user(self, id: str):
+    def get_user(self, user_id: str):
         """
         Returns the `User` object associated with the provided user ID.
 
         Args:
-            id (str): The ID of the target user.
+            user_id (str): The ID of the target user.
 
         Returns:
             The user object associated with the provided ID, or `None` if the specified user does not exist.
@@ -181,27 +184,28 @@ class Database:
         Raises:
             DatabaseException: If there was a problem querying the user.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import User
 
         session = self.int__Session()
         user = None
         try:
-            user = session.query(User).filter_by(id=id).first()
-        except Exception as E:
-            print(E)
+            user = session.query(User).filter_by(id=user_id).first()
+        except Exception as e:
+            print(e)
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
         return user
 
-    # def user_exists(self, id: str) -> bool:
-    def user_exists(self, id: str) -> bool:
+    def user_exists(self, user_id: str) -> bool:
         """
         Returns true if the user with the specified ID exists.
 
         Args:
-            id (str): The ID of the target user.
+            user_id (str): The ID of the target user.
 
         Returns:
             True if the user with the specified ID exists.
@@ -209,14 +213,14 @@ class Database:
         Raises:
             DatabaseException: If there was a problem querying the user.
         """
-        return self.get_user(id) != None
+        return self.get_user(user_id) != None
 
-    def get_recipe(self, id: int):
+    def get_recipe(self, recipe_id: int):
         """
         Returns the `Recipe` object associated with the provided ID.
 
         Args:
-            id (int): The ID of the target recipe.
+            recipe_id (int): The ID of the target recipe.
 
         Returns:
             The recipe object associated with the provided ID, or `None` if the specified recipe does not exist.
@@ -224,25 +228,27 @@ class Database:
         Raises:
             DatabaseException: If there was a problem querying the recipe.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import Recipe
 
         session = self.int__Session()
         recipe = None
         try:
-            recipe = session.query(Recipe).filter_by(id=id).first()
-        except:
+            recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
         return recipe
 
-    def get_ingredient(self, id: int):
+    def get_ingredient(self, ingredient_id: int):
         """
         Returns the `Ingredient` object associated with the provided ID.
 
         Args:
-            id (int): The ID of the target ingredient.
+            ingredient_id (int): The ID of the target ingredient.
 
         Returns:
             The ingredient object associated with the provided ID, or `None` if the specified ingredient does not exist.
@@ -250,15 +256,17 @@ class Database:
         Raises:
             DatabaseException: If there was a problem querying the ingredient.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import Ingredient
 
         session = self.int__Session()
         ingredient = None
         try:
-            ingredient = session.query(Ingredient).filter_by(id=id).first()
-        except:
+            ingredient = session.query(Ingredient).filter_by(id=ingredient_id).first()
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
         return ingredient
@@ -278,6 +286,8 @@ class Database:
             NoUserException: If the specified user does not exist.
             DatabaseException: If there was a problem querying the recipes.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import SavedRecipe
 
         if not self.user_exists(user_id):
@@ -288,9 +298,9 @@ class Database:
         try:
             saved_recipes = session.query(SavedRecipe).filter_by(user_id=user_id).all()
             recipes = [x.recipe for x in saved_recipes]
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
 
@@ -311,6 +321,8 @@ class Database:
             NoUserException: If the specified user does not exist.
             DatabaseException: If there was a problem querying the ingredients.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import SavedIngredient
 
         if not self.user_exists(user_id):
@@ -323,9 +335,9 @@ class Database:
                 session.query(SavedIngredient).filter_by(user_id=user_id).all()
             )
             ingredients = [x.ingredient for x in saved_ingredients]
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
 
@@ -346,6 +358,8 @@ class Database:
             NoUserException: If the specified user does not exist.
             DatabaseException: If there was a problem querying the intolerances.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import Intolerance
 
         if not self.user_exists(user_id):
@@ -355,9 +369,9 @@ class Database:
         intolerances = []
         try:
             intolerances = session.query(Intolerance).filter_by(user_id=user_id).all()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
 
@@ -376,6 +390,8 @@ class Database:
         Raises:
             DatabaseException: If there was a problem querying the database.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import User
 
         session = self.int__Session()
@@ -384,9 +400,9 @@ class Database:
             has_username = (
                 session.query(User).filter_by(username=username).first() is not None
             )
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to perform query")
+            raise DatabaseException("Failed to perform query") from e
         finally:
             session.close()
 
@@ -415,8 +431,6 @@ class Database:
 
         prefix += "-"
 
-        from random import randint
-
         # Randomly generate a 5-digit suffix.
         suffix_digits = 5
         suffix_number = randint(0, 10 ** suffix_digits - 1)
@@ -424,6 +438,8 @@ class Database:
         uname = prefix + str(format_string % suffix_number).strip()
         tries = 1
         while self.username_exists(uname):
+            if tries > 100:
+                raise DatabaseException("could not generate username")
             # The algorithm will try up to suffix_digits number of times to generate a username.
             # If it still fails to generate a unique username after this point, the number of digits in the suffix will increase by 1 and the process will begin again.
             suffix_number = randint(0, 10 ** suffix_digits - 1)
@@ -452,7 +468,7 @@ class Database:
         - Underscores, hyphens, periods, and dollar signs
 
         As a regular expression, a character is valid if it matches the following pattern:
-        `[a-zA-Z0-9_-\.\$]`
+        `[a-zA-Z0-9_-\\.\\$]`
         """
         for char in username:
             if not self.is_valid_username_char(char):
@@ -493,6 +509,8 @@ class Database:
             NoUserException: If the specified user does not exist or does not have an account type which stores a password.
             DatabaseException: If there was a problem querying the database.
         """
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import Password
 
         session = self.int__Session()
@@ -501,9 +519,9 @@ class Database:
             if pwd == None:
                 raise NoUserException(user_id)
             return pwd
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query password")
+            raise DatabaseException("Failed to query password") from e
         finally:
             session.close()
 
@@ -555,6 +573,8 @@ class Database:
         if not encrypted:
             password = self.generate_encrypted_password(password)
 
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import Password
 
         session = self.int__Session()
@@ -564,9 +584,9 @@ class Database:
                 raise NoUserException(user_id)
             pwd.phrase = password
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query database")
+            raise DatabaseException("Failed to query database") from e
         finally:
             session.close()
 
@@ -588,6 +608,8 @@ class Database:
         if not self.user_exists(id):
             raise NoUserException(id)
 
+        # pylint: disable=import-error
+        # This import is valid
         from database.models import User
 
         session = self.int__Session()
@@ -606,9 +628,9 @@ class Database:
         except KeyError as e:
             session.rollback()
             raise e
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to set username")
+            raise DatabaseException("Failed to set username") from e
         finally:
             session.close()
 
@@ -677,9 +699,9 @@ class Database:
             session.add(user)
             session.add(pwd)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add user")
+            raise DatabaseException("Failed to add user") from e
         finally:
             session.close()
 
@@ -749,9 +771,9 @@ class Database:
         try:
             session.add(user)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add user")
+            raise DatabaseException("Failed to add user") from e
         finally:
             session.close()
 
@@ -779,9 +801,9 @@ class Database:
             if user == None:
                 raise NoUserException(username)
             return user
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query database")
+            raise DatabaseException("Failed to query database") from e
         finally:
             session.close()
 
@@ -818,9 +840,9 @@ class Database:
         try:
             session.add(recipe)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add recipe")
+            raise DatabaseException("Failed to add recipe") from e
         finally:
             session.close()
 
@@ -853,9 +875,9 @@ class Database:
         try:
             session.add(ingredient)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add ingredient")
+            raise DatabaseException("Failed to add ingredient") from e
         finally:
             session.close()
 
@@ -893,9 +915,9 @@ class Database:
         try:
             session.add(recipe)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add recipe")
+            raise DatabaseException("Failed to add recipe") from e
         finally:
             session.close()
 
@@ -927,9 +949,9 @@ class Database:
         try:
             session.add(ingredient)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add ingredient")
+            raise DatabaseException("Failed to add ingredient") from e
         finally:
             session.close()
 
@@ -961,9 +983,9 @@ class Database:
         try:
             session.add(Intolerance(user_id=user_id, intolerance=intolerance))
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to add intolerance")
+            raise DatabaseException("Failed to add intolerance") from e
         finally:
             session.close()
 
@@ -988,9 +1010,9 @@ class Database:
         try:
             session.query(User).filter_by(id=id).delete()
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete user")
+            raise DatabaseException("Failed to delete user") from e
         finally:
             session.close()
 
@@ -1016,9 +1038,9 @@ class Database:
         try:
             session.query(Recipe).filter_by(id=id).delete()
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete recipe")
+            raise DatabaseException("Failed to delete recipe") from e
         finally:
             session.close()
 
@@ -1044,9 +1066,9 @@ class Database:
         try:
             session.query(Ingredient).filter_by(id=id).delete()
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete ingredient")
+            raise DatabaseException("Failed to delete ingredient") from e
         finally:
             session.close()
 
@@ -1073,9 +1095,9 @@ class Database:
         try:
             session.query(SavedRecipe).filter_by(user_id=user_id, id=recipe_id).delete()
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete recipe")
+            raise DatabaseException("Failed to delete recipe") from e
         finally:
             session.close()
 
@@ -1110,9 +1132,9 @@ class Database:
                 user_id=user_id, id=ingredient_id
             ).delete()
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete ingredient")
+            raise DatabaseException("Failed to delete ingredient") from e
         finally:
             session.close()
 
@@ -1141,9 +1163,9 @@ class Database:
                 user_id=user_id, intolerance=intolerance
             ).delete()
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete intolerance")
+            raise DatabaseException("Failed to delete intolerance") from e
         finally:
             session.close()
 
@@ -1197,8 +1219,7 @@ class Database:
             session.commit()
         except Exception as e:
             session.rollback()
-            print(f"dberr: {e}")
-            raise DatabaseException("Failed to add relationship")
+            raise DatabaseException("Failed to add relationship") from e
         finally:
             session.close()
 
@@ -1241,9 +1262,9 @@ class Database:
                 .first()
                 is not None
             )
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query relationship")
+            raise DatabaseException("Failed to query relationship") from e
         finally:
             session.close()
 
@@ -1288,9 +1309,9 @@ class Database:
 
             session.delete(relationship)
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to delete relationship")
+            raise DatabaseException("Failed to delete relationship") from e
         finally:
             session.close()
 
@@ -1330,9 +1351,9 @@ class Database:
             )
             for relationship in user2_relationships:
                 users.append(relationship.user1_obj)
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query relationships")
+            raise DatabaseException("Failed to query relationships") from e
         finally:
             session.close()
 
@@ -1488,7 +1509,8 @@ class Database:
             tries = 0
             while ingredients[index].id in result and tries <= MAX_TRIES:
                 # Increase the search range if it's still less than the length of the actual list
-                if current_range < ingredients_len:
+                if current_range < ingredient_count:
+                    # ingredients_len:
                     current_range += 1
                 index = randrange(ingredients_len - current_range, ingredients_len)
                 tries += 1
@@ -1603,9 +1625,9 @@ class Database:
         try:
             session.query(User).filter_by(id=user_id).update({"username": new_username})
             session.commit()
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to set username")
+            raise DatabaseException("Failed to set username") from e
         finally:
             session.close()
 
@@ -1663,9 +1685,9 @@ class Database:
 
             if users != None:
                 result = users
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query users")
+            raise DatabaseException("Failed to query users") from e
         finally:
             session.close()
 
@@ -1704,9 +1726,9 @@ class Database:
 
             if users != None:
                 result = users
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query users")
+            raise DatabaseException("Failed to query users") from e
         finally:
             session.close()
 
@@ -1741,9 +1763,9 @@ class Database:
             request = (
                 session.query(FriendRequest).filter_by(src=src, target=target).first()
             )
-        except:
+        except Exception as e:
             session.rollback()
-            raise DatabaseException("Failed to query friend request")
+            raise DatabaseException("Failed to query friend request") from e
         finally:
             session.close()
         return request

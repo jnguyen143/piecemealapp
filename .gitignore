@@ -3,3 +3,6 @@ __pycache__
 private_key.pem
 public_key.pem
 .DS_Store
+.vscode
+node_modules
+

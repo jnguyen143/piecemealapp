@@ -1,6 +1,5 @@
-# pylint: disable=(E0401)
 # pylint: disable=(C0114)
-# disabled missing module and import error
+# pylint: disable=(E0401)
 import unittest
 from unittest.mock import patch
 from random import seed, randint
@@ -13,13 +12,11 @@ import pathlib
 # comment below
 # being declared as useless
 """
-This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
-
-Given a dummy user with dummy saved recipes, this file tests to make sure that
-`get_recommended_user_recipes()` returns only the most recently liked recipes.
-
-This file tests `get_recommended_user_recipes()` with randomly generated dummy
-user data to ensure that it is robust enough to handle any kind of input data.
+This file tests the functionality of `database.Database.get_recommended_user_ingredients()`.
+Given a dummy user with dummy saved ingredients, this file tests to make sure that
+ `get_recommended_user_ingredients()` returns only the most recently liked ingredients.
+This file tests the `get_recommended_user_ingredients()' function with random dummy
+user data to ensure that it can handle any kind of input data.
 """
 
 # pylint: disable=(C0116)
@@ -43,7 +40,7 @@ def generate_prefixed_string(prefix):
 
 
 # pylint: disable=(C0115)
-class MockedSavedRecipe:
+class MockedSavedingredient:
     # pylint: disable=(W0622)
     # disabled built in error
     def __init__(self, id, name, image):
@@ -53,30 +50,31 @@ class MockedSavedRecipe:
         self.name = name
         self.image = image
 
+    # pylint: disable=(C0116)
     def __repr__(self):
         return f"id={self.id}, name={self.name}, image={self.image}"
 
 
 # pylint: disable=(C0116)
-def generate_saved_recipe():
+def generate_saved_ingredient():
     # pylint: disable=(W0622)
     # disabled built in error
     # pylint: disable=(C0103)
     # disabled snake case error
     id = randint(0, 100000)
-    name = generate_prefixed_string("saved_recipe_")
+    name = generate_prefixed_string("saved_ingredient_")
     image = generate_prefixed_string("image_")
-    return MockedSavedRecipe(id, name, image)
+    return MockedSavedingredient(id, name, image)
 
 
 # pylint: disable=(C0116)
-def get_saved_recipes_mock(seedval):
-    # Return a list of recipe objects, which amounts to a dict of id, name, and image
-    # Return between 0 and 100 recipes
+def get_saved_ingredients_mock(seedval):
+    # Return a list of ingredient objects, which amounts to a dict of id, name, and image
+    # Return between 0 and 100 ingredients
     seed(seedval)
     result = []
     for _ in range(0, randint(0, 100)):
-        result.append(generate_saved_recipe())
+        result.append(generate_saved_ingredient())
     return result
 
 
@@ -94,14 +92,15 @@ def get_limit_mock(seedval):
 
 # pylint: disable=(C0116)
 def get_expected_output(seedval):
-    saved_recipes = get_saved_recipes_mock(seedval)
+    saved_ingredients = get_saved_ingredients_mock(seedval)
     limit = get_limit_mock(seedval)
-    return saved_recipes[-limit:]
+    return saved_ingredients[-limit:]
 
 
 # pylint: disable=(C0103)
 # disabled snake case error
-def recipes_match(a, b):
+def ingredients_match(a, b):
+
     try:
         return a.id == b.id and a.name == b.name and a.image == b.image
     # pylint: disable=(W0702)
@@ -110,22 +109,24 @@ def recipes_match(a, b):
         return False
 
 
-def contains_recipe(src, target):
-    for recipe in src:
-        if recipes_match(recipe, target):
+def contains_ingredient(src, target):
+    for ingredient in src:
+        if ingredients_match(ingredient, target):
             return True
     return False
 
 
-def validate_input(recipes, expected_output):
-    for recipe in recipes:
-        if not contains_recipe(expected_output, recipe):
+# pylint: disable=(C0115)
+
+
+def validate_input(ingredients, expected_output):
+    for ingredient in ingredients:
+        if not contains_ingredient(expected_output, ingredient):
             return False
     return True
 
 
-class GetRecommendedUserRecipesTestCase(unittest.TestCase):
-    # pylint: disable=(C0116)
+class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
     def setUp(self):
         self.test_success_params = []
         for _ in range(0, 10):
@@ -134,7 +135,7 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 {
                     INPUT: {
                         "seedval": seedval,
-                        "saved_recipes": get_saved_recipes_mock(seedval),
+                        "saved_ingredients": get_saved_ingredients_mock(seedval),
                         "user_id": get_user_id_mock(seedval),
                         "limit": get_limit_mock(seedval),
                     },
@@ -147,19 +148,19 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
         init_app_module_dir()
         import app
 
-        # If the below comment is not present, pylance will generate an
-        # import warning. We know the import is valid because the above
-        #  function call injects the required module directory.
+        # If the below comment is not present, pylance will generate
+        # an import warning. We know the import is valid because the
+        #  above function call injects the required module directory.
         # pyright: reportMissingImports=false
 
         app.init_app()
         for test in self.test_success_params:
             with patch(
-                "database.database.Database.get_saved_recipes"
-            ) as db_get_saved_recipes:
-                db_get_saved_recipes.return_value = test[INPUT]["saved_recipes"]
+                "database.database.Database.get_saved_ingredients"
+            ) as db_get_saved_ingredients:
+                db_get_saved_ingredients.return_value = test[INPUT]["saved_ingredients"]
                 validation = validate_input(
-                    app.db.get_recommended_recipes_from_user(
+                    app.db.get_recommended_ingredients_from_user(
                         test[INPUT]["user_id"], test[INPUT]["limit"]
                     ),
                     test[EXPECTED_OUTPUT],

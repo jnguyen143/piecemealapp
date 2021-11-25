@@ -1,7 +1,13 @@
 from flask import Blueprint, render_template, request
 from flask_login import current_user
 from werkzeug.datastructures import ImmutableHeadersMixin
+
+# pylint: disable=import-error
+# This import is valid
 import routes.util as util
+
+# pylint: disable=import-error
+# This import is valid
 from api.spoonacular import Cuisine, search_recipes, search_ingredients
 
 
@@ -31,6 +37,7 @@ def searchByingredients():
     if request.method == "POST":
         ingredients = request.form.get("searchIngredients")
         keyword = ingredients
+        # pylint: disable=C0103
         returnedDict = search_ingredients(ingredients)
         if returnedDict == []:
             print("No ingredients produced by API call")
@@ -46,11 +53,13 @@ def searchByingredients():
 
 # Route that searches for recipes based on user input keyword
 @search_blueprint.route("/search_recipes", methods=["POST"])
+# pylint: disable=C0103
 def searchByrecipes():
     if request.method == "POST":
         keyword = request.form.get("searchRecipes")
         cuisine = request.form.get("cuisine")
         query_string = keyword + ", " + cuisine
+        # pylint: disable=C0103
         returnedDict = search_recipes(query_string)
         if returnedDict == []:
             print("No recipes produced by API call")

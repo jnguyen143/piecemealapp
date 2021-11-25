@@ -1,16 +1,28 @@
+# pylint: disable=(C0114)
+# pylint: disable=(E0401)
+# disabled the above errors and error
+# C0116 due to it not having
+# an effect on code functionality
+import unittest
+from random import randrange, seed, randint
+import sys
+import pathlib
+
+
+# pylint: disable=(W0105)
+# disabled error for string
+# comment below
+# being declared as useless
 """
 This file tests the functionality of `database.Database.get_recommended_user_ingredients()`.
 
-This file injects a random number of randomly generated users, ingredients, and saved ingredients, then tests to ensure that `get_recommended_user_ingredients()` returns the expected result given the ID of a user from the list of dummy users.
+This file injects a random number of randomly generated users, ingredients,
+and saved ingredients, then tests to ensure that `get_recommended_user_ingredients()`
+returns the expected result given the ID of a user from the list of dummy users.
 """
 
-import unittest
-from random import randrange, seed, randint
-
-
+# pylint: disable=(C0116)
 def init_app_module_dir():
-    import sys
-    import pathlib
 
     path = str(
         pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
@@ -21,7 +33,7 @@ def init_app_module_dir():
 INPUT = "input"
 EXPECTED_OUTPUT = "expected"
 
-
+# pylint: disable=(C0116)
 def generate_prefixed_string(prefix):
     result = prefix
     for _ in range(1, 10):
@@ -30,6 +42,11 @@ def generate_prefixed_string(prefix):
 
 
 def generate_ingredient():
+    # pylint: disable=(C0103)
+    # disbled snake case error
+    # pylint: disable=(W0622)
+    # disabled redefined built in
+    # error
     id = randint(0, 100000)
     name = generate_prefixed_string("saved_ingredient_")
     image = generate_prefixed_string("image_")
@@ -49,6 +66,13 @@ def generate_ingredients(seedval):
 
 def generate_user():
     email = generate_prefixed_string("email_")
+    # pylint: disable=(C0103)
+    # disabled snake case error
+    # pylint: disable=(W0622)
+    # disabled redefined built in
+    # error, as this does not
+    # affect code
+    # functionality
     id = generate_prefixed_string("id_")
     return {"email": email, "id": id}
 
@@ -126,6 +150,7 @@ def validate_input(actual_output, expected_output):
     return True
 
 
+# pylint: disable=(C0115)
 class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
     def setUp(self):
         self.test_success_params = []
@@ -152,16 +177,31 @@ class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
                 }
             )
 
+    # pylint: disable=(C0103)
+    # disabled snake case error
     def runTest(self):
         print("\033[0;33m===== TEST: GetRecommendedUserIngredients =====\033[0m")
         init_app_module_dir()
-        # If the below comment is not present, pylance will generate an import warning. We know the import is valid because the above function call injects the required module directory.
-        import app  # pyright: reportMissingImports=false
+        import app
 
+        # If the below comment is not present,
+        # pylance will generate an import warning.
+        # We know the import is valid because the
+        # above function call injects the required module directory.
+        # pyright: reportMissingImports=false
+
+        # pylint: disable=(C0200)
+        # disabled consider
+        # using error
         app.init_app()
         total_test_amount = len(self.test_success_params)
         for current_test_index in range(0, len(self.test_success_params)):
             test = self.test_success_params[current_test_index]
+            # pylint: disable=(C0301)
+            # disabled the above error
+            # being line below is
+            # too long, it
+            # has to be in one line as a print statement
             print(
                 f"\033[0;33m----- Executing test {current_test_index + 1} of {total_test_amount} -----\033[0m"
             )
@@ -179,6 +219,9 @@ class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
                     ),
                     test[EXPECTED_OUTPUT],
                 )
+            # pylint: disable=(W0702)
+            # disabled except error
+            # as this except case works
             except:
                 pass
             finally:

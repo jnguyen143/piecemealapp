@@ -1,17 +1,27 @@
-"""
-This file tests the correctness of default recommended recipes being rendered to the homepage.
-
-Given a set of dummy default recommended recipes, this file ensures that the recipes are being rendered to the generated HTML page returned by the '/' endpoint.
-"""
-
+# pylint: disable=(C0114)
+# pylint: disable=(E0401)
 import unittest
 from unittest.mock import patch
 from random import seed, randint
+import sys
+import pathlib
 
 
+# pylint: disable=(W0105)
+# disabled error for string
+# comment below
+# being declared as useless
+"""
+This file tests the correctness of default
+recommended recipes being rendered to the homepage.
+
+Given a set of dummy default recommended recipes,
+this file ensures that the recipes are being
+rendered to the generated HTML page returned by the '/' endpoint.
+"""
+
+# pylint: disable=(C0116)
 def init_app_module_dir():
-    import sys
-    import pathlib
 
     path = str(
         pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
@@ -21,7 +31,7 @@ def init_app_module_dir():
 
 INPUT = "input"
 
-
+# pylint: disable=(C0116)
 def generate_prefixed_string(prefix):
     result = prefix
     for _ in range(1, 10):
@@ -29,6 +39,7 @@ def generate_prefixed_string(prefix):
     return result
 
 
+# pylint: disable=(C0116)
 def validate_page(recipes, page: str):
     for recipe in recipes:
         if page.find(recipe["name"]) == -1:
@@ -41,13 +52,14 @@ def validate_page(recipes, page: str):
 
 
 def generate_recipe():
-    id = generate_prefixed_string("id_")
+
+    recipe_id = generate_prefixed_string("id_")
     name = generate_prefixed_string("name_")
     image = generate_prefixed_string("image_")
     full_summary = generate_prefixed_string("full_summary_")
     summary = generate_prefixed_string("summary_")
     return {
-        "id": id,
+        "id": recipe_id,
         "name": name,
         "image": image,
         "full_summary": full_summary,
@@ -55,6 +67,7 @@ def generate_recipe():
     }
 
 
+# pylint: disable=(C0116)
 def generate_recommended_recipes(seedval):
     seed(seedval)
     result = []
@@ -63,7 +76,9 @@ def generate_recommended_recipes(seedval):
     return result
 
 
+# pylint: disable=(C0115)
 class DefaultRecommendedRecipesTest(unittest.TestCase):
+    # pylint: disable=(C0116)
     def setUp(self):
         self.test_success_params = []
         for _ in range(0, 10):
@@ -77,12 +92,21 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
                 }
             )
 
+    # pylint: disable=(C0103)
+    # disabled  snake case error
     def runTest(self):
+
         init_app_module_dir()
-        # If the below comment is not present, pylance will generate an import warning. We know the import is valid because the above function call injects the required module directory.
-        import app  # pyright: reportMissingImports=false
+
+        # If the below comment is not present,
+        # pylance will generate an import warning.
+        # We know the import is valid because the
+        # above function call injects the required module directory.
+        # pyright: reportMissingImports=false
+
 
         app.init_app()
+        from routes import index
 
         for test in self.test_success_params:
             with patch("routes.index.get_current_user") as index_get_current_user:
@@ -94,8 +118,6 @@ class DefaultRecommendedRecipesTest(unittest.TestCase):
                     get_recommended_recipes_from_spoonacular.return_value = test[INPUT][
                         "recommended_recipes"
                     ]
-
-                    from routes import index
 
                     # Render page
                     page_content = ""

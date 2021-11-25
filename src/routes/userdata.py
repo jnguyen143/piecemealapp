@@ -1,12 +1,20 @@
 """
 ==================== USERDATA ====================
-This file defines all of the endpoints relating to user data, such as saving recipes and ingredients, deleting users, and more.
-All of the endpoints defined in this file are API endpoints (i.e. they should not be navigated to using the browser's address bar).
+This file defines all of the endpoints relating to user data, such as saving recipes and
+ingredients, deleting users, and more. All of the endpoints defined in this file are API
+endpoints (i.e. they should not be navigated to using the browser's address bar).
 """
-
+import os
+import json
+import dotenv
 from flask import Blueprint, request, redirect
 from flask.json import jsonify
+import requests
 from oauthlib.oauth2.rfc6749.clients.web_application import WebApplicationClient
+from flask_login import login_required, current_user, login_user, logout_user
+
+# pylint: disable=import-error
+# This import is valid
 from database.database import (
     DuplicateUserException,
     UserAuthentication,
@@ -14,17 +22,17 @@ from database.database import (
     Database,
     NoUserException,
 )
+import keystore as keystore
 from . import util
-from flask_login import login_required, current_user, login_user, logout_user
-import os
-import requests
-import json
+
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 GOOGLE_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 # Used during the Google login flow
+# pylint: disable=C0103
 login_handler_client = WebApplicationClient(GOOGLE_ID)
 
 userdata_blueprint = Blueprint(
@@ -56,9 +64,11 @@ def recipe_exists(id):
 
 
 def ingredient_exists(id):
+    # pylint: disable=C0103
     return int__db.get_ingredient(id) != None
 
 
+# pylint: disable=C0103
 def init(db: Database):
     """
     Initializes this module using the provided arguments.
@@ -75,7 +85,8 @@ def get_current_user():
     Returns the current user for the application.
 
     Returns:
-        The current user for the application, or `None` if there is no currently logged-in user.
+        The current user for the application, or `None` if there is no currently
+        logged-in user.
     """
     return current_user
 
@@ -85,7 +96,8 @@ def get_current_user():
 def save_recipe():
     """
     Saves a recipe to the current user's list of saved recipes.
-    If the recipe has not been cached in the server's global list of recipes, it is also stored there.
+    If the recipe has not been cached in the server's global list of recipes,
+    it is also stored there.
 
     This function does not validate the recipe data with Spoonacular.
 
@@ -96,11 +108,13 @@ def save_recipe():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one of the
+            following values:
                 0: The recipe was saved successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: There was a problem saving the recipe.
-                3: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                3: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
     RESPONSE_OK = 0
@@ -123,7 +137,7 @@ def save_recipe():
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
     if not recipe_exists(id):
         # Cache the recipe
@@ -132,7 +146,7 @@ def save_recipe():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_recipe(user.id, id, name, image, summary, full_summary)
+        int__db.add_saved_recipe(user.id, id)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -143,7 +157,8 @@ def save_recipe():
 def save_ingredient():
     """
     Saves a ingredient to the current user's list of saved ingredients.
-    If the ingredient has not been cached in the server's global list of ingredients, it is also stored there.
+    If the ingredient has not been cached in the server's global list of
+    ingredients, it is also stored there.
 
     This function does not validate the ingredient data with Spoonacular.
 
@@ -154,11 +169,13 @@ def save_ingredient():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one of the
+            following values:
                 0: The ingredient was saved successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: There was a problem saving the ingredient.
-                3: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                3: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
 
@@ -190,12 +207,7 @@ def save_ingredient():
         except DatabaseException:
             return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     try:
-        int__db.add_saved_ingredient(
-            user.id,
-            id,
-            name,
-            image,
-        )
+        int__db.add_saved_ingredient(user.id, id)
     except DatabaseException:
         return jsonify({"result": RESPONSE_ERR_SAVE_FAIL})
     return jsonify({"result": RESPONSE_OK})
@@ -212,11 +224,13 @@ def delete_recipe():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one of the
+            following values:
                 0: The recipe was deleted successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: There was a problem deleting the recipe.
-                3: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                3: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
 
@@ -236,7 +250,7 @@ def delete_recipe():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -251,18 +265,21 @@ def delete_recipe():
 @login_required
 def delete_ingredient():
     """
-    Deletes the specified ingredient from the current user's list of saved ingredients.
+    Deletes the specified ingredient from the current user's list of saved
+    ingredients.
 
     Parameters:
         id (int): The ID of the ingredient.
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one of the
+            following values:
                 0: The ingredient was deleted successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: There was a problem deleting the ingredient.
-                3: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                3: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
 
@@ -277,12 +294,12 @@ def delete_ingredient():
     except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
-    if id == None:
+    if id is None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -320,10 +337,12 @@ def delete_user():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one
+            of the following values:
                 0: The user was deleted successfully.
                 1: There was a problem deleting the user.
-                2: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                2: There is no currently logged-in user (this error
+                should never occur, but it's listed here just in case).
         }
     """
 
@@ -333,7 +352,7 @@ def delete_user():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -357,12 +376,14 @@ def update_username():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one
+            of the following values:
                 0: The username was updated successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: There was a problem updating the username.
                 3: The specified username was already taken.
-                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                4: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
 
@@ -379,12 +400,12 @@ def update_username():
     except KeyError:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
-    if new_username == None:
+    if new_username is None:
         return jsonify({"result": RESPONSE_ERR_CORRUPT_INPUT})
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_ERR_NO_USER})
 
     try:
@@ -411,20 +432,26 @@ def search_users():
     Searches the database for users which match the specified criteria.
 
     Parameters:
-        criteria (str): The search criteria to use. This value must be one of the following:
+        criteria (str): The search criteria to use. This value must
+        be one of the following:
             `name`: Search for users by their name.
             `username`: Search for users by their username.
         query (str): The query string to use.
-        offset (int): The offset into the search results to start at. This value is optional.
-        limit (int): The maximum number of users to return. This value is optional.
-        exclude_current (bool): Whether the search should exclude the currently logged-in user. This value is optional and is true by default.
+        offset (int): The offset into the search results to start at.
+        This value is optional.
+        limit (int): The maximum number of users to return. This value
+        is optional.
+        exclude_current (bool): Whether the search should exclude the
+        currently logged-in user. This value is optional and is true by default.
 
     Response:
         {
-            users (list): A list of user objects containing only their IDs, usernames, and names.
+            users (list): A list of user objects containing only their
+            IDs, usernames, and names.
         }
 
-    If the search query failed, an empty JSON object will be returned and will not contain a `users` entry.
+    If the search query failed, an empty JSON object will be returned and
+    will not contain a `users` entry.
     """
 
     data = request.get_json()
@@ -439,9 +466,9 @@ def search_users():
         query = data["query"]
 
         if (
-            query == None
-            or criteria == None
-            or (criteria != CRITERIA_NAME and criteria != CRITERIA_USERNAME)
+            query is None
+            or criteria is None
+            or (criteria != CRITERIA_NAME, CRITERIA_USERNAME)
         ):
             return jsonify({})
     except KeyError:
@@ -476,35 +503,25 @@ def search_users():
     return jsonify({"users": user_json})
 
 
-def get_private_key():
-    """
-    Returns the server's stored private key.
-
-    The private key must be stored in a file with the name "private_key.pem" in the application root directory.
-    """
-    import pathlib
-
-    root_dir = util.get_application_root_dir()
-    result = ""
-    with open(pathlib.Path(root_dir).joinpath("private_key.pem").resolve(), "r") as f:
-        result = f.read()
-    return result
-
-
 @userdata_blueprint.route("/api/start-login", methods=["POST"])
 def start_login():
     """
-    Initiates the login flow. The value returned by this function will be a redirect to Google's login handler URL.
+    Initiates the login flow. The value returned by this function will be
+    a redirect to Google's login handler URL.
 
     The input data for this endpoint must be encrypted using the correct public key.
 
     Parameters:
-        authentication (str): The authentication method to use. This value should be one of the values in `database.UserAuthentication`.
-        username (str): The user's username. This value is optional depending on the authentication method.
-        password (str): The user's password. This value is optional depending on the authentication method.
+        authentication (str): The authentication method to use. This value
+        should be one of the values in `database.UserAuthentication`.
+        username (str): The user's username. This value is optional depending
+        on the authentication method.
+        password (str): The user's password. This value is optional depending
+        on the authentication method.
 
     Response:
-        If the authentication method is `database.UserAuthentication.Google`, then this function will return a redirect to Google's login handler URL.
+        If the authentication method is `database.UserAuthentication.Google`,
+        then this function will return a redirect to Google's login handler URL.
 
         Otherwise, the following value will be returned:
         {
@@ -516,6 +533,7 @@ def start_login():
     try:
         message = request.get_data()
     except:
+        print("test1")
         return jsonify({"success": False})
 
     from Crypto.Cipher import PKCS1_OAEP
@@ -525,10 +543,11 @@ def start_login():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
+        print("test2")
         return jsonify({"success": False})
 
     actual_data = json.loads(decrypted_message)
@@ -553,17 +572,21 @@ def start_login():
                 login_user(user)
                 return jsonify({"success": True})
             else:
+                print("test3")
                 return jsonify({"success": False})
         except Exception as E:
             print(E)
+            print("test4")
             return jsonify({"success": False})
     else:
+        print("test5")
         return jsonify({"success": False})
 
 
 def validate_with_google(google_provider, code):
     """
-    Ensures the code received by the /api/validate-login endpoint is valid and actually from Google.
+    Ensures the code received by the /api/validate-login endpoint is valid
+    and actually from Google.
     """
     token_endpoint = google_provider["token_endpoint"]
 
@@ -581,7 +604,7 @@ def validate_with_google(google_provider, code):
     if not response.ok:
         raise Exception("Invalid response")
     response_json = response.json()
-    if response_json == None:
+    if response_json is None:
         raise Exception("Invalid response")
     return response_json
 
@@ -597,7 +620,7 @@ def get_google_user_info(google_provider):
     if not response.ok:
         raise Exception("Invalid response")
     response_json = response.json()
-    if response_json == None:
+    if response_json is None:
         raise Exception("Invalid response")
 
     if not response_json.get("email_verified"):
@@ -622,9 +645,12 @@ def validate_login():
     """
     Validates that the attempted login was successful.
 
-    If there was a problem logging in using the Google account, this function will redirect back to the `/login` endpoint with an error flag set in the request parameters.
+    If there was a problem logging in using the Google account, this function
+    will redirect back to the `/login` endpoint with an error flag set in the
+    request parameters.
 
-    Do not use this endpoint directly; it's only intended for use as a redirect destination from the Google login flow.
+    Do not use this endpoint directly; it's only intended for use as a redirect
+    destination from the Google login flow.
     """
     userinfo = None
     try:
@@ -638,7 +664,7 @@ def validate_login():
 
     user = int__db.get_user(userinfo["id"])
 
-    if user == None:
+    if user is None:
         return redirect("/login?login-auth-status=2")
 
     # With Google-authenticated accounts, Google controls the user's email and name. Therefore they need to be updated to reflect Google's changes
@@ -656,22 +682,31 @@ def validate_login():
 @userdata_blueprint.route("/api/start-signup", methods=["POST"])
 def start_signup():
     """
-    Initiates the signup flow. The value returned by this function will be a JSON object containing information about the result of the call.
+    Initiates the signup flow. The value returned by this function will be
+    a JSON object containing information about the result of the call.
 
     The input data for this endpoint must be encrypted using the correct public key.
 
     Parameters:
-        authentication (str): The authentication method to use. This value should be one of the values in `database.UserAuthentication`.
-        username (str): The user's username. This value is optional depending on the authentication method.
-        email (str): The user's email. This value is optional depending on the authentication method.
-        given_name (str): The user's given name. This value is optional depending on the authentication method.
-        family_name (str): The user's family name. This value is optional depending on the authentication method.
-        password (str): The user's password. This value is optional depending on the authentication method.
+        authentication (str): The authentication method to use. This value should
+        be one of the values in `database.UserAuthentication`.
+        username (str): The user's username. This value is optional depending on
+        the authentication method.
+        email (str): The user's email. This value is optional depending on the
+        authentication method.
+        given_name (str): The user's given name. This value is optional depending
+        on the authentication method.
+        family_name (str): The user's family name. This value is optional depending
+        on the authentication method.
+        password (str): The user's password. This value is optional depending
+        on the authentication method.
 
     Response:
         {
             success (bool): Whether the user was successfully created and logged in.
-            redirect_url (str): The destination URL for a Google-authenticated signup request. This value is only present if the authentication method is `database.UserAuthentication.Google`.
+            redirect_url (str): The destination URL for a Google-authenticated
+            signup request. This value is only present if the authentication method
+            is `database.UserAuthentication.Google`.
         }
     """
     message = ""
@@ -687,7 +722,7 @@ def start_signup():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
@@ -729,7 +764,8 @@ def validate_signup():
     """
     Validates that the attempted signup was successful.
 
-    Do not use this endpoint directly; it's only intended for use as a redirect destination from the Google login flow.
+    Do not use this endpoint directly; it's only intended for use as a redirect
+    destination from the Google login flow.
     """
     userinfo = None
     try:
@@ -759,32 +795,18 @@ def validate_signup():
     return redirect("/")
 
 
-def get_public_key():
-    """
-    Returns the server's stored public key.
-
-    The public key must be stored in a file with the name "public_key.pem" in the application root directory.
-    """
-    import pathlib
-
-    root_dir = util.get_application_root_dir()
-    result = ""
-    with open(pathlib.Path(root_dir).joinpath("public_key.pem").resolve(), "r") as f:
-        result = f.read()
-    return result
-
-
 @userdata_blueprint.route("/api/get-public-key")
 def get_server_public_key():
     """
-    Returns the server's public key for use in encrypting data that should be sent back to the server.
+    Returns the server's public key for use in encrypting data that should be
+    sent back to the server.
 
     Response:
     {
         key (str): The server's public key (as a string).
     }
     """
-    return jsonify({"key": get_public_key()})
+    return jsonify({"key": keystore.get_public_key()})
 
 
 @userdata_blueprint.route("/api/update-password", methods=["POST"])
@@ -792,7 +814,8 @@ def update_password():
     """
     Updates the current user's password.
 
-    The input data for this endpoint must be encrypted using the correct public key.
+    The input data for this endpoint must be encrypted using the correct public
+    key.
 
     Parameters:
         old_password (str): The user's current password.
@@ -806,7 +829,8 @@ def update_password():
                 2: The old password was incorrect.
                 3: The user's account type does not allow for passwords.
                 4: There was a problem updating the username.
-                5: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                5: There is no currently logged-in user (this error should never
+                occur, but it's listed here just in case).
         }
     """
     RESPONSE_OK = 0
@@ -829,7 +853,7 @@ def update_password():
 
     decrypted_message = ""
     try:
-        key = RSA.importKey(get_private_key())
+        key = RSA.importKey(keystore.get_private_key())
         cipher = PKCS1_OAEP.new(key, hashAlgo=SHA256)
         decrypted_message = cipher.decrypt(b64decode(message))
     except:
@@ -847,7 +871,7 @@ def update_password():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     try:
@@ -871,7 +895,8 @@ def delete_friend():
     """
     Deletes the relationship between the current user and the specified user.
 
-    This operation works both ways; the relationship will be deleted for the current user against the specified user and vice versa.
+    This operation works both ways; the relationship will be deleted for the
+    current user against the specified user and vice versa.
 
     Parameters:
         user_id (str): The ID of the related user to be deleted.
@@ -883,7 +908,8 @@ def delete_friend():
                 1: The input arguments were corrupted or otherwise invalid.
                 2: The current user does not have a relationship with the specified user.
                 3: There was a problem deleting the relationship.
-                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                4: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
     RESPONSE_OK = 0
@@ -901,7 +927,7 @@ def delete_friend():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     try:
@@ -924,12 +950,14 @@ def send_friend_request():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one of the
+            following values:
                 0: The request was sent successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: The specified user does not exist.
                 3: There was a problem sending the request.
-                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                4: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
     RESPONSE_OK = 0
@@ -947,7 +975,7 @@ def send_friend_request():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     try:
@@ -965,7 +993,8 @@ def handle_friend_request():
     """
     Handles the friend request for the current user against the specified user.
 
-    If the friend request is accepted, this function will delete the request from the table and add a relationship between the current user and the specified user.
+    If the friend request is accepted, this function will delete the request
+    from the table and add a relationship between the current user and the specified user.
 
     Parameters:
         user_id (str): The ID of the user who sent the request.
@@ -975,12 +1004,14 @@ def handle_friend_request():
 
     Response:
         {
-            result (int): The result of the operation, which is one of the following values:
+            result (int): The result of the operation, which is one of the
+            following values:
                 0: The action was performed successfully.
                 1: The input arguments were corrupted or otherwise invalid.
                 2: The specified user does not exist.
                 3: There was a problem performing the action.
-                4: There is no currently logged-in user (this error should never occur, but it's listed here just in case).
+                4: There is no currently logged-in user (this error should
+                never occur, but it's listed here just in case).
         }
     """
     RESPONSE_OK = 0
@@ -1004,7 +1035,7 @@ def handle_friend_request():
 
     user = get_current_user()
 
-    if user == None:
+    if user is None:
         return jsonify({"result": RESPONSE_NO_USER})
 
     if action == ACTION_ACCEPT:
@@ -1014,8 +1045,8 @@ def handle_friend_request():
         except NoUserException:
             print("err1")
             return jsonify({"result": RESPONSE_NO_SRC_USER})
-        except Exception as e:
-            print(f"err2: {e}")
+        except Exception as exception:
+            print(f"err2: {exception}")
             return jsonify({"result": RESPONSE_REQUEST_ACTION_FAIL})
     elif action == ACTION_DENY:
         try:
