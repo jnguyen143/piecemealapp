@@ -2,7 +2,7 @@ import { encryptData } from './EncryptedRequests.js'; // eslint-disable-line
 import { showToast } from './Toast.js'; // eslint-disable-line
 
 async function startSignup(data) {
-  return fetch('/api/start-signup', {
+  return fetch('/api/signup/init', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/octet-stream',
@@ -14,7 +14,7 @@ async function startSignup(data) {
 document.getElementById('default-signup-form').onsubmit = () => {
   // Encrypt the data, then send it to the server
   encryptData(JSON.stringify({
-    authentication: 'Default',
+    authentication: 0,
     username: document.getElementById('username').value,
     email: document.getElementById('email').value,
     given_name: document.getElementById('given_name').value,
@@ -35,7 +35,7 @@ document.getElementById('default-signup-form').onsubmit = () => {
 
 document.getElementById('google-signup-form').onsubmit = () => {
   encryptData(JSON.stringify({
-    authentication: 'Google',
+    authentication: 1,
   })).then((data) => {
     startSignup(data).then((response) => response.json()).then((response) => {
       if (response.success) { window.location.replace(response.redirect_url); } else {
