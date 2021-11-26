@@ -20,7 +20,7 @@ def error_not_found(_):
         render_template(
             "error.html",
             header="Page Not Found",
-            tagline="You tryin' to order off-menu?",
+            tagline="You can't order off-menu here.",
             message=["Sorry, that page doesn't exist."],
         ),
         404,

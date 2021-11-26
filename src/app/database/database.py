@@ -29,6 +29,58 @@ from ..util import (
 )
 
 
+class ProfileVisibility(Enum):
+    """
+    This type specifies all of the possible values for the
+    `profile_visibility` field in the `users` table.
+    """
+
+    NAME = 0x01
+    CREATION_DATE = 0x02
+    INTOLERANCES = 0x04
+    SAVED_RECIPES = 0x08
+    SAVED_INGREDIENTS = 0x10
+    FRIENDS = 0x20
+
+    def __init__(self, value):
+        self._value_ = value
+
+    @classmethod
+    def has(cls, bitfield: int, value) -> bool:
+        """
+        Returns true if `bitfield` has the specified ProfileVisibility `value`.
+        """
+        return bitfield & value.value
+
+    @classmethod
+    def enable(cls, bitfield: int, value) -> int:
+        """
+        Enables the specified ProfileVisibility `value` in `bitfield`.
+        """
+        return bitfield | value
+
+    @classmethod
+    def disable(cls, bitfield: int, value) -> int:
+        """
+        Disables the specified ProfileVisibility `value` in `bitfield`.
+        """
+        return bitfield & ~value
+
+    @classmethod
+    def enable_all(cls) -> int:
+        """
+        Returns a bitfield which has all ProfileVisibility values enabled.
+        """
+        return 0xFF
+
+    @classmethod
+    def disable_all(cls) -> int:
+        """
+        Returns a bitfield which has all ProfileVisibility values disabled.
+        """
+        return 0
+
+
 class UserIntolerance(Enum):
     """
     This type specifies the available intolerance types a user can have.
@@ -418,6 +470,10 @@ class Database:
                     This must be one of the values specified by the UserStatus type.
                     If it is not present, this function will automatically assign
                     a status of `UNVERIFIED` (due to the email having not yet been verified).
+                profile_visibility (int): The user's profile visibility.
+                    This must be a bitfield containing the values specified by
+                    the ProfileVisibility type. If it is not present, this function will
+                    automatically assign a value of 0 (all fields disabled).
 
         Raises:
             DatabaseException: If the function failed to create the user.
@@ -477,6 +533,8 @@ class Database:
 
         status: UserStatus = get_or_default(userdata, "status", UserStatus.UNVERIFIED)
 
+        profile_visibility = get_or_default(userdata, "profile_visibility", 0)
+
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
         from .models import User
@@ -493,6 +551,7 @@ class Database:
                         profile_image=profile_image,
                         authentication=auth,
                         status=status,
+                        profile_visibility=profile_visibility,
                     )
                 )
         except Exception as exc:
@@ -698,6 +757,7 @@ class Database:
                     "authentication": authentication,
                     "status": get_or_default(user, "status", UserStatus.UNVERIFIED),
                     "password": get_or_default(user, "password", None),
+                    "profile_visibility": get_or_default(user, "profile_visibility", 0),
                 }
             )
 
@@ -718,6 +778,7 @@ class Database:
                             profile_image=user["profile_image"],
                             authentication=user["authentication"],
                             status=user["status"],
+                            profile_visibility=user["profile_visibility"],
                         )
                     )
         except Exception as exc:
@@ -3244,6 +3305,33 @@ class Database:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).update(
                     {"family_name": family_name}
+                )
+        except Exception as exc:
+            raise DatabaseException("Failed to query database") from exc
+
+    def set_profile_visibility(self, user_id: str, profile_visibility: int):
+        """
+        Sets the profile visibility for the specified user.
+
+        Args:
+            user_id (str): The ID of the target user.
+            profile_visibility (int): The profile visibility for the target user.
+
+        Raises:
+            DatabaseException: If there was a problem querying the database.
+            NoUserException: If the specified user does not exist.
+        """
+        if not self.user_exists(user_id):
+            raise NoUserException(user_id)
+
+        # pylint: disable=import-outside-toplevel
+        # This must be imported in this function
+        from .models import User
+
+        try:
+            with self.session_generator() as session:
+                session.query(User).filter_by(id=user_id).update(
+                    {"profile_visibility": profile_visibility}
                 )
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc

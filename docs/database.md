@@ -17,6 +17,7 @@ The following document details the database API calls and types.
     - [`DuplicateIngredientException`](#duplicateingredientexception)
     - [`InvalidArgumentException`](#invalidargumentexception)
     - [`EncryptionException`](#encryptionexception)
+    - [`ProfileVisibility`](#profilevisibility)
   - [Tables](#tables)
     - [Users](#users)
     - [Recipes](#recipes)
@@ -99,6 +100,7 @@ The following document details the database API calls and types.
       - [Set Name](#set-name)
       - [Set Given Name](#set-given-name)
       - [Set Family Name](#set-family-name)
+      - [Set Profile Visibility](#set-profile-visibility)
 
 ## Types
 ### `UserIntolerance`
@@ -163,22 +165,45 @@ Raised when an argument to a database-related function is invalid.
 ### `EncryptionException`
 Raised when there is a problem ensuring the integrity of an encrypted piece of data in a database call.
 
+### `ProfileVisibility`
+This type specifies all of the possible values for the `profile_visibility` field in the `users` table.
+
+The `profile_visibility` field is a _bitfield_ value. This means that the profile visibility may have zero or more of any combination of the values in the table below.
+
+To check if the profile visibility has a particular value, use `ProfileVisibility.has(bitfield, value)`, which checks if the specified profile visibility bitfield has the specified `ProfileVisibility` value.
+
+To enable a value in the profile visibility, use `bitfield = ProfileVisibility.enable(bitfield, value)`, which will set the `value` bit in the `bitfield` variable to 1 (true).
+
+To disable a value in the profile visibility, use `bitfield = ProfileVisibility.disable(bitfield, value)`, which will set the `value` bit in the `bitfield` variable to 0 (false).
+
+To enable all values in the profile visibility, use `bitfield = ProfileVisibility.enable_all()`. To disable all values in the profile visibility, use `bitfield = ProfileVisibility.disable_all()`.
+
+|         ID          | Integral Value | Details                                                                  |
+| :-----------------: | :------------: | ------------------------------------------------------------------------ |
+|       `NAME`        |     `0x01`     | Determines if the user's given and family name will be publicly visible. |
+|   `CREATION_DATE`   |     `0x02`     | Determines if the user's account creation date will be publicly visible. |
+|   `INTOLERANCES`    |     `0x04`     | Determines if the user's saved intolerances will be publicly visible.    |
+|   `SAVED_RECIPES`   |     `0x08`     | Determines if the user's saved recipes will be publicly visible.         |
+| `SAVED_INGREDIENTS` |     `0x10`     | Determines if the user's saved ingredients will be publicly visible.     |
+|      `FRIENDS`      |     `0x20`     | Determines if the user's friend list will be publicly visible.           |
+
 ## Tables
 ### Users
 The `users` table is responsible for storing user data. It keeps track of all users across the site and their related account information, such as their IDs, usernames, emails, and authentication methods.
 
 The following table details the columns in the `users` table:
-|   Column Name    |      Type      | Details                                                                                                                                                                                                                                                           |
-| :--------------: | :------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|       `id`       | `varchar(255)` | The ID of the user. This value is unique across all users, must be less than or equal to 255 characters in length, and can only contain ASCII-compatible characters.                                                                                              |
-|    `username`    | `varchar(50)`  | The username of the user. This value is unique across all users and must be between 3 and 50 characters in length. Usernames can only contain uppercase and lowercase regular Latin letters, Arabic numerals, hyphens, underscores, periods, and US dollar signs. |
-|     `email`      | `varchar(255)` | The user's email. This value is unique across all users and must be less than or equal to 255 characters in length.                                                                                                                                               |
-|   `given_name`   | `varchar(255)` | The user's given name. This value must be less than or equal to 255 characters in length.                                                                                                                                                                         |
-|  `family_name`   | `varchar(255)` | The user's family name. This value must be less than or equal to 255 characters in length.                                                                                                                                                                        |
-| `profile_image`  |     `text`     | The URL for the user's profile image.                                                                                                                                                                                                                             |
-| `creation_date`  |  `timestamp`   | The time at which the user's account was created.                                                                                                                                                                                                                 |
-| `authentication` |     `int`      | The authentication method for the user. This value must be one of the values specified by `UserAuthentication`.                                                                                                                                                   |
-|     `status`     |     `int`      | The user's status. This value must be one of the values specified by `UserStatus`.                                                                                                                                                                                |
+|     Column Name      |      Type      | Details                                                                                                                                                                                                                                                                                       |
+| :------------------: | :------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|         `id`         | `varchar(255)` | The ID of the user. This value is unique across all users, must be less than or equal to 255 characters in length, and can only contain ASCII-compatible characters.                                                                                                                          |
+|      `username`      | `varchar(50)`  | The username of the user. This value is unique across all users and must be between 3 and 50 characters in length. Usernames can only contain uppercase and lowercase regular Latin letters, Arabic numerals, hyphens, underscores, periods, and US dollar signs.                             |
+|       `email`        | `varchar(255)` | The user's email. This value is unique across all users and must be less than or equal to 255 characters in length.                                                                                                                                                                           |
+|     `given_name`     | `varchar(255)` | The user's given name. This value must be less than or equal to 255 characters in length.                                                                                                                                                                                                     |
+|    `family_name`     | `varchar(255)` | The user's family name. This value must be less than or equal to 255 characters in length.                                                                                                                                                                                                    |
+|   `profile_image`    |     `text`     | The URL for the user's profile image.                                                                                                                                                                                                                                                         |
+|   `creation_date`    |  `timestamp`   | The time at which the user's account was created.                                                                                                                                                                                                                                             |
+|   `authentication`   |     `int`      | The authentication method for the user. This value must be one of the values specified by `UserAuthentication`.                                                                                                                                                                               |
+|       `status`       |     `int`      | The user's status. This value must be one of the values specified by `UserStatus`.                                                                                                                                                                                                            |
+| `profile_visibility` |     `int`      | The user's profile visibility. This value determines what other users who are not friends with the user can see on their profile page. This value is a bitfield which must be made up of any combination of the values specified by `ProfileVisibility`. By default, all fields are disabled. |
 
 The following code snippet details the exact function used to create the `users` table:
 ```sql
@@ -192,6 +217,7 @@ CREATE TABLE users (
     creation_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     authentication INT NOT NULL,
     status INT NOT NULL DEFAULT 0,
+    profile_visibility INT NOT NULL DEFAULT 0,
     PRIMARY KEY (id)
 );
 ```
@@ -383,17 +409,18 @@ CREATE TABLE friends (
 Args
 - `userdata (dict)`: A dictionary of user data values consisting of the following entries (required entries are listed first):
 
-|       Key        | Type  | Usage                                                                                                                                                                                                                         | Required |
-| :--------------: | :---: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| `authentication` | `int` | The authentication type for the user. This value must be one of the values specified by the `UserAuthentication` type.                                                                                                        |   Yes    |
-|     `email`      | `str` | The user's email. This value must be unique across all users and is checked for syntax correctness.                                                                                                                           |   Yes    |
-|    `password`    | `str` | The user's (unencrypted) password. This value is only required for accounts whose authentication method is `DEFAULT`.                                                                                                         |   No*    |
-|       `id`       | `str` | The internal ID of the user. This value must be unique across all users. If it is not present, this function will automatically generate a value.                                                                             |    No    |
-|    `username`    | `str` | The username of the user. This value must be unique across all users. If it is not present, this function will automatically generate a value.                                                                                |    No    |
-|   `given_name`   | `str` | The user's given name.                                                                                                                                                                                                        |    No    |
-|  `family_name`   | `str` | The user's family name.                                                                                                                                                                                                       |    No    |
-| `profile_image`  | `str` | The URL for the user's profile image. If it is not present, this function will automatically insert a default URL.                                                                                                            |    No    |
-|     `status`     | `int` | The user's status. This must be one of the values specified by the `UserStatus` type. If it is not present, this function will automatically assign a status of `UNVERIFIED` (due to the email having not yet been verified). |    No    |
+|         Key          | Type  | Usage                                                                                                                                                                                                                                                    | Required |
+| :------------------: | :---: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+|   `authentication`   | `int` | The authentication type for the user. This value must be one of the values specified by the `UserAuthentication` type.                                                                                                                                   |   Yes    |
+|       `email`        | `str` | The user's email. This value must be unique across all users and is checked for syntax correctness.                                                                                                                                                      |   Yes    |
+|      `password`      | `str` | The user's (unencrypted) password. This value is only required for accounts whose authentication method is `DEFAULT`.                                                                                                                                    |   No*    |
+|         `id`         | `str` | The internal ID of the user. This value must be unique across all users. If it is not present, this function will automatically generate a value.                                                                                                        |    No    |
+|      `username`      | `str` | The username of the user. This value must be unique across all users. If it is not present, this function will automatically generate a value.                                                                                                           |    No    |
+|     `given_name`     | `str` | The user's given name.                                                                                                                                                                                                                                   |    No    |
+|    `family_name`     | `str` | The user's family name.                                                                                                                                                                                                                                  |    No    |
+|   `profile_image`    | `str` | The URL for the user's profile image. If it is not present, this function will automatically insert a default URL.                                                                                                                                       |    No    |
+|       `status`       | `int` | The user's status. This must be one of the values specified by the `UserStatus` type. If it is not present, this function will automatically assign a status of `UNVERIFIED` (due to the email having not yet been verified).                            |    No    |
+| `profile_visibility` | `int` | The user's profile visibility. The user's profile visibility. This must be a bitfield containing the values specified by the `ProfileVisibility` type. If it is not present, this function will automatically assign a value of 0 (all fields disabled). |
 
 Raises
 - `DatabaseException`: If the function failed to create the user.
@@ -1341,6 +1368,17 @@ Raises
 Args
 - `user_id (str)`: The ID of the target user.
 - `family_name (str)`: The family name of the target user.
+
+Raises
+- `DatabaseException`: If there was a problem querying the database.
+- `NoUserException`: If the specified user does not exist.
+
+#### Set Profile Visibility
+`set_profile_visibility(user_id: str, profile_visibility: int)` - Sets the profile visibility for the specified user.
+
+Args
+- `user_id (str)`: The ID of the target user.
+- `profile_visibility (int)`: The profile visibility for the target user.
 
 Raises
 - `DatabaseException`: If there was a problem querying the database.

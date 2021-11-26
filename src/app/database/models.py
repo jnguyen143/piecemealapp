@@ -11,7 +11,7 @@ import builtins
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
-from .database import DatabaseException
+from .database import DatabaseException, ProfileVisibility
 
 # This member is present
 # pylint: disable=no-member
@@ -45,6 +45,7 @@ class User(DATABASE.Model, UserMixin):
     username = DATABASE.Column(DATABASE.String(50), unique=True, nullable=False)
     authentication = DATABASE.Column(DATABASE.Integer, nullable=False)
     status = DATABASE.Column(DATABASE.Integer, nullable=False, default=0)
+    profile_visibility = DATABASE.Column(DATABASE.Integer, nullable=False, default=0)
 
     def to_json(self, shallow: bool = False):
         """
@@ -59,20 +60,30 @@ class User(DATABASE.Model, UserMixin):
         Returns:
             This row instance as a JSON object.
         """
+
         result = {
             "id": self.id,
-            "given_name": self.given_name,
-            "family_name": self.family_name,
             "profile_image": self.profile_image,
             "username": self.username,
+            "profile_visibility": self.profile_visibility,
         }
+
+        if not shallow or ProfileVisibility.has(
+            self.profile_visibility, ProfileVisibility.NAME
+        ):
+            result["given_name"] = self.given_name
+            result["family_name"] = self.family_name
+
+        if not shallow or ProfileVisibility.has(
+            self.profile_visibility, ProfileVisibility.CREATION_DATE
+        ):
+            result["creation_date"] = self.creation_date
+            result["display_creation_date"] = self.creation_date.strftime("%d %B, %Y")
 
         if not shallow:
             result["email"] = self.email
             result["authentication"] = self.authentication
-            result["creation_date"] = self.creation_date
             result["status"] = self.status
-            result["display_creation_date"] = self.creation_date.strftime("%d %B, %Y")
 
         return result
 

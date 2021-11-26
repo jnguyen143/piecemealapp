@@ -103,9 +103,11 @@ User objects contain minimal information about users; they do not contain sensit
 Attributes
 - `id (str)`: The ID of the user.
 - `username (str)`: The username of the user.
-- `given_name (str)`: The user's given name.
-- `family_name (str)`: The user's family name.
+- `given_name (str)`: The user's given name. This value is only present if the user allows their name to be shared publicly.
+- `family_name (str)`: The user's family name. This value is only present if the user allows their name to be shared publicly.
 - `profile_image (str)`: The URL for the user's profile image.
+- `profile_visibility (int)`: The user's profile visibility.
+- `creation_date (str)`: The user's account creation date as a string with the format `DD MM, YYYY`, where `MM` is the month spelled out completely. This value is only present if the user allows their account creation date to be shared publicly.
 
 ### Intolerance
 An intolerance object contains information describing a food intolerance.
@@ -676,6 +678,7 @@ Args
 - `given_name (str)`: The user's given name.
 - `family_name (str)`: The user's family name.
 - `profile_image (str)`: The user's profile image.
+- `profile_visibility (int)`: The user's profile visibility.
 
 Returns
 
