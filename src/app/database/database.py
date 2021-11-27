@@ -50,7 +50,7 @@ class ProfileVisibility(Enum):
         """
         Returns true if `bitfield` has the specified ProfileVisibility `value`.
         """
-        return bitfield & value.value
+        return (bitfield & value.value) == value.value
 
     @classmethod
     def enable(cls, bitfield: int, value) -> int:
@@ -934,13 +934,8 @@ class Database:
 
         # Split the query into two parts (given name and family name)
         parts = query.strip().split(sep=None)
-        name1 = parts[0] if len(parts) > 0 else ""
+        name1 = parts[0] if len(parts) > 0 else query
         name2 = parts[1] if len(parts) > 1 else ""
-
-        if name1 == "":
-            name1 = name2
-        elif name2 == "":
-            name2 = name1
 
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
@@ -948,69 +943,47 @@ class Database:
 
         try:
             with self.session_generator(expire_on_commit=False) as session:
-                count = (
-                    session.query(User)
-                    .filter(
+                filters = None
+                if name2 == "":
+                    filters = and_(
+                        or_(
+                            not obey_visibility_rules,
+                            User.profile_visibility.op("&")(
+                                ProfileVisibility.NAME.value
+                            )
+                            == ProfileVisibility.NAME.value,
+                        ),
+                        or_(
+                            User.given_name.ilike(f"%{name1}%"),
+                            User.family_name.ilike(f"%{name1}%"),
+                        ),
+                    )
+                else:
+                    filters = and_(
+                        or_(
+                            not obey_visibility_rules,
+                            User.profile_visibility.op("&")(
+                                ProfileVisibility.NAME.value
+                            )
+                            == ProfileVisibility.NAME.value,
+                        ),
                         or_(
                             and_(
-                                and_(
-                                    User.given_name.ilike(f"%{name1}%"),
-                                    User.family_name.ilike(f"%{name2}%"),
-                                ),
-                                (not obey_visibility_rules)
-                                or (
-                                    ProfileVisibility.has(
-                                        User.profile_visibility, ProfileVisibility.NAME
-                                    )
-                                ),
+                                User.given_name.ilike(f"%{name1}%"),
+                                User.family_name.ilike(f"%{name2}%"),
                             ),
                             and_(
-                                and_(
-                                    User.given_name.ilike(f"%{name2}%"),
-                                    User.family_name.ilike(f"%{name1}%"),
-                                ),
-                                (not obey_visibility_rules)
-                                or (
-                                    ProfileVisibility.has(
-                                        User.profile_visibility, ProfileVisibility.NAME
-                                    )
-                                ),
+                                User.given_name.ilike(f"%{name2}%"),
+                                User.family_name.ilike(f"%{name1}%"),
                             ),
-                        )
+                        ),
                     )
-                    .count()
-                )
+
+                count = session.query(User).filter(filters).count()
 
                 users = (
                     session.query(User)
-                    .filter(
-                        or_(
-                            and_(
-                                and_(
-                                    User.given_name.ilike(f"%{name1}%"),
-                                    User.family_name.ilike(f"%{name2}%"),
-                                ),
-                                (not obey_visibility_rules)
-                                or (
-                                    ProfileVisibility.has(
-                                        User.profile_visibility, ProfileVisibility.NAME
-                                    )
-                                ),
-                            ),
-                            and_(
-                                and_(
-                                    User.given_name.ilike(f"%{name2}%"),
-                                    User.family_name.ilike(f"%{name1}%"),
-                                ),
-                                (not obey_visibility_rules)
-                                or (
-                                    ProfileVisibility.has(
-                                        User.profile_visibility, ProfileVisibility.NAME
-                                    )
-                                ),
-                            ),
-                        )
-                    )
+                    .filter(filters)
                     .offset(offset)
                     .limit(limit)
                     .all()
@@ -1020,6 +993,9 @@ class Database:
                     return (users, count)
                 return ([], count)
         except Exception as exc:
+            import traceback
+
+            print(traceback.format_exc())
             raise DatabaseException("Failed to query database") from exc
 
     def search_users_by_username(self, query: str, offset: int = 0, limit: int = 10):

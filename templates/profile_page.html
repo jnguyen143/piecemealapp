@@ -16,15 +16,28 @@
             <a class="navbar-brand" href="/">
                 <img src="../static/assets/logo.png" alt="PieceMeal Logo" style="width:150px;" />
             </a>
-            <form class="d-flex w-50 justify-content-center ms-5" method="GET" onsubmit="return searchUsers();"
-                id="search-box-form">
-                <input id="search-box" class="form-control me-2 flex-fill" type="text" placeholder="Search for Users">
-                <button class="btn btn-primary" type="button"><i class="bi-search"></i></button>
-
-                <div id="search-results" class="dropdown">
-                    <a id="search-results-button" class="dropdown-toggle d-none" href="#" role="button"
-                        data-bs-toggle="dropdown"></a>
-                    <div id="search-results-content" class="dropdown-menu show"></div>
+            <form class="d-flex w-50 justify-content-center" method="GET" onsubmit="onSearchBoxChange(); return false;"
+                onfocusout="closeSearchBox();" id="search-box-form">
+                <div class="d-flex w-100 flex-fill justify-content-center">
+                    <div class="w-100 row row-cols-2">
+                        <div class="col flex-grow-1">
+                            <input id="search-box" class="form-control" type="text" autocomplete="off"
+                                oninput="onSearchBoxChange();" placeholder="Search for Users">
+                        </div>
+                        <div class="col-sm-auto">
+                            <button class="btn btn-primary form-control" type="submit"><i
+                                    class="bi-search"></i></button>
+                        </div>
+                        <div class="col flex-grow-1" id="search-results-div">
+                            <div class="dropdown w-100">
+                                <button class="nav-link dropdown-toggle d-none" type="button" data-bs-toggle="dropdown"
+                                    id="search-results-button"></button>
+                                <div class="dropdown-menu w-100" id="search-results"
+                                    style="max-height: 40vh; overflow-y: auto;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
             <ul class="navbar-nav">
@@ -223,49 +236,84 @@
     </script>
 
     <script>
-        function searchUsers() {
+        function closeSearchBox() {
+            let form = document.getElementById('search-box-form');
             let value = document.getElementById('search-box').value;
 
-            console.log(`value: ${value}`);
+            const activeIsFormChild = form.contains(document.activeElement);
+            const activeIsBody = document.activeElement === document.getElementsByTagName('body')[0];
 
-            if (value === "") {
-                //document.getElementById('search-results').classList.remove('show');
-                document.getElementById('search-results-button').hide();
+            if ((!activeIsFormChild && !activeIsBody) || ((activeIsFormChild || activeIsBody) && value === '')) {
+                const dropdownToggleEl = document.getElementById('search-results-button');
+                const dropdownList = new bootstrap.Dropdown(dropdownToggleEl);
+                dropdownList.hide();
+            }
+        }
+
+        function openSearchBox() {
+            let value = document.getElementById('search-box').value;
+
+            if (value !== "" && document.getElementById('search-results').innerHTML !== "") {
+                const dropdownToggleEl = document.getElementById('search-results-button');
+                const dropdownList = new bootstrap.Dropdown(dropdownToggleEl);
+                dropdownList.show();
+            }
+        }
+
+        function onSearchBoxChange() {
+            let value = document.getElementById('search-box').value;
+
+            if (value === "")
+                closeSearchBox();
+            else {
+                searchUsers(value);
+            }
+        }
+
+        function searchUsers(value) {
+            let query = value;
+            let searchBy = null;
+
+            if (value.startsWith("@")) {
+                if (value.length === 1)
+                    return;
+                // Search by username
+                query = value.substring(1);
+                searchBy = 'username';
             } else {
-                //document.getElementById('search-results').classList.add('show');
-                document.getElementById('search-results-button').dropdown();
-                if (value.startsWith("@")) {
-                    if (value.length === 1)
-                        return;
-                    // Search by username
-                    fetch('/api/users/search?' + new URLSearchParams({
-                        query: value.substring(1),
-                        search_by: 'username'
-                    }).toString()).then(response => response.json()).then(data => {
-                        if (data.success) {
-                            let parent = document.getElementById('search-results-content');
-                            parent.innerHTML = '';
-                            for (let user of data.results) {
-                                let ndiv = document.createElement('a');
-                                ndiv.classList.add('dropdown-item');
-                                ndiv.setAttribute('href', '/@' + user.username);
-                                ndiv.text = user.username;
-                                parent.appendChild(ndiv);
-
-                                let divider = document.createElement('div');
-                                divider.classList.add('dropdown-divider');
-                                parent.appendChild(divider);
-                            }
-                        }
-                    }).catch((e) => {
-                        console.log(`Error: ${e}`);
-                    });
-                } else {
-                    // Search by given name
-                }
+                // Search by display name
+                searchBy = 'full_name';
             }
 
-            return false;
+            fetch('/api/users/search?' + new URLSearchParams({
+                query: query,
+                search_by: searchBy
+            }).toString()).then(response => response.json()).then(data => {
+                if (data.success) {
+                    let parent = document.getElementById('search-results');
+                    parent.innerHTML = '';
+                    for (let i = 0; i < data.results.length; i++) {
+                        if (i > 0) {
+                            let divider = document.createElement('div');
+                            divider.classList.add('dropdown-divider');
+                            parent.appendChild(divider);
+                        }
+
+                        let user = data.results[i];
+                        let ndiv = document.createElement('a');
+                        ndiv.classList.add('dropdown-item');
+                        ndiv.setAttribute('href', '/@' + user.username);
+                        if (searchBy === 'username')
+                            ndiv.text = user.username;
+                        else
+                            ndiv.text = user.given_name + ' ' + user.family_name;
+                        parent.appendChild(ndiv);
+                    }
+                    openSearchBox();
+                }
+            }).catch((e) => {
+                console.log(`Error: ${e}`);
+            });
         };
     </script>
 
