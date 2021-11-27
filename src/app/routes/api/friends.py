@@ -151,7 +151,7 @@ def send_friend_request():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         target = util.get_or_raise(data, "target", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
@@ -207,7 +207,7 @@ def handle_friend_request():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         src = util.get_or_raise(data, "src", InvalidEndpointArgsException())
         action = util.get_or_raise(data, "action", InvalidEndpointArgsException())
 

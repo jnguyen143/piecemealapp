@@ -136,7 +136,6 @@ class UserAuthentication(Enum):
         Returns the enum instance associated with the provided value.
         """
         for member in cls:
-            print(f"member: {member.get_id()}")
             if value == member.get_id():
                 return member
         raise ValueError()
@@ -896,7 +895,13 @@ class Database:
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def search_users_by_name(self, query: str, offset: int = 0, limit: int = 10):
+    def search_users_by_name(
+        self,
+        query: str,
+        offset: int = 0,
+        limit: int = 10,
+        obey_visibility_rules: bool = True,
+    ):
         """
         Returns a list of `User` objects whose names contain the given query string
         and the maximum number of available results.
@@ -907,6 +912,10 @@ class Database:
                 This value is optional and is 0 by default.
             limit (int): The maximum number of users to return.
                 This value is optional and is 10 by default.
+            obey_visibility_rules (bool): Whether the visibility rules should be obeyed
+                when searching for users, meaning that users whose names are not publicly
+                visible will not show up in the search results if this value is true.
+                This value is optional and is true by default.
 
         Returns:
             A tuple containing the list of `User` objects whose names contain
@@ -944,12 +953,28 @@ class Database:
                     .filter(
                         or_(
                             and_(
-                                User.given_name.ilike(f"%{name1}%"),
-                                User.family_name.ilike(f"%{name2}%"),
+                                and_(
+                                    User.given_name.ilike(f"%{name1}%"),
+                                    User.family_name.ilike(f"%{name2}%"),
+                                ),
+                                (not obey_visibility_rules)
+                                or (
+                                    ProfileVisibility.has(
+                                        User.profile_visibility, ProfileVisibility.NAME
+                                    )
+                                ),
                             ),
                             and_(
-                                User.given_name.ilike(f"%{name2}%"),
-                                User.family_name.ilike(f"%{name1}%"),
+                                and_(
+                                    User.given_name.ilike(f"%{name2}%"),
+                                    User.family_name.ilike(f"%{name1}%"),
+                                ),
+                                (not obey_visibility_rules)
+                                or (
+                                    ProfileVisibility.has(
+                                        User.profile_visibility, ProfileVisibility.NAME
+                                    )
+                                ),
                             ),
                         )
                     )
@@ -961,12 +986,28 @@ class Database:
                     .filter(
                         or_(
                             and_(
-                                User.given_name.ilike(f"%{name1}%"),
-                                User.family_name.ilike(f"%{name2}%"),
+                                and_(
+                                    User.given_name.ilike(f"%{name1}%"),
+                                    User.family_name.ilike(f"%{name2}%"),
+                                ),
+                                (not obey_visibility_rules)
+                                or (
+                                    ProfileVisibility.has(
+                                        User.profile_visibility, ProfileVisibility.NAME
+                                    )
+                                ),
                             ),
                             and_(
-                                User.given_name.ilike(f"%{name2}%"),
-                                User.family_name.ilike(f"%{name1}%"),
+                                and_(
+                                    User.given_name.ilike(f"%{name2}%"),
+                                    User.family_name.ilike(f"%{name1}%"),
+                                ),
+                                (not obey_visibility_rules)
+                                or (
+                                    ProfileVisibility.has(
+                                        User.profile_visibility, ProfileVisibility.NAME
+                                    )
+                                ),
                             ),
                         )
                     )
@@ -1804,13 +1845,13 @@ class Database:
 
                 if first_user is not None:
                     for user in first_user:
-                        result.append(user.user1_obj)
+                        result.append(user.user2_obj)
 
                 second_user = session.query(Relationship).filter_by(user2=user_id).all()
 
                 if second_user is not None:
                     for user in second_user:
-                        result.append(user.user2_obj)
+                        result.append(user.user1_obj)
 
                 count = len(result)
 

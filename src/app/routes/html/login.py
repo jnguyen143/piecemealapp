@@ -7,6 +7,7 @@ from flask_login.utils import login_required, logout_user
 from werkzeug.utils import redirect
 from ...database.database import (
     Database,
+    DatabaseException,
 )
 from ... import util
 
@@ -58,7 +59,10 @@ def load_user(user_id):
     """
     Callback function for loading a user for flask_login.
     """
-    return DATABASE.get_user_by_id(user_id)
+    try:
+        return DATABASE.get_user_by_id(user_id)
+    except DatabaseException:
+        return None
 
 
 def get_login_auth_status():

@@ -538,12 +538,13 @@ Raises
 - `NoUserException`: If any of the passed IDs do not correspond to a user in the database.
 
 #### Search Users by Name
-`search_users_by_name(query: str, offset: int = 0, limit: int = 10) -> (list[User], int)` - Returns a list of `User` objects whose names contain the given query string and the maximum number of available results.
+`search_users_by_name(query: str, offset: int = 0, limit: int = 10, obey_visibility_rules: bool = True) -> (list[User], int)` - Returns a list of `User` objects whose names contain the given query string and the maximum number of available results.
 
 Args
 - `query (str)`: The query string to use when searching for users.
 - `offset (int)`: The offset into the search results to start at. This value is optional and is 0 by default.
 - `limit (int)`: The maximum number of users to return. This value is optional and is 10 by default.
+- `obey_visibility_rules (bool)`: Whether the visibility rules should be obeyed when searching for users, meaning that users whose names are not publicly visible will not show up in the search results if this value is true. This value is optional and is true by default.
 
 Returns
 

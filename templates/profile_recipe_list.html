@@ -1,0 +1,25 @@
+<div style="margin-top:10px;">
+    {% for recipe in recipes %}
+    <div class="row">
+        <div class="col-sm-auto">
+            <img class="img-thumbnail" src="{{recipe['image']}}" alt="Image of {{recipe['name']}}"
+                style="width:80px;" />
+        </div>
+        <div class="col">
+            <div class="pm-font-major h4">
+                {{recipe["name"]}}
+            </div>
+            {% if "full_summary" in recipe %}
+            <div class="pm-font-minor font-justified">
+                {{recipe["full_summary"]}}
+            </div>
+            {% else %}
+            <div class="pm-font-minor font-justified">
+                {{recipe["summary"]}}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <hr />
+    {% endfor %}
+</div>

@@ -267,7 +267,7 @@ def update_account():
 
     data = None
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
     except InvalidEndpointArgsException:
         # If no data was passed, that's okay; all of the fields are optional.
         return success_response()

@@ -12,6 +12,7 @@ from ...database.database import (
     Database,
     DatabaseException,
     NoUserException,
+    ProfileVisibility,
 )
 from ... import util
 
@@ -55,6 +56,54 @@ def init(app: Flask, database: Database):
     app.register_blueprint(get_blueprint())
 
 
+def get_intolerances(user_id):
+    """
+    Returns a list of intolerances for the specified user.
+    """
+    try:
+        return [
+            intolerance.to_json()
+            for intolerance in DATABASE.get_intolerances(user_id)[0]
+        ]
+    except DatabaseException:
+        return []
+
+
+def get_saved_recipes(user_id):
+    """
+    Returns a list of saved recipes for the specified user.
+    """
+    try:
+        return [recipe.to_json() for recipe in DATABASE.get_recipes(user_id)[0]]
+    except DatabaseException:
+        return []
+
+
+def get_saved_ingredients(user_id):
+    """
+    Returns a list of saved ingredients for the specified user.
+    """
+    try:
+        return [
+            ingredient.to_json() for ingredient in DATABASE.get_ingredients(user_id)[0]
+        ]
+    except DatabaseException:
+        return []
+
+
+def get_friends(user_id):
+    """
+    Returns a list of friends for the specified user.
+    """
+    try:
+        return [
+            friend.to_json(shallow=True)
+            for friend in DATABASE.get_relationships_for_user(user_id)[0]
+        ]
+    except DatabaseException:
+        return []
+
+
 @blueprint.route("/@<username>")
 def user_profile(username):
     """
@@ -62,16 +111,44 @@ def user_profile(username):
     """
     current_user = None
     try:
-        current_user = get_current_user()
+        current_user = get_current_user().to_json()
     except NoCurrentUserException:
         pass
 
     try:
         user = DATABASE.get_user_by_username(username)
+        userdata = user.to_json(shallow=True)
+
+        userdata[
+            "has_relationship_with_current"
+        ] = current_user is not None and DATABASE.has_relationship(
+            user.id, current_user["id"]
+        )
+
+        if ProfileVisibility.has(
+            userdata["profile_visibility"], ProfileVisibility.INTOLERANCES
+        ):
+            userdata["intolerances"] = get_intolerances(user.id)
+
+        if ProfileVisibility.has(
+            userdata["profile_visibility"], ProfileVisibility.SAVED_RECIPES
+        ):
+            userdata["recipes"] = get_saved_recipes(user.id)
+
+        if ProfileVisibility.has(
+            userdata["profile_visibility"], ProfileVisibility.SAVED_INGREDIENTS
+        ):
+            userdata["ingredients"] = get_saved_ingredients(user.id)
+
+        if ProfileVisibility.has(
+            userdata["profile_visibility"], ProfileVisibility.FRIENDS
+        ):
+            userdata["friends"] = get_friends(user.id)
+
         return render_template(
             "profile_page.html",
-            userdata=user.to_json(),
-            current_userdata=current_user.to_json(),
+            userdata=userdata,
+            current_userdata=current_user,
         )
     except NoUserException:
         abort(404)

@@ -624,6 +624,8 @@ On failure, the possible error codes are:
 #### Search for Users
 `GET /api/users/search` - Returns a list of users which match the specified query string.
 
+Note that when attempting to search by full name, given name, or family name, if a user's name is not publicly visible, they will not show up in the search results.
+
 Args
 - `query (str)`: The query string to use.
 - `search_by (str)`: The field to search by. This must be one of:

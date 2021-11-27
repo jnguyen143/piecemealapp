@@ -163,7 +163,7 @@ def add_user_intolerance():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         intolerance = util.get_or_raise(
             data, "intolerance", InvalidEndpointArgsException()
         )
@@ -213,7 +213,7 @@ def delete_user_intolerance():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         intolerance_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
 
         user_id = get_current_user().id

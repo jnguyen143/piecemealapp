@@ -167,7 +167,7 @@ def add_user_recipe():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         recipe = util.get_or_raise(data, "recipe", InvalidEndpointArgsException())
 
         validate_recipe_object(recipe)
@@ -215,7 +215,7 @@ def delete_user_recipe():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         recipe_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
