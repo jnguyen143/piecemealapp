@@ -224,9 +224,46 @@
         </div>
     </div>
 
+    <div id="page-modal" class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You'll need to sign in if you want to do that.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="window.location.href = '/login';">Sign
+                        In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-absolute bottom-0 end-0 p-3">
+        <div id="toast-div" class="toast align-items-center hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toast-message"></div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
         crossorigin="anonymous"></script>
+
+    <script>
+        function showToast(message) {
+            document.getElementById('toast-message').textContent = message;
+            let toastElement = document.getElementById('toast-div');
+            let toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+    </script>
 
     <script>
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -315,6 +352,11 @@
                 console.log(`Error: ${e}`);
             });
         };
+
+        function openModal() {
+            let modalElement = new bootstrap.Modal(document.getElementById('page-modal'));
+            modalElement.show();
+        }
     </script>
 
     <style>

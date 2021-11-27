@@ -68,9 +68,12 @@ def validate_recipe_object(recipe_obj: dict):
 
     If any of the required fields are missing, this function will raise an exception.
     """
-    util.get_or_raise(recipe_obj, "id", InvalidEndpointArgsException())
-    util.get_or_raise(recipe_obj, "name", InvalidEndpointArgsException())
-    util.get_or_raise(recipe_obj, "image", InvalidEndpointArgsException())
+    recipe_id = util.get_or_raise(recipe_obj, "id", InvalidEndpointArgsException())
+    name = util.get_or_raise(recipe_obj, "name", InvalidEndpointArgsException())
+    image = util.get_or_raise(recipe_obj, "image", InvalidEndpointArgsException())
+
+    if recipe_id is None or name is None or image is None:
+        raise InvalidEndpointArgsException()
 
 
 @blueprint.route("/api/user-recipes/get")
