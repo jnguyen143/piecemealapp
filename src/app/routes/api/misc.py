@@ -12,6 +12,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 
+from ...routes.api.gmail import confirmation_email
 from ...database.database import (
     Database,
     DatabaseException,
@@ -26,6 +27,7 @@ from ..routing_util import (
     error_response,
     InvalidEndpointArgsException,
 )
+
 
 blueprint = Blueprint(
     "bp_api_misc",
@@ -268,6 +270,8 @@ def signup_default(data, error_responses):
 
         user = DATABASE.get_user_by_username(username)
 
+        confirmation_email(email)
+
         login_user(user)
 
         return success_response()
@@ -495,6 +499,8 @@ def validate_signup_callback():
         )
 
         user = DATABASE.get_user_by_id(userinfo["id"])
+
+        confirmation_email(userinfo["email"])
 
         login_user(user)
 
