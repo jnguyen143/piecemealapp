@@ -49,7 +49,7 @@
                             alt="{{current_userdata['username']}} Profile Picture" style="width:50px;" />
                     </a>
                     <div class="dropdown-menu" style="min-width:1rem; transform:translateX(-15%);">
-                        <div class="text-center">
+                        <div class="text-center" id="current-user-info" current-user-id="{{current_userdata['id']}}">
                             {{current_userdata['username']}}
                         </div>
                         <div class="dropdown-divider"></div>
@@ -282,6 +282,14 @@
             btn.addEventListener('click', (e) => {
                 const userId = e.target.hasAttribute('user-id') ? e.target.getAttribute('user-id')
                     : e.target.parentNode.getAttribute('user-id');
+
+                let currentUserId = document.getElementById('current-user-info').getAttribute('current-user-id');
+
+                if (userId === currentUserId) {
+                    showToast('You can\'t send a friend request to yourself!')
+                    return;
+                }
+
                 fetch('/api/friends/send-request', {
                     method: 'POST',
                     headers: {
@@ -293,7 +301,9 @@
                         showToast('Friend request sent!');
                         btn.setAttribute('disabled', true);
                     } else if (data.error_code === 3) {
-                        showToast('You\'ve already sent a request to this user.');
+                        showToast('You\'ve already sent a request to that user.');
+                    } else if (data.error_code === 4) {
+                        showToast('You\'re already friends with that user!')
                     } else {
                         showToast('Sorry, the request couldn\'t be sent right now.');
                     }

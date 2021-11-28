@@ -503,6 +503,7 @@ On failure, the possible error codes are:
 - 1 - There is no user currently logged in.
 - 2 - The input arguments were missing or otherwise corrupted.
 - 3 - The user has already sent the request.
+- 4 - The user is already friends with the target.
 
 #### Handle a Friend Request
 `POST /api/friends/handle-request` - Processes the request for the current user and the specified source user.

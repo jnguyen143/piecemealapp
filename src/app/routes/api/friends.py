@@ -141,6 +141,7 @@ def send_friend_request():
             1 - There is no user currently logged in.
             2 - The input arguments were missing or otherwise corrupted.
             3 - The user has already sent the request.
+            4 - The user is already friends with the target.
     """
 
     response_error_messages = [
@@ -148,6 +149,7 @@ def send_friend_request():
         "No user logged in",
         "Corrupt input arguments",
         "Request has already been sent",
+        "Users are already friends",
     ]
 
     try:
@@ -155,6 +157,12 @@ def send_friend_request():
         target = util.get_or_raise(data, "target", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
+
+        if user_id == target:
+            return error_response(0, response_error_messages[0])
+
+        if DATABASE.has_relationship(user_id, target):
+            return error_response(4, response_error_messages[4])
 
         result = DATABASE.add_friend_request(user_id, target)
 
