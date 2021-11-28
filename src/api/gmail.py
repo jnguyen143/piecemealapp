@@ -1,21 +1,20 @@
 """
-This file contains the GMAIL API authorization and automated email processing for 
+This file contains the GMAIL API authorization and automated email processing for
 the Service Account
 """
 from __future__ import print_function
+from email.mime.text import MIMEText
 from googleapiclient.discovery import build
 from apiclient import errors
-from email.mime.text import MIMEText
 import pybase64
 from google.oauth2 import service_account
-from googleapiclient.discovery import build
-
+from os import getenv
 
 # Email sending confirmation email
-EMAIL_FROM = "admin@piecemealapp2.com"
+EMAIL_FROM = getenv("ADMIN_EMAIL")
 
 
-def confirmation_email(new_user_email):
+def send_confirmation_email(new_user_email):
     """
 
     Initiates the issuance of account creation confirmation email
@@ -26,19 +25,24 @@ def confirmation_email(new_user_email):
     """
 
     # Email from user must be retrieved and stored in EMAIL_TO
-    EMAIL_TO = new_user_email
-    EMAIL_SUBJECT = "Welcome to pieceMeal!"
-    EMAIL_CONTENT = "Welcome to pieceMeal! \nThank you for creating a new account with us. \nPlease sign in at https://www.piecemealapp2.com to complete your profile"
+    email_to = new_user_email
+    email_subject = "Welcome to pieceMeal!"
+
+    message_file = open("confirmation.txt", "r")
+    message = message_file.read()
+    message_file.close()
+
+    email_content = message
 
     # Login into service
     service = service_account_login()
 
     # Call the Gmail API
     message = create_registration_confirm_message(
-        EMAIL_FROM, EMAIL_TO, EMAIL_SUBJECT, EMAIL_CONTENT
+        EMAIL_FROM, email_to, email_subject, email_content
     )
 
-    sent = send_message(service, "me", message)
+    send_message(service, "me", message)
 
 
 class ServiceKeyException(Exception):
@@ -61,7 +65,7 @@ def service_account_login():
     Returns:
         Service built for specified authorized service account user - Admin
     """
-    SCOPES = [
+    scopes = [
         "https://www.googleapis.com/auth/gmail.send",
         "https://mail.google.com",
         "https://www.googleapis.com/auth/gmail.compose",
@@ -72,12 +76,12 @@ def service_account_login():
     ]
 
     try:
-        SERVICE_ACCOUNT_FILE = "service-key.json"
+        service_account_file = "service-key.json"
     except ServiceKeyException:
         pass
 
     credentials = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+        service_account_file, scopes=scopes
     )
 
     delegated_credentials = credentials.with_subject(EMAIL_FROM)
@@ -87,7 +91,7 @@ def service_account_login():
     return service
 
 
-def create_registration_confirm_message(sender, to, subject, message_text):
+def create_registration_confirm_message(sender, new_user, subject, message_text):
     """
     Creates automated message for user signup confirmation
 
@@ -101,7 +105,7 @@ def create_registration_confirm_message(sender, to, subject, message_text):
       An object containing a base64url encoded email object.
     """
     message = MIMEText(message_text)
-    message["to"] = to
+    message["to"] = new_user
     message["from"] = sender
     message["subject"] = subject
     message_string = bytes("{}".format(message), "utf-8")
@@ -127,8 +131,8 @@ def send_message(service, user_id, message):
         message = (
             service.users().messages().send(userId=user_id, body=message).execute()
         )
-        # print(message)
-        # print("Message Id: %s" % message["id"])
-        return message
+
+        print("Message Id: %s" % message["id"])
+
     except errors.HttpError as error:
         print("An error occurred: %s" % error)
