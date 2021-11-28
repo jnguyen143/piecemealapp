@@ -1,0 +1,14 @@
+<div style="margin-top:10px;" id="intolerance-list-div">
+    {% for intolerance in intolerances %}
+    <div class="profile-intolerance-container" intolerance-id="{{intolerance['id']}}">
+        <div class="row">
+            <div class="col">
+                <div class="pm-font-minor h4">
+                    {{intolerance["name"]}}
+                </div>
+            </div>
+        </div>
+        <hr />
+    </div>
+    {% endfor %}
+</div>

@@ -160,11 +160,9 @@
                             This user has no saved intolerances.
                         </div>
                         {% else %}
-                        {% for intolerance in userdata["intolerances"] %}
-                        <div>
-                            {{intolerance["name"]}}
-                        </div>
-                        {% endfor %}
+                        {% with intolerances=userdata["intolerances"] %}
+                        {% include "profile_intolerance_list.html" %}
+                        {% endwith %}
                         {% endif %}
                         {% else %}
                         {% with blocked_value="saved intolerances" %}
@@ -279,10 +277,16 @@
                 const userId = e.target.hasAttribute('user-id') ? e.target.getAttribute('user-id')
                     : e.target.parentNode.getAttribute('user-id');
 
-                let currentUserId = document.getElementById('current-user-info').getAttribute('current-user-id');
+                if (!!document.getElementById('current-user-info')) {
+                    let currentUserId = document.getElementById('current-user-info').getAttribute('current-user-id');
 
-                if (userId === currentUserId) {
-                    showToast('You can\'t send a friend request to yourself!')
+                    if (userId === currentUserId) {
+                        showToast('You can\'t send a friend request to yourself!')
+                        return;
+                    }
+                } else {
+                    // We're not logged in, so don't make the request
+                    showToast('You need to be logged in to send a friend request.');
                     return;
                 }
 

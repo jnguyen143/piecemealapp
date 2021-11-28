@@ -128,33 +128,46 @@ def user_profile(username):
 
     try:
         user = DATABASE.get_user_by_username(username)
-        userdata = user.to_json(shallow=True)
 
-        userdata[
-            "has_relationship_with_current"
-        ] = current_user is not None and DATABASE.has_relationship(
+        has_relationship = current_user is not None and DATABASE.has_relationship(
             user.id, current_user["id"]
         )
 
-        if ProfileVisibility.has(
-            userdata["profile_visibility"], ProfileVisibility.INTOLERANCES
+        userdata = user.to_json(shallow=(not has_relationship))
+
+        userdata["has_relationship_with_current"] = has_relationship
+
+        if (
+            ProfileVisibility.has(
+                userdata["profile_visibility"], ProfileVisibility.INTOLERANCES
+            )
+            or userdata["has_relationship_with_current"]
         ):
             userdata["intolerances"] = get_intolerances(user.id)
 
-        if ProfileVisibility.has(
-            userdata["profile_visibility"], ProfileVisibility.SAVED_RECIPES
+        if (
+            ProfileVisibility.has(
+                userdata["profile_visibility"], ProfileVisibility.SAVED_RECIPES
+            )
+            or userdata["has_relationship_with_current"]
         ):
             userdata["recipes"] = get_saved_recipes(user.id)
 
-        if ProfileVisibility.has(
-            userdata["profile_visibility"], ProfileVisibility.SAVED_INGREDIENTS
+        if (
+            ProfileVisibility.has(
+                userdata["profile_visibility"], ProfileVisibility.SAVED_INGREDIENTS
+            )
+            or userdata["has_relationship_with_current"]
         ):
             (liked_ingredients, disliked_ingredients) = get_saved_ingredients(user.id)
             userdata["liked_ingredients"] = liked_ingredients
             userdata["disliked_ingredients"] = disliked_ingredients
 
-        if ProfileVisibility.has(
-            userdata["profile_visibility"], ProfileVisibility.FRIENDS
+        if (
+            ProfileVisibility.has(
+                userdata["profile_visibility"], ProfileVisibility.FRIENDS
+            )
+            or userdata["has_relationship_with_current"]
         ):
             userdata["friends"] = get_friends(user.id)
 
