@@ -2,6 +2,7 @@
 This file contains error-handling functions, such as ones that handle 404 or 500 errors.
 """
 from flask import Flask, render_template
+from werkzeug.utils import redirect
 
 
 def init(app: Flask):
@@ -10,6 +11,7 @@ def init(app: Flask):
     """
     app.register_error_handler(404, error_not_found)
     app.register_error_handler(500, error_internal)
+    app.register_error_handler(401, error_not_signed_in)
 
 
 def error_not_found(_):
@@ -43,3 +45,16 @@ def error_internal(_):
         ),
         500,
     )
+
+
+def error_not_signed_in(_):
+    """
+    This error occurs when the user attempted to access a page
+    for which they were not authorized to access.
+
+    This is usually because they are not logged in.
+
+    Triggering this error will redirect the user to the login page.
+    """
+
+    return redirect("/login")

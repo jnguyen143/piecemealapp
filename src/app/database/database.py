@@ -80,6 +80,20 @@ class ProfileVisibility(Enum):
         """
         return 0
 
+    @classmethod
+    def to_json(cls, bitfield: int) -> dict:
+        """
+        Creates a JSON object representing all of the permissions stored in `bitfield`.
+
+        Each permission will be a mapping of the permission name (in lower snake case)
+        to a boolean.
+        """
+
+        result = {}
+        for field in ProfileVisibility:
+            result[field.name.lower()] = ProfileVisibility.has(bitfield, field)
+        return result
+
 
 class UserIntolerance(Enum):
     """
@@ -114,6 +128,17 @@ class UserIntolerance(Enum):
         Returns a JSON representation of this intolerance instance.
         """
         return {"id": self.value, "name": self.display_name}
+
+    @classmethod
+    def get_from_id(cls, intolerance_id: int):
+        """
+        Returns the UserIntolerance object which corresponds to the specified ID,
+        or None if no intolerance matches.
+        """
+        for intolerance in UserIntolerance:
+            if intolerance.value == int(intolerance_id):
+                return intolerance
+        return None
 
 
 class UserAuthentication(Enum):
@@ -553,6 +578,7 @@ class Database:
                         profile_visibility=profile_visibility,
                     )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to add user") from exc
 
@@ -643,6 +669,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).delete()
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -780,6 +807,7 @@ class Database:
                             profile_visibility=user["profile_visibility"],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to add users") from exc
 
@@ -890,6 +918,7 @@ class Database:
                         raise NoUserException(user_id)
                     else:
                         session.delete(user)
+                session.commit()
         except NoUserException as exc:
             raise exc
         except Exception as exc:
@@ -993,9 +1022,6 @@ class Database:
                     return (users, count)
                 return ([], count)
         except Exception as exc:
-            import traceback
-
-            print(traceback.format_exc())
             raise DatabaseException("Failed to query database") from exc
 
     def search_users_by_username(self, query: str, offset: int = 0, limit: int = 10):
@@ -1102,6 +1128,7 @@ class Database:
                         full_summary=full_summary,
                     )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1157,6 +1184,7 @@ class Database:
                 if recipe is None:
                     raise NoRecipeException(recipe_id)
                 session.delete(recipe)
+                session.commit()
         except NoRecipeException as exc:
             raise exc
         except Exception as exc:
@@ -1258,6 +1286,7 @@ class Database:
                             full_summary=info["full_summary"],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1328,6 +1357,7 @@ class Database:
                         raise NoRecipeException(recipe_id)
                     else:
                         session.delete(recipe)
+                session.commit()
         except NoRecipeException as exc:
             raise exc
         except Exception as exc:
@@ -1415,6 +1445,7 @@ class Database:
                         image=image,
                     )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1474,6 +1505,7 @@ class Database:
                 if ingredient is None:
                     raise NoIngredientException(ingredient_id)
                 session.delete(ingredient)
+                session.commit()
         except NoIngredientException as exc:
             raise exc
         except Exception as exc:
@@ -1572,6 +1604,7 @@ class Database:
                             image=info["image"],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1646,6 +1679,7 @@ class Database:
                         raise NoIngredientException(ingredient_id)
                     else:
                         session.delete(ingredient)
+                session.commit()
         except NoIngredientException as exc:
             raise exc
         except Exception as exc:
@@ -1679,6 +1713,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(Relationship(user1=user1_id, user2=user2_id))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1739,6 +1774,9 @@ class Database:
             user1_id (str): The ID of the first user in the relationship.
             user2_id (str): The ID of the second user in the relationship.
 
+        Returns:
+            True if the relationship was deleted and false otherwise.
+
         Raises:
             DatabaseException: If there was a problem querying the database.
             NoUserException: If either of the specified users do not exist.
@@ -1774,6 +1812,9 @@ class Database:
 
                 if relationship is not None:
                     session.delete(relationship)
+                    session.commit()
+                    return True
+                return False
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1877,6 +1918,7 @@ class Database:
                 if request is not None:
                     return False
                 session.add(FriendRequest(src=src, target=target))
+                session.commit()
                 return True
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
@@ -2039,6 +2081,7 @@ class Database:
                 if request is None:
                     return False
                 session.delete(request)
+                session.commit()
                 return True
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
@@ -2073,6 +2116,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(Intolerance(user_id=user_id, intolerance=intolerance.value))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2146,6 +2190,7 @@ class Database:
                 )
                 if entry is not None:
                     session.delete(entry)
+                    session.commit()
                     return True
                 return False
         except Exception as exc:
@@ -2203,7 +2248,7 @@ class Database:
 
                 if intolerances is not None:
                     for entry in intolerances:
-                        result.append(entry)
+                        result.append(UserIntolerance.get_from_id(entry.intolerance))
                 return (result, count)
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
@@ -2249,6 +2294,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(SavedRecipe(user_id=user_id, recipe_id=recipe_id))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2324,6 +2370,7 @@ class Database:
                 )
                 if entry is not None:
                     session.delete(entry)
+                    session.commit()
                     return True
                 else:
                     return False
@@ -2439,6 +2486,7 @@ class Database:
             with self.session_generator() as session:
                 for i, recipe_id in enumerate(recipe_ids):
                     session.add(SavedRecipe(user_id=user_ids[i], recipe_id=recipe_id))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2488,6 +2536,7 @@ class Database:
                     )
                     if recipe is not None:
                         session.delete(recipe)
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2659,6 +2708,7 @@ class Database:
                 session.add(
                     SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2735,6 +2785,7 @@ class Database:
                 )
                 if entry is not None:
                     session.delete(entry)
+                    session.commit()
                     return True
                 else:
                     return False
@@ -2860,6 +2911,7 @@ class Database:
                             user_id=user_ids[i], ingredient_id=ingredient_id
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2909,6 +2961,7 @@ class Database:
                     )
                     if ingredient is not None:
                         session.delete(ingredient)
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3070,6 +3123,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).update({"username": username})
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3101,6 +3155,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).update({"email": email})
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3138,6 +3193,7 @@ class Database:
                 session.query(Password).filter_by(user_id=user_id).update(
                     {"phrase": password}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3208,6 +3264,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"profile_image": profile_image}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3235,6 +3292,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"status": status.get_id()}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3269,6 +3327,7 @@ class Database:
                     user.update({"given_name": given_name})
                 if family_name is not None:
                     user.update({"family_name": family_name})
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3296,6 +3355,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"given_name": given_name}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3323,6 +3383,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"family_name": family_name}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3350,5 +3411,6 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"profile_visibility": profile_visibility}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc

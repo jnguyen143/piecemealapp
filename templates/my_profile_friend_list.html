@@ -1,0 +1,60 @@
+<div style="margin-top:10px;">
+    {% for friend in friends %}
+    <div class="profile-friend-container" friend-id="{{friend['id']}}">
+        <div class="row">
+            <div class="col-sm-auto">
+                <button class="btn btn-sm btn-danger delete-friend-button" friend-id="{{friend['id']}}"
+                    style="vertical-align: middle;">
+                    <i class="bi-x-lg h5"></i>
+                </button>
+            </div>
+            <div class="col-sm-auto">
+                <img class="img-thumbnail" src="{{friend['profile_image']}}" alt="Image of {{friend['username']}}"
+                    style="width:80px;" />
+            </div>
+            <div class="col">
+                <a class="pm-font-minor h4" href="/@{{friend['username']}}">
+                    {{friend["username"]}}
+                </a>
+            </div>
+        </div>
+        <hr />
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    (function () {
+        let buttons = document.getElementsByClassName('delete-friend-button');
+        for (let button of buttons) {
+            button.addEventListener('click', (e) => {
+                const friendId = e.target.hasAttribute('friend-id') ? e.target.getAttribute('friend-id')
+                    : e.target.parentNode.getAttribute('friend-id');
+                openDeleteConfirmModal('friend', () => {
+                    fetch('/api/friends/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: friendId })
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            showToast('Successfully deleted friend');
+                            let options = document.getElementsByClassName('profile-friend-container');
+                            for (let option of options) {
+                                if (option.getAttribute('friend-id') === friendId) {
+                                    option.remove();
+                                    break;
+                                }
+                            }
+                        } else {
+                            showToast('Unable to delete the friend at this time');
+                        }
+                    }).catch((err) => {
+                        console.log(`ERROR: ${err.stack}`);
+                    });
+                });
+            });
+        }
+    })();
+</script>

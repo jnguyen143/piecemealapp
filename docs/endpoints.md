@@ -42,6 +42,7 @@ This file details the list of available endpoints for PieceMeal, including user-
       - [Handle a Friend Request](#handle-a-friend-request)
       - [Get Sent Requests](#get-sent-requests)
       - [Get Received Requests](#get-received-requests)
+      - [Delete Friend](#delete-friend)
     - [User Intolerances](#user-intolerances)
       - [Get User Intolerances](#get-user-intolerances)
       - [Add User Intolerance](#add-user-intolerance)
@@ -562,6 +563,23 @@ On failure, the possible error codes are:
 - 0 - A general exception occurred.
 - 1 - There is no user currently logged in.
 - 2 - The input arguments were missing or otherwise corrupted.
+
+#### Delete Friend
+`POST /api/friends/delete` - Deletes the specified friend from the current user's list of friends.
+
+Args
+- `id (int)`: The ID of the friend to delete.
+
+Returns
+
+On success, a JSON object containing the following field:
+- `success (bool)`: Whether the request was successfully completed.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - There is no user currently logged in.
+- 2 - The input arguments were missing or otherwise corrupted.
+- 3 - The user does not have the specified friend.
 
 ### User Intolerances
 #### Get User Intolerances

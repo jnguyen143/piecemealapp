@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../static/stylesheets/common.css">
 </head>
 
 <body>
@@ -99,18 +100,21 @@
                             {% if userdata["has_relationship_with_current"] %}
                             <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" style="margin-top:10px;"
                                 title="You're already friends!">
-                                <button type="button" class="btn btn-primary" disabled><i
-                                        class="bi-person-plus me-2"></i>Send Friend Request</button>
+                                <button type="button" class="btn btn-primary" disabled id="send-friend-request-button"
+                                    user-id="{{userdata['id']}}"><i class="bi-person-plus me-2"></i>Send Friend
+                                    Request</button>
                             </span>
                             {% else %}
-                            <button type="button" class="btn btn-primary" style="margin-top:10px;">
+                            <button type="button" class="btn btn-primary" style="margin-top:10px;"
+                                id="send-friend-request-button" user-id="{{userdata['id']}}">
                                 <i class="bi-person-plus me-2"></i>
                                 Send Friend Request
                             </button>
                             {% endif %}
                             {% endif %}
                             {% else %}
-                            <button type="button" class="btn btn-primary" style="margin-top:10px;"><i
+                            <button type="button" class="btn btn-primary" style="margin-top:10px;"
+                                id="send-friend-request-button" user-id="{{userdata['id']}}"><i
                                     class="bi-person-plus me-2"></i>
                                 Send Friend Request
                                 {% endif %}
@@ -224,7 +228,7 @@
         </div>
     </div>
 
-    <div id="page-modal" class="modal" tabindex="-1">
+    <div id="pm-font-minor page-modal" class="modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -243,7 +247,7 @@
         </div>
     </div>
 
-    <div class="toast-container position-absolute bottom-0 end-0 p-3">
+    <div class="pm-font-minor toast-container position-absolute bottom-0 end-0 p-3">
         <div id="toast-div" class="toast align-items-center hide" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body" id="toast-message"></div>
@@ -270,6 +274,34 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
+    </script>
+
+    <script>
+        (function () {
+            let btn = document.getElementById('send-friend-request-button');
+            btn.addEventListener('click', (e) => {
+                const userId = e.target.hasAttribute('user-id') ? e.target.getAttribute('user-id')
+                    : e.target.parentNode.getAttribute('user-id');
+                fetch('/api/friends/send-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ target: userId })
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        showToast('Friend request sent!');
+                        btn.setAttribute('disabled', true);
+                    } else if (data.error_code === 3) {
+                        showToast('You\'ve already sent a request to this user.');
+                    } else {
+                        showToast('Sorry, the request couldn\'t be sent right now.');
+                    }
+                }).catch((err) => {
+                    console.log(`ERROR: ${err}`);
+                });
+            });
+        })();
     </script>
 
     <script>
@@ -349,7 +381,7 @@
                     openSearchBox();
                 }
             }).catch((e) => {
-                console.log(`Error: ${e}`);
+                console.log(`ERROR: ${e}`);
             });
         };
 
@@ -358,18 +390,6 @@
             modalElement.show();
         }
     </script>
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
-        .pm-font-major {
-            font-family: 'Playfair Display', serif;
-        }
-
-        .pm-font-minor {
-            font-family: 'Lato', sans-serif;
-        }
-    </style>
 </body>
 
 </html>

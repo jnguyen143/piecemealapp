@@ -818,6 +818,10 @@ Args
 - `user1_id (str)`: The ID of the first user in the relationship.
 - `user2_id (str)`: The ID of the second user in the relationship.
 
+Returns
+
+True if the relationship was deleted and false otherwise.
+
 Raises
 - `DatabaseException`: If there was a problem querying the database.
 - `NoUserException`: If either of the specified users do not exist.
