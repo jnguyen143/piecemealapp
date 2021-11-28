@@ -119,11 +119,18 @@ def get_user_ingredients():
     try:
         user_id = get_current_user().id
 
-        ingredients = DATABASE.get_ingredients(user_id, offset, limit)
+        (ingredients, liked, total) = DATABASE.get_ingredients(user_id, offset, limit)
+
+        result = []
+        for i, ingredient in enumerate(ingredients):
+            ingredient_json = ingredient.to_json()
+            ingredient_json["liked"] = liked[i]
+            result.append(ingredient_json)
+
         return success_response(
             {
-                "ingredients": [ingredient.to_json() for ingredient in ingredients[0]],
-                "total_ingredients": ingredients[1],
+                "ingredients": result,
+                "total_ingredients": total,
             }
         )
     except NoCurrentUserException:
@@ -162,16 +169,18 @@ def add_user_ingredient():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         ingredient = util.get_or_raise(
             data, "ingredient", InvalidEndpointArgsException()
         )
 
         validate_ingredient_object(ingredient)
 
+        liked = util.get_or_default(ingredient, "liked", True)
+
         user_id = get_current_user().id
 
-        result = DATABASE.add_ingredient(user_id, ingredient)
+        result = DATABASE.add_ingredient(user_id, ingredient, liked)
 
         if not result:
             return error_response(3, response_error_messages[3])
@@ -212,7 +221,7 @@ def delete_user_ingredient():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         ingredient_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
 
         user_id = get_current_user().id

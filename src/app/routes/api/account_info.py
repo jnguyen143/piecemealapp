@@ -187,7 +187,7 @@ def try_set_family_name(data, user_id):
 
 def try_set_profile_image(data, user_id):
     """
-    Tries to set the given name for the specified user.
+    Tries to set the profile image for the specified user.
     """
     error_code = -1
 
@@ -196,6 +196,26 @@ def try_set_profile_image(data, user_id):
             data, "profile_image", InvalidEndpointArgsException()
         )
         DATABASE.set_profile_image(user_id, profile_image)
+    except InvalidEndpointArgsException:
+        pass  # If it's not present, that's fine; it's optional.
+    except DatabaseException:
+        error_code = 0
+
+    if error_code != -1:
+        raise AccountInfoSetException(error_code)
+
+
+def try_set_profile_visibility(data, user_id):
+    """
+    Tries to set the profile visibility for the specified user.
+    """
+    error_code = -1
+
+    try:
+        profile_visibility = util.get_or_raise(
+            data, "profile_visibility", InvalidEndpointArgsException()
+        )
+        DATABASE.set_profile_visibility(user_id, profile_visibility)
     except InvalidEndpointArgsException:
         pass  # If it's not present, that's fine; it's optional.
     except DatabaseException:
@@ -219,6 +239,7 @@ def update_account():
         given_name (str): The user's given name.
         family_name (str): The user's family name.
         profile_image (str): The user's profile image.
+        profile_visibility (int): The user's profile visibility.
 
     Returns:
         On success, a JSON object containing the following field:
@@ -246,7 +267,7 @@ def update_account():
 
     data = None
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
     except InvalidEndpointArgsException:
         # If no data was passed, that's okay; all of the fields are optional.
         return success_response()
@@ -265,6 +286,7 @@ def update_account():
         try_set_given_name(data, user_id)
         try_set_family_name(data, user_id)
         try_set_profile_image(data, user_id)
+        try_set_profile_visibility(data, user_id)
     except AccountInfoSetException as exc:
         revert_user(original_data)
         return error_response(exc.error_code, response_error_messages[exc.error_code])

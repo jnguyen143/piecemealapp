@@ -1,0 +1,16 @@
+<div style="margin-top:10px;">
+    {% for friend in friends %}
+    <div class="row">
+        <div class="col-sm-auto">
+            <img class="img-thumbnail" src="{{friend['profile_image']}}" alt="Image of {{friend['profile_image']}}"
+                style="width:80px;" />
+        </div>
+        <div class="col">
+            <a class="pm-font-minor h4" href="/@{{friend['username']}}">
+                {{friend["username"]}}
+            </a>
+        </div>
+    </div>
+    <hr />
+    {% endfor %}
+</div>

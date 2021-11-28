@@ -11,7 +11,7 @@ from ..routing_util import NoCurrentUserException, get_current_user
 from ...api import spoonacular
 
 blueprint = Blueprint(
-    "bp_direct_index",
+    "bp_html_index",
     __name__,
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),

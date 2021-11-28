@@ -141,6 +141,7 @@ def send_friend_request():
             1 - There is no user currently logged in.
             2 - The input arguments were missing or otherwise corrupted.
             3 - The user has already sent the request.
+            4 - The user is already friends with the target.
     """
 
     response_error_messages = [
@@ -148,13 +149,20 @@ def send_friend_request():
         "No user logged in",
         "Corrupt input arguments",
         "Request has already been sent",
+        "Users are already friends",
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         target = util.get_or_raise(data, "target", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
+
+        if user_id == target:
+            return error_response(0, response_error_messages[0])
+
+        if DATABASE.has_relationship(user_id, target):
+            return error_response(4, response_error_messages[4])
 
         result = DATABASE.add_friend_request(user_id, target)
 
@@ -207,7 +215,7 @@ def handle_friend_request():
     ]
 
     try:
-        data = get_json_data(request)
+        data = get_json_data(request, "POST")
         src = util.get_or_raise(data, "src", InvalidEndpointArgsException())
         action = util.get_or_raise(data, "action", InvalidEndpointArgsException())
 
@@ -362,5 +370,52 @@ def get_received_requests():
         return error_response(1, response_error_messages[1])
     except InvalidArgumentException:
         return error_response(2, response_error_messages[2])
+    except DatabaseException:
+        return error_response(0, response_error_messages[0])
+
+
+@blueprint.route("/api/friends/delete")
+@login_required
+def delete_friend():
+    """
+    Deletes the specified friend from the current user's list of friends.
+
+    Args:
+        id (int): The ID of the friend to delete.
+
+    Returns:
+        On success, a JSON object containing the following field:
+            success (bool): Whether the request was successfully completed.
+
+        On failure, the possible error codes are:
+            0 - A general exception occurred.
+            1 - There is no user currently logged in.
+            2 - The input arguments were missing or otherwise corrupted.
+            3 - The user does not have the specified friend.
+    """
+
+    response_error_messages = [
+        "Unknown error",
+        "No user logged in",
+        "Corrupt input arguments",
+        "The current user is not friends with the specified user",
+    ]
+
+    try:
+        data = get_json_data(request, "POST")
+        friend_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
+
+        user_id = get_current_user().id
+
+        result = DATABASE.delete_relationship(user_id, friend_id)
+
+        if result:
+            return success_response()
+        else:
+            return error_response(3, response_error_messages[3])
+    except (InvalidEndpointArgsException, InvalidArgumentException):
+        return error_response(2, response_error_messages[2])
+    except NoCurrentUserException:
+        return error_response(1, response_error_messages[1])
     except DatabaseException:
         return error_response(0, response_error_messages[0])

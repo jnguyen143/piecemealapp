@@ -345,7 +345,7 @@ def search_recipes(
     sort_by: SortCriteria = None,
     offset: int = 0,
     limit: int = 10,
-) -> tuple(list[dict], int):
+) -> tuple[list[dict], int]:
     """
     Returns a list of recipes which match the specified search query.
 

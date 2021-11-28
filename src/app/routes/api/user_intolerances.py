@@ -7,6 +7,7 @@ from ...database.database import (
     Database,
     DatabaseException,
     InvalidArgumentException,
+    UserIntolerance,
 )
 from ... import util
 from ..routing_util import (
@@ -142,7 +143,7 @@ def add_user_intolerance():
     Adds the specified intolerance to the current user's list of saved intolerances.
 
     Args:
-        intolerance: The intolerance to save, which must be an Intolerance object.
+        id (int): The ID of the intolerance to save.
 
     Returns:
         On success, a JSON object containing the following field:
@@ -152,30 +153,33 @@ def add_user_intolerance():
             0 - A general exception occurred.
             1 - There is no user currently logged in.
             2 - The input arguments were missing or otherwise corrupted.
-            3 - The user already has the specified intolerance.
+            3 - The specified intolerance is invalid.
+            4 - The user already has the specified intolerance.
     """
 
     response_error_messages = [
         "Unknown error",
         "No user logged in",
         "Corrupt input arguments",
+        "Invalid intolerance",
         "Duplicate intolerance entry",
     ]
 
     try:
-        data = get_json_data(request)
-        intolerance = util.get_or_raise(
-            data, "intolerance", InvalidEndpointArgsException()
-        )
-
-        validate_intolerance_object(intolerance)
+        data = get_json_data(request, "POST")
+        intolerance_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
 
         user_id = get_current_user().id
+
+        intolerance = UserIntolerance.get_from_id(intolerance_id)
+
+        if intolerance is None:
+            return error_response(3, response_error_messages[3])
 
         result = DATABASE.add_intolerance(user_id, intolerance)
 
         if not result:
-            return error_response(3, response_error_messages[3])
+            return error_response(4, response_error_messages[4])
         return success_response()
     except (InvalidEndpointArgsException, InvalidArgumentException):
         return error_response(2, response_error_messages[2])
@@ -213,12 +217,19 @@ def delete_user_intolerance():
     ]
 
     try:
-        data = get_json_data(request)
-        intolerance_id = util.get_or_raise(data, "id", InvalidEndpointArgsException())
+        data = get_json_data(request, "POST")
+        intolerance_id = int(
+            util.get_or_raise(data, "id", InvalidEndpointArgsException())
+        )
 
         user_id = get_current_user().id
 
-        result = DATABASE.delete_intolerance(user_id, intolerance_id)
+        intolerance = UserIntolerance.get_from_id(intolerance_id)
+
+        if intolerance is None:
+            return error_response(2, response_error_messages[2])
+
+        result = DATABASE.delete_intolerance(user_id, intolerance)
 
         if not result:
             return error_response(3, response_error_messages[3])
