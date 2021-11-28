@@ -412,7 +412,7 @@ class Database:
             raise InvalidArgumentException("username is too short")
         if len(username) > 50:
             raise InvalidArgumentException("username is too long")
-        if re.fullmatch(r"\b[a-zA-Z0-9_-.$]+\b", username) is None:
+        if re.fullmatch(r"\b[a-zA-Z0-9_\-.$]+\b", username) is None:
             raise InvalidArgumentException("username has invalid syntax")
 
     def validate_user_id(self, user_id: str):
@@ -573,8 +573,8 @@ class Database:
                         given_name=given_name,
                         family_name=family_name,
                         profile_image=profile_image,
-                        authentication=auth,
-                        status=status,
+                        authentication=auth.get_id(),
+                        status=status.get_id(),
                         profile_visibility=profile_visibility,
                     )
                 )
