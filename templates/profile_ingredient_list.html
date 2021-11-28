@@ -1,5 +1,13 @@
 <div style="margin-top:10px;">
-    {% for ingredient in ingredients %}
+    <div class="h3 pm-font-major">
+        Liked Ingredients
+    </div>
+    {% if liked_ingredients | length == 0 %}
+    <div class="text-center p-5 h5">
+        This user has no liked ingredients saved.
+    </div>
+    {% else %}
+    {% for ingredient in liked_ingredients %}
     <div class="row">
         <div class="col-sm-auto">
             <img class="img-thumbnail" src="{{ingredient['image']}}" alt="Image of {{recipe['ingredient']}}"
@@ -13,4 +21,29 @@
     </div>
     <hr />
     {% endfor %}
+    {% endif %}
+
+    <div class="h3 pm-font-major">
+        Disliked Ingredients
+    </div>
+    {% if disliked_ingredients | length == 0 %}
+    <div class="text-center p-5 h5">
+        This user has no disliked ingredients saved.
+    </div>
+    {% else %}
+    {% for ingredient in disliked_ingredients %}
+    <div class="row">
+        <div class="col-sm-auto">
+            <img class="img-thumbnail" src="{{ingredient['image']}}" alt="Image of {{recipe['ingredient']}}"
+                style="width:80px;" />
+        </div>
+        <div class="col">
+            <div class="pm-font-major h4">
+                {{ingredient["name"]}}
+            </div>
+        </div>
+    </div>
+    <hr />
+    {% endfor %}
+    {% endif %}
 </div>

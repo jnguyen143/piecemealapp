@@ -95,6 +95,7 @@ Attributes
 - `id (int)`: The ID of the ingredient.
 - `name (str)`: The name of the ingredient.
 - `image (str)`: The URL for an image of the ingredient.
+- `liked (bool)`: Whether the associated user likes the ingredient. This value is only present on user-associated ingredients (i.e. when retrieving global ingredient information, this value will not be present).
 
 ### User
 A user object contains information describing a user.

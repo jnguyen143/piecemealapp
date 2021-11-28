@@ -2667,7 +2667,9 @@ class Database:
 
     # ===== USER-SAVED INGREDIENTS ===== #
 
-    def add_ingredient(self, user_id: str, ingredient_info: dict) -> bool:
+    def add_ingredient(
+        self, user_id: str, ingredient_info: dict, liked: bool = True
+    ) -> bool:
         """
         Adds the specified ingredient to the user's list of saved ingredients.
 
@@ -2679,6 +2681,8 @@ class Database:
                 The format for this argument is specified in the `add_ingredient_info()` section.
                 If the specified ingredient does not exist in the global ingredient table,
                 this function will add it to the table.
+            liked (bool): Whether the user likes the ingredient. This value is optional and
+                is true by default.
 
         Returns:
             True if the ingredient was added and false otherwise.
@@ -2706,7 +2710,9 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(
-                    SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
+                    SavedIngredient(
+                        user_id=user_id, ingredient_id=ingredient_id, liked=liked
+                    )
                 )
                 session.commit()
         except Exception as exc:
@@ -2807,8 +2813,9 @@ class Database:
 
         Returns:
             A tuple containing the list of Ingredient objects for which the user has
-            in their list of saved ingredients, or an empty list if the user
-            has no saved ingredients, and an integer describing the maximum number
+            in their list of saved ingredients (or an empty list if the user
+            has no saved ingredients), a list of booleans describing whether the user
+            likes the associated ingredient, and an integer describing the maximum number
             of available results.
 
         Raises:
@@ -2832,6 +2839,7 @@ class Database:
         try:
             with self.session_generator(expire_on_commit=False) as session:
                 result = []
+                liked = []
                 count = (
                     session.query(SavedIngredient).filter_by(user_id=user_id).count()
                 )
@@ -2849,11 +2857,14 @@ class Database:
                 if entries is not None:
                     for entry in entries:
                         result.append(entry.ingredient)
-                return (result, count)
+                        liked.append(entry.liked)
+                return (result, liked, count)
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def add_ingredients(self, user_ids: list[str], ingredient_infos: list[dict]):
+    def add_ingredients(
+        self, user_ids: list[str], ingredient_infos: list[dict], liked: list[bool]
+    ):
         """
         Adds each of the specified ingredients to their corresponding user.
 
@@ -2870,7 +2881,9 @@ class Database:
                 This list must have the same length as ingredient_infos.
             ingredient_infos (list[dict]): The list of ingredient information dictionaries
                 whose format is specified in `add_ingredient()`.
-                This list must have the same length as user_ids.
+                This list must have the same length as `user_ids`.
+            liked (list[bool]): The list of `liked` flags for each ingredient.
+                This list must have the same length as `user_ids`.
 
         Raises
             DatabaseException: If there was a problem querying the database.
@@ -2884,6 +2897,7 @@ class Database:
 
         processed_user_ids = []
         ingredient_ids = []
+        processed_liked = []
 
         for i, info in enumerate(ingredient_infos):
             ingredient_id: int = get_or_raise(
@@ -2895,6 +2909,7 @@ class Database:
                 # Only add it to the list if the user doesn't already have it
                 processed_user_ids.append(user_id)
                 ingredient_ids.append(ingredient_id)
+                processed_liked.append(liked[i])
 
             if not self.ingredient_info_exists(ingredient_id):
                 self.add_ingredient_info(info)
@@ -2908,7 +2923,9 @@ class Database:
                 for i, ingredient_id in enumerate(ingredient_ids):
                     session.add(
                         SavedIngredient(
-                            user_id=user_ids[i], ingredient_id=ingredient_id
+                            user_id=user_ids[i],
+                            ingredient_id=ingredient_id,
+                            liked=processed_liked[i],
                         )
                     )
                 session.commit()

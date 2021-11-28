@@ -301,6 +301,7 @@ The following table details the columns in the `saved_ingredients` table:
 |      `id`       |     `int`      | The ID of the saved ingredient. This value is automatically generated. |
 |    `user_id`    | `varchar(255)` | The ID of the associated user.                                         |
 | `ingredient_id` |     `int`      | The ID of the associated ingredient.                                   |
+|     `liked`     |     `bool`     | Whether the associated user likes the saved ingredient.                |
 
 The following code snippet details the exact function used to create the `saved_ingredients` table:
 ```sql
@@ -308,6 +309,7 @@ CREATE TABLE saved_ingredients (
     id INT UNIQUE NOT NULL GENERATED ALWAYS AS IDENTITY,
     user_id VARCHAR(255) NOT NULL,
     ingredient_id INT,
+    liked BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (id),
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT fk_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON UPDATE CASCADE ON DELETE SET NULL
@@ -1120,13 +1122,14 @@ Raises
 
 ### User-Saved Ingredients
 #### Add Ingredient
-`add_ingredient(user_id: str, ingredient_info: dict) -> bool` - Adds the specified ingredient to the user's list of saved ingredients.
+`add_ingredient(user_id: str, ingredient_info: dict, liked: bool = True) -> bool` - Adds the specified ingredient to the user's list of saved ingredients.
 
 If the user already has the ingredient saved, this function has no effect.
 
 Args
 - `user_id (str)`: The ID of the target user.
 - `ingredient_info (dict)`: The info for the target ingredient. The format for this argument is specified in the [`add_ingredient_info()`](#add-ingredient-info) section. If the specified ingredient does not exist in the global ingredient table, this function will add it to the table.
+- `liked (bool)`: Whether the user likes the ingredient. This value is optional and is true by default.
 
 Returns
 
@@ -1179,7 +1182,7 @@ Args
 
 Returns
 
-A tuple containing the list of `Ingredient` objects for which the user has in their list of saved ingredients, or an empty list if the user has no saved ingredients, and an integer describing the maximum number of available results.
+A tuple containing the list of `Ingredient` objects for which the user has in their list of saved ingredients (or an empty list if the user has no saved ingredients), a list of booleans describing whether the user likes the associated ingredient, and an integer describing the maximum number of available results.
 
 Raises
 - `DatabaseException`: If there was a problem querying the database.
@@ -1187,7 +1190,7 @@ Raises
 - `InvalidArgumentException`: If the specified offset or limit is less than 0.
 
 #### Add Multiple Ingredients
-`add_ingredients(user_ids: list[str], ingredient_infos: list[dict])` - Adds each of the specified ingredients to their corresponding user.
+`add_ingredients(user_ids: list[str], ingredient_infos: list[dict], liked: list[bool])` - Adds each of the specified ingredients to their corresponding user.
 
 For any of the user/ingredient combinations, if the user already has the specified ingredient, this function has no effect for that particular combination.
 
@@ -1196,6 +1199,7 @@ This is a bulk operation, which means it is equivalent to calling `add_ingredien
 Args
 - `user_ids (list[str])`: The list of user IDs. This list must have the same length as `ingredient_infos`.
 - `ingredient_infos (list[dict])`: The list of ingredient information dictionaries whose format is specified [here](#add-ingredient-info). This list must have the same length as `user_ids`.
+- `liked (list[bool])`: The list of `liked` flags for each ingredient. This list must have the same length as `user_ids`.
 
 Raises
 - `DatabaseException`: If there was a problem querying the database.

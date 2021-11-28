@@ -190,16 +190,12 @@
                         {% endif %}
                     </div>
                     <div class="tab-pane fade" id="ingredients" role="tabpanel" aria-labelledby="ingredients-tab">
-                        {% if "ingredients" in userdata %}
-                        {% if userdata["ingredients"] | length == 0 %}
-                        <div class="text-center p-5 h5">
-                            This user has no saved ingredients.
-                        </div>
-                        {% else %}
-                        {% with ingredients=userdata["ingredients"] %}
+                        {% if "liked_ingredients" in userdata %}
+                        {% with liked_ingredients=userdata["liked_ingredients"] %}
+                        {% with disliked_ingredients=userdata["disliked_ingredients"] %}
                         {% include "profile_ingredient_list.html" %}
                         {% endwith %}
-                        {% endif %}
+                        {% endwith %}
                         {% else %}
                         {% with blocked_value="saved ingredients" %}
                         {% include "profile_info_blocked.html" %}

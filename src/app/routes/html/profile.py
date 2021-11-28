@@ -72,14 +72,25 @@ def get_saved_recipes(user_id):
 
 def get_saved_ingredients(user_id):
     """
-    Returns a list of saved ingredients for the specified user.
+    Returns a list of saved ingredients for the specified user
+    split into "liked" and "disliked" groups.
     """
     try:
-        return [
-            ingredient.to_json() for ingredient in DATABASE.get_ingredients(user_id)[0]
-        ]
+        (ingredients, liked, _) = DATABASE.get_ingredients(user_id)
+        liked_group = []
+        disliked_group = []
+        for i, ingredient in enumerate(ingredients):
+            ingredient_json = ingredient.to_json()
+            ingredient_json["liked"] = liked[i]
+
+            if liked[i]:
+                liked_group.append(ingredient_json)
+            else:
+                disliked_group.append(ingredient_json)
+
+        return (liked_group, disliked_group)
     except DatabaseException:
-        return []
+        return ([], [])
 
 
 def get_friends(user_id):
@@ -119,7 +130,11 @@ def profile():
     userdata = current_user.to_json()
 
     userdata["recipes"] = get_saved_recipes(current_user.id)
-    userdata["ingredients"] = get_saved_ingredients(current_user.id)
+
+    (liked_ingredients, disliked_ingredients) = get_saved_ingredients(current_user.id)
+    userdata["liked_ingredients"] = liked_ingredients
+    userdata["disliked_ingredients"] = disliked_ingredients
+
     userdata["intolerances"] = get_intolerances(current_user.id)
     userdata["friends"] = get_friends(current_user.id)
     userdata["friend_requests"] = get_friend_requests(current_user.id)

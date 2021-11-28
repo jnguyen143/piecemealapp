@@ -224,6 +224,11 @@ class SavedIngredient(DATABASE.Model):
         DATABASE.ForeignKey("ingredients.id", onupdate="CASCADE", ondelete="NO ACTION"),
         nullable=False,
     )
+    liked = DATABASE.Column(
+        DATABASE.Boolean,
+        nullable=False,
+        default=True
+    )
     ingredient = relationship(Ingredient, foreign_keys=[ingredient_id])
 
     def to_json(self, shallow: bool = True):
@@ -240,8 +245,8 @@ class SavedIngredient(DATABASE.Model):
             This row instance as a JSON object.
         """
         if shallow:
-            return {"user_id": self.user_id, "ingredient_id": self.ingredient_id}
-        return {"user_id": self.user_id, "ingredient": self.ingredient.to_json()}
+            return {"user_id": self.user_id, "ingredient_id": self.ingredient_id, "liked": self.liked}
+        return {"user_id": self.user_id, "ingredient": self.ingredient.to_json(), "liked": self.liked}
 
 
 class Intolerance(DATABASE.Model):
