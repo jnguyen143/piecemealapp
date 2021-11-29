@@ -452,12 +452,6 @@ select {
 .image {
   display: flex;
   flex-flow: column;
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-}
-=======
-=======
->>>>>>> 2c66ca4fb60e1a111dfe886311636ad06779d2ed
 }
 
 .account{
@@ -467,11 +461,7 @@ select {
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-<<<<<<< HEAD
-  display:fit;
-=======
   display:inline-block;
->>>>>>> 2c66ca4fb60e1a111dfe886311636ad06779d2ed
   text-align:center;
   width:75%;
   margin-bottom:3px;
@@ -481,12 +471,9 @@ select {
 
 .account>*{
   margin-top:8px;
-<<<<<<< HEAD
-=======
   margin-bottom:8px;
   margin-left: 10px;
   margin-right:10px;
->>>>>>> 2c66ca4fb60e1a111dfe886311636ad06779d2ed
 }
 
 .accountPageButtons {
@@ -525,11 +512,7 @@ select {
   font-size: 17px;
   border: none;
   cursor: pointer;
-<<<<<<< HEAD
-  border-radius: 20px;
-=======
   /* border-radius: 20px; */
->>>>>>> 2c66ca4fb60e1a111dfe886311636ad06779d2ed
 }
 
 
@@ -537,9 +520,6 @@ select {
   background: #c46d04;
 }
 
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
 .navbar{
   margin-left:15px;
 }
@@ -556,9 +536,6 @@ select {
   margin-bottom:3px;
   height:450px;
 }
-<<<<<<< HEAD
->>>>>>> 2c66ca4fb60e1a111dfe886311636ad06779d2ed
-=======
 input[type=email]{
   padding: 8px 10px;
   margin: 10px auto;
@@ -594,4 +571,34 @@ input:focus:invalid {
 .error.active {
   padding: 0.3em;
 }
->>>>>>> 802dd2e96f6acdfe234723f20a90e3a1e3c27056
+.message {
+  display:none;
+  background: #f1f1f1;
+  color: #000;
+  position: relative;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.message p {
+  padding: 10px 35px;
+  font-size: 18px;
+}
+.valid {
+  color: green;
+}
+
+.valid:before {
+  position: relative;
+  left: -35px;
+  content: "&#10004;";
+}
+invalid {
+  color: red;
+}
+
+.invalid:before {
+  position: relative;
+  left: -35px;
+  content: "&#10006;";
+}
