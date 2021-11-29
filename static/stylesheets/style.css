@@ -556,4 +556,42 @@ select {
   margin-bottom:3px;
   height:450px;
 }
+<<<<<<< HEAD
 >>>>>>> 2c66ca4fb60e1a111dfe886311636ad06779d2ed
+=======
+input[type=email]{
+  padding: 8px 10px;
+  margin: 10px auto;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+
+
+input:invalid{
+  border-color: #900;
+  background-color: #FDD;
+}
+
+input:focus:invalid {
+  outline: none;
+}
+
+
+.error {
+  width  : 100%;
+  padding: 0;
+
+  font-size: 80%;
+  color: white;
+  background-color: #900;
+  border-radius: 0 0 5px 5px;
+
+  box-sizing: border-box;
+}
+
+.error.active {
+  padding: 0.3em;
+}
+>>>>>>> 802dd2e96f6acdfe234723f20a90e3a1e3c27056
