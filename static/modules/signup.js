@@ -57,6 +57,8 @@ document.getElementById('google-signup-form').onsubmit = () => {
 const email = document.getElementById('email');
 const emailError = document.querySelector('#mail + span.error');
 
+
+
 email.addEventListener('input', function (event) {
   if (email.validity.valid) {
     emailError.textContent = ''; // Reset the content of the message
@@ -65,6 +67,7 @@ email.addEventListener('input', function (event) {
     showError();
   }
 });
+
 
 form.addEventListener('submit', function (event) {
   if (!email.validity.valid) {
@@ -76,10 +79,60 @@ form.addEventListener('submit', function (event) {
 function showError() {
   if (email.validity.valueMissing) {
     emailError.textContent = 'You need to enter an e-mail address.';
-  } else if (email.validity.typeMismatch) {
+  }
+  else if (email.validity.typeMismatch) {
     emailError.textContent = 'Entered value needs to be an e-mail address.';
-  } else if (email.validity.tooShort) {
-    emailError.textContent = `Email should be at least ${email.minLength} characters; you entered ${email.value.length}.`;
   }
   emailError.className = 'error active';
+}
+
+var Password = document.getElementById("password");
+var letter = document.getElementById("letter");
+var capital = document.getElementById("capital");
+var number = document.getElementById("number");
+var length = document.getElementById("length");
+
+Password.onfocus = function () {
+  document.getElementById("message").style.display = "block";
+}
+Password.onblur = function () {
+  document.getElementById("message").style.display = "none";
+}
+
+Password.onkeyup = function () {
+  // Validate lowercase letters
+  var lowerCaseLetters = /[a-z]/g;
+  if (Password.value.match(lowerCaseLetters)) {
+    letter.classList.remove("invalid");
+    letter.classList.add("valid");
+  } else {
+    letter.classList.remove("valid");
+    letter.classList.add("invalid");
+  }
+  var upperCaseLetters = /[A-Z]/g;
+  if (Password.value.match(upperCaseLetters)) {
+    capital.classList.remove("invalid");
+    capital.classList.add("valid");
+  } else {
+    capital.classList.remove("valid");
+    capital.classList.add("invalid");
+  }
+
+  // Validates numbers in password  
+  var numbers = /[0-9]/g;
+  if (Password.value.match(numbers)) {
+    number.classList.remove("invalid");
+    number.classList.add("valid");
+  } else {
+    number.classList.remove("valid");
+    number.classList.add("invalid");
+  }
+  // Validates length of password
+  if (Password.value.length >= 8) {
+    length.classList.remove("invalid");
+    length.classList.add("valid");
+  } else {
+    length.classList.remove("valid");
+    length.classList.add("invalid");
+  }
 }
