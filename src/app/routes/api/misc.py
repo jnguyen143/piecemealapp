@@ -12,6 +12,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 
+
 from ...api.gmail import send_confirmation_email
 from ...database.database import (
     Database,
