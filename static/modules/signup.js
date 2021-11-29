@@ -12,12 +12,6 @@ async function startSignup(data) {
 }
 
 document.getElementById('default-signup-form').onsubmit = () => {
-  password = document.getElementById("password")
-  passwordCheck = document.getElementById("passwordConfirm")
-  if (password != passwordCheck) {
-    showToast("Passwords must match!")
-  }
-
   // Encrypt the data, then send it to the server
   encryptData(JSON.stringify({
     authentication: 0,
