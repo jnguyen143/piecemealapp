@@ -42,6 +42,7 @@ This file details the list of available endpoints for PieceMeal, including user-
       - [Handle a Friend Request](#handle-a-friend-request)
       - [Get Sent Requests](#get-sent-requests)
       - [Get Received Requests](#get-received-requests)
+      - [Delete Friend](#delete-friend)
     - [User Intolerances](#user-intolerances)
       - [Get User Intolerances](#get-user-intolerances)
       - [Add User Intolerance](#add-user-intolerance)
@@ -94,6 +95,7 @@ Attributes
 - `id (int)`: The ID of the ingredient.
 - `name (str)`: The name of the ingredient.
 - `image (str)`: The URL for an image of the ingredient.
+- `liked (bool)`: Whether the associated user likes the ingredient. This value is only present on user-associated ingredients (i.e. when retrieving global ingredient information, this value will not be present).
 
 ### User
 A user object contains information describing a user.
@@ -103,9 +105,11 @@ User objects contain minimal information about users; they do not contain sensit
 Attributes
 - `id (str)`: The ID of the user.
 - `username (str)`: The username of the user.
-- `given_name (str)`: The user's given name.
-- `family_name (str)`: The user's family name.
+- `given_name (str)`: The user's given name. This value is only present if the user allows their name to be shared publicly.
+- `family_name (str)`: The user's family name. This value is only present if the user allows their name to be shared publicly.
 - `profile_image (str)`: The URL for the user's profile image.
+- `profile_visibility (int)`: The user's profile visibility.
+- `creation_date (str)`: The user's account creation date as a string with the format `DD MM, YYYY`, where `MM` is the month spelled out completely. This value is only present if the user allows their account creation date to be shared publicly.
 
 ### Intolerance
 An intolerance object contains information describing a food intolerance.
@@ -500,6 +504,7 @@ On failure, the possible error codes are:
 - 1 - There is no user currently logged in.
 - 2 - The input arguments were missing or otherwise corrupted.
 - 3 - The user has already sent the request.
+- 4 - The user is already friends with the target.
 
 #### Handle a Friend Request
 `POST /api/friends/handle-request` - Processes the request for the current user and the specified source user.
@@ -560,6 +565,23 @@ On failure, the possible error codes are:
 - 0 - A general exception occurred.
 - 1 - There is no user currently logged in.
 - 2 - The input arguments were missing or otherwise corrupted.
+
+#### Delete Friend
+`POST /api/friends/delete` - Deletes the specified friend from the current user's list of friends.
+
+Args
+- `id (int)`: The ID of the friend to delete.
+
+Returns
+
+On success, a JSON object containing the following field:
+- `success (bool)`: Whether the request was successfully completed.
+
+On failure, the possible error codes are:
+- 0 - A general exception occurred.
+- 1 - There is no user currently logged in.
+- 2 - The input arguments were missing or otherwise corrupted.
+- 3 - The user does not have the specified friend.
 
 ### User Intolerances
 #### Get User Intolerances
@@ -622,6 +644,8 @@ On failure, the possible error codes are:
 #### Search for Users
 `GET /api/users/search` - Returns a list of users which match the specified query string.
 
+Note that when attempting to search by full name, given name, or family name, if a user's name is not publicly visible, they will not show up in the search results.
+
 Args
 - `query (str)`: The query string to use.
 - `search_by (str)`: The field to search by. This must be one of:
@@ -676,6 +700,7 @@ Args
 - `given_name (str)`: The user's given name.
 - `family_name (str)`: The user's family name.
 - `profile_image (str)`: The user's profile image.
+- `profile_visibility (int)`: The user's profile visibility.
 
 Returns
 

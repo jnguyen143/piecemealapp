@@ -1,0 +1,101 @@
+<div style="margin-top:10px;">
+    {% for friend_request in friend_requests %}
+    <div class="profile-friend-request-container" friend-request-id="{{friend_request['id']}}">
+        <div class="row">
+            <div class="col-sm-auto">
+                <button class="btn btn-sm btn-danger deny-friend-request-button"
+                    friend-request-id="{{friend_request['id']}}" style="vertical-align: middle;">
+                    <i class="bi-x-lg h5"></i>
+                </button>
+            </div>
+            <div class="col-sm-auto">
+                <button class="btn btn-sm btn-success accept-friend-request-button"
+                    friend-request-id="{{friend_request['id']}}" style="vertical-align: middle;">
+                    <i class="bi-check-lg h5"></i>
+                </button>
+            </div>
+            <div class="col-sm-auto">
+                <img class="img-thumbnail" src="{{friend_request['profile_image']}}"
+                    alt="Image of {{friend_request['username']}}" style="width:80px;" />
+            </div>
+            <div class="col">
+                <a class="pm-font-minor h4" href="/@{{friend_request['username']}}">
+                    {{friend_request["username"]}}
+                </a>
+            </div>
+        </div>
+        <hr />
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    (function () {
+        let buttons = document.getElementsByClassName('accept-friend-request-button');
+        for (let button of buttons) {
+            button.addEventListener('click', (e) => {
+                const friendRequestId = e.target.hasAttribute('friend-request-id') ? e.target.getAttribute('friend-request-id')
+                    : e.target.parentNode.getAttribute('friend-request-id');
+                fetch('/api/friends/handle-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ src: friendRequestId, action: 1 })
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        showToast('Friend request accepted');
+                        let options = document.getElementsByClassName('profile-friend-request-container');
+                        for (let option of options) {
+                            if (option.getAttribute('friend-request-id') === friendRequestId) {
+                                option.remove();
+                                break;
+                            }
+                        }
+
+                        let friendsTabButton = document.getElementById('friends-tab');
+                        friendsTabButton.setAttribute('profile-needs-reload', true);
+                    } else {
+                        showToast('Unable to accept the friend request at this time');
+                    }
+                }).catch((err) => {
+                    console.log(`ERROR: ${err.stack}`);
+                });
+            });
+        }
+    })();
+
+    (function () {
+        let buttons = document.getElementsByClassName('deny-friend-request-button');
+        for (let button of buttons) {
+            button.addEventListener('click', (e) => {
+                const friendRequestId = e.target.hasAttribute('friend-request-id') ? e.target.getAttribute('friend-request-id')
+                    : e.target.parentNode.getAttribute('friend-request-id');
+                openDeleteConfirmModal('friend request', () => {
+                    fetch('/api/friends/handle-request', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ src: friendRequestId, action: 0 })
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            showToast('Friend request denied');
+                            let options = document.getElementsByClassName('profile-friend-request-container');
+                            for (let option of options) {
+                                if (option.getAttribute('friend-request-id') === friendRequestId) {
+                                    option.remove();
+                                    break;
+                                }
+                            }
+                        } else {
+                            showToast('Unable to delete the friend request at this time');
+                        }
+                    }).catch((err) => {
+                        console.log(`ERROR: ${err.stack}`);
+                    });
+                });
+            });
+        }
+    })();
+</script>

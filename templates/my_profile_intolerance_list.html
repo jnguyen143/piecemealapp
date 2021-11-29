@@ -1,0 +1,60 @@
+<div style="margin-top:10px;" id="intolerance-list-div">
+    {% for intolerance in intolerances %}
+    <div class="profile-intolerance-container" intolerance-id="{{intolerance['id']}}">
+        <div class="row">
+            <div class="col-sm-auto">
+                <button class="btn btn-sm btn-danger delete-intolerance-button" intolerance-id="{{intolerance['id']}}"
+                    style="vertical-align: middle;">
+                    <i class="bi-x-lg h5"></i>
+                </button>
+            </div>
+            <div class="col">
+                <div class="pm-font-minor h4">
+                    {{intolerance["name"]}}
+                </div>
+            </div>
+        </div>
+        <hr />
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function getIntoleranceDeleteEvent() {
+        return (e) => {
+            const intoleranceId = e.target.hasAttribute('intolerance-id') ? e.target.getAttribute('intolerance-id')
+                : e.target.parentNode.getAttribute('intolerance-id');
+            openDeleteConfirmModal('intolerance', () => {
+                fetch('/api/user-intolerances/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: intoleranceId })
+                }).then(response => response.json()).then(data => {
+                    if (data.success) {
+                        showToast('Successfully deleted intolerance');
+                        let options = document.getElementsByClassName('profile-intolerance-container');
+                        for (let option of options) {
+                            if (option.getAttribute('intolerance-id') === intoleranceId) {
+                                option.remove();
+                                break;
+                            }
+                        }
+                    } else {
+                        showToast('Unable to delete the intolerance at this time');
+                    }
+                }).catch((err) => {
+                    console.log(`ERROR: ${err.stack}`);
+                });
+            });
+        };
+    }
+
+    (function () {
+        let buttons = document.getElementsByClassName('delete-intolerance-button');
+        for (let button of buttons) {
+            button.addEventListener('click', getIntoleranceDeleteEvent());
+        }
+    })();
+</script>

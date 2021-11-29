@@ -1,0 +1,88 @@
+<div style="margin-top:10px;">
+    {% for recipe in recipes %}
+    <div class="row">
+        <div class="col-sm-auto">
+            <button class="btn btn-default add-recipe-button" recipe-id="{{recipe['id']}}"
+                recipe-name="{{recipe['name']}}" recipe-image="{{recipe['image']}}"
+                recipe-summary="{{recipe['summary']}}" recipe-full-summary="{{recipe['full_summary']}}"
+                style="vertical-align: middle;">
+                <i class="bi-plus h2"></i>
+            </button>
+        </div>
+        <div class="col-sm-auto">
+            <img class="img-thumbnail" src="{{recipe['image']}}" alt="Image of {{recipe['name']}}"
+                style="width:80px;" />
+        </div>
+        <div class="col">
+            <div class="pm-font-major h4">
+                {{recipe["name"]}}
+            </div>
+            {% if "full_summary" in recipe and recipe["full_summary"] != "" %}
+            <div class="pm-font-minor">
+                {{recipe["full_summary"]}}
+            </div>
+            {% else %}
+            <div class="pm-font-minor">
+                {{recipe["summary"]}}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <hr />
+    {% endfor %}
+</div>
+
+{% if current_user.is_authenticated %}
+<script>
+    let buttons = document.getElementsByClassName('add-recipe-button');
+    for (let button of buttons) {
+        button.addEventListener('click', (e) => {
+            let btn = e.target.parentNode;
+            if (e.target.hasAttribute('recipe-id'))
+                btn = e.target;
+            let recipeId = parseInt(btn.getAttribute('recipe-id'), 10);
+            let name = btn.getAttribute('recipe-name');
+            let image = btn.getAttribute('recipe-image');
+            let summary = btn.getAttribute('recipe-summary');
+            let fullSummary = btn.getAttribute('recipe-full-summary');
+
+            fetch('/api/user-recipes/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    recipe: {
+                        id: recipeId,
+                        name: name,
+                        image: image,
+                        summary: summary,
+                        full_summary: fullSummary
+                    }
+                })
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    showToast('Successfully added recipe');
+                }
+                else if (data.error_code === 3) {
+                    showToast('You already have that recipe saved!');
+                }
+                else {
+                    showToast('Sorry, we couldn\'t process your request right now.');
+                }
+            }).catch((err) => {
+                console.log(`ERROR: ${err.stack}`);
+            });
+        });
+    }
+</script>
+{% else %}
+<script>
+    let buttons = document.getElementsByClassName('add-recipe-button');
+    for (let button of buttons) {
+        button.addEventListener('click', (e) => {
+            openModal();
+        });
+    }
+</script>
+{% endif %}

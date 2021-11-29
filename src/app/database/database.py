@@ -29,6 +29,72 @@ from ..util import (
 )
 
 
+class ProfileVisibility(Enum):
+    """
+    This type specifies all of the possible values for the
+    `profile_visibility` field in the `users` table.
+    """
+
+    NAME = 0x01
+    CREATION_DATE = 0x02
+    INTOLERANCES = 0x04
+    SAVED_RECIPES = 0x08
+    SAVED_INGREDIENTS = 0x10
+    FRIENDS = 0x20
+
+    def __init__(self, value):
+        self._value_ = value
+
+    @classmethod
+    def has(cls, bitfield: int, value) -> bool:
+        """
+        Returns true if `bitfield` has the specified ProfileVisibility `value`.
+        """
+        return (bitfield & value.value) == value.value
+
+    @classmethod
+    def enable(cls, bitfield: int, value) -> int:
+        """
+        Enables the specified ProfileVisibility `value` in `bitfield`.
+        """
+        return bitfield | value
+
+    @classmethod
+    def disable(cls, bitfield: int, value) -> int:
+        """
+        Disables the specified ProfileVisibility `value` in `bitfield`.
+        """
+        return bitfield & ~value
+
+    @classmethod
+    def enable_all(cls) -> int:
+        """
+        Returns a bitfield which has all ProfileVisibility values enabled.
+        """
+        return 0xFF
+
+    @classmethod
+    def disable_all(cls) -> int:
+        """
+        Returns a bitfield which has all ProfileVisibility values disabled.
+        """
+        return 0
+
+    @classmethod
+    def to_json(cls, bitfield: int) -> dict:
+        """
+        Creates a JSON object representing all of the permissions stored in `bitfield`.
+
+        Each permission will be a mapping of the permission name (in lower snake case)
+        to a boolean.
+        """
+
+        result = {}
+        for field in ProfileVisibility:
+            result[field.name.lower()] = ProfileVisibility.has(bitfield, field)
+        return result
+
+
 class UserIntolerance(Enum):
     """
     This type specifies the available intolerance types a user can have.
@@ -63,6 +129,17 @@ class UserIntolerance(Enum):
         """
         return {"id": self.value, "name": self.display_name}
 
+    @classmethod
+    def get_from_id(cls, intolerance_id: int):
+        """
+        Returns the UserIntolerance object which corresponds to the specified ID,
+        or None if no intolerance matches.
+        """
+        for intolerance in UserIntolerance:
+            if intolerance.value == int(intolerance_id):
+                return intolerance
+        return None
+
 
 class UserAuthentication(Enum):
     """
@@ -84,7 +161,6 @@ class UserAuthentication(Enum):
         Returns the enum instance associated with the provided value.
         """
         for member in cls:
-            print(f"member: {member.get_id()}")
             if value == member.get_id():
                 return member
         raise ValueError()
@@ -336,7 +412,7 @@ class Database:
             raise InvalidArgumentException("username is too short")
         if len(username) > 50:
             raise InvalidArgumentException("username is too long")
-        if re.fullmatch(r"\b[a-zA-Z0-9_-.$]+\b", username) is None:
+        if re.fullmatch(r"\b[a-zA-Z0-9_\-.$]+\b", username) is None:
             raise InvalidArgumentException("username has invalid syntax")
 
     def validate_user_id(self, user_id: str):
@@ -418,6 +494,10 @@ class Database:
                     This must be one of the values specified by the UserStatus type.
                     If it is not present, this function will automatically assign
                     a status of `UNVERIFIED` (due to the email having not yet been verified).
+                profile_visibility (int): The user's profile visibility.
+                    This must be a bitfield containing the values specified by
+                    the ProfileVisibility type. If it is not present, this function will
+                    automatically assign a value of 0 (all fields disabled).
 
         Raises:
             DatabaseException: If the function failed to create the user.
@@ -477,6 +557,8 @@ class Database:
 
         status: UserStatus = get_or_default(userdata, "status", UserStatus.UNVERIFIED)
 
+        profile_visibility = get_or_default(userdata, "profile_visibility", 0)
+
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
         from .models import User
@@ -491,10 +573,12 @@ class Database:
                         given_name=given_name,
                         family_name=family_name,
                         profile_image=profile_image,
-                        authentication=auth,
-                        status=status,
+                        authentication=auth.get_id(),
+                        status=status.get_id(),
+                        profile_visibility=profile_visibility,
                     )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to add user") from exc
 
@@ -585,6 +669,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).delete()
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -698,6 +783,7 @@ class Database:
                     "authentication": authentication,
                     "status": get_or_default(user, "status", UserStatus.UNVERIFIED),
                     "password": get_or_default(user, "password", None),
+                    "profile_visibility": get_or_default(user, "profile_visibility", 0),
                 }
             )
 
@@ -718,8 +804,10 @@ class Database:
                             profile_image=user["profile_image"],
                             authentication=user["authentication"],
                             status=user["status"],
+                            profile_visibility=user["profile_visibility"],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to add users") from exc
 
@@ -830,12 +918,19 @@ class Database:
                         raise NoUserException(user_id)
                     else:
                         session.delete(user)
+                session.commit()
         except NoUserException as exc:
             raise exc
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def search_users_by_name(self, query: str, offset: int = 0, limit: int = 10):
+    def search_users_by_name(
+        self,
+        query: str,
+        offset: int = 0,
+        limit: int = 10,
+        obey_visibility_rules: bool = True,
+    ):
         """
         Returns a list of `User` objects whose names contain the given query string
         and the maximum number of available results.
@@ -846,6 +941,10 @@ class Database:
                 This value is optional and is 0 by default.
             limit (int): The maximum number of users to return.
                 This value is optional and is 10 by default.
+            obey_visibility_rules (bool): Whether the visibility rules should be obeyed
+                when searching for users, meaning that users whose names are not publicly
+                visible will not show up in the search results if this value is true.
+                This value is optional and is true by default.
 
         Returns:
             A tuple containing the list of `User` objects whose names contain
@@ -864,13 +963,8 @@ class Database:
 
         # Split the query into two parts (given name and family name)
         parts = query.strip().split(sep=None)
-        name1 = parts[0] if len(parts) > 0 else ""
+        name1 = parts[0] if len(parts) > 0 else query
         name2 = parts[1] if len(parts) > 1 else ""
-
-        if name1 == "":
-            name1 = name2
-        elif name2 == "":
-            name2 = name1
 
         # pylint: disable=import-outside-toplevel
         # This must be imported in this function
@@ -878,9 +972,30 @@ class Database:
 
         try:
             with self.session_generator(expire_on_commit=False) as session:
-                count = (
-                    session.query(User)
-                    .filter(
+                filters = None
+                if name2 == "":
+                    filters = and_(
+                        or_(
+                            not obey_visibility_rules,
+                            User.profile_visibility.op("&")(
+                                ProfileVisibility.NAME.value
+                            )
+                            == ProfileVisibility.NAME.value,
+                        ),
+                        or_(
+                            User.given_name.ilike(f"%{name1}%"),
+                            User.family_name.ilike(f"%{name1}%"),
+                        ),
+                    )
+                else:
+                    filters = and_(
+                        or_(
+                            not obey_visibility_rules,
+                            User.profile_visibility.op("&")(
+                                ProfileVisibility.NAME.value
+                            )
+                            == ProfileVisibility.NAME.value,
+                        ),
                         or_(
                             and_(
                                 User.given_name.ilike(f"%{name1}%"),
@@ -890,25 +1005,14 @@ class Database:
                                 User.given_name.ilike(f"%{name2}%"),
                                 User.family_name.ilike(f"%{name1}%"),
                             ),
-                        )
+                        ),
                     )
-                    .count()
-                )
+
+                count = session.query(User).filter(filters).count()
 
                 users = (
                     session.query(User)
-                    .filter(
-                        or_(
-                            and_(
-                                User.given_name.ilike(f"%{name1}%"),
-                                User.family_name.ilike(f"%{name2}%"),
-                            ),
-                            and_(
-                                User.given_name.ilike(f"%{name2}%"),
-                                User.family_name.ilike(f"%{name1}%"),
-                            ),
-                        )
-                    )
+                    .filter(filters)
                     .offset(offset)
                     .limit(limit)
                     .all()
@@ -1024,6 +1128,7 @@ class Database:
                         full_summary=full_summary,
                     )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1079,6 +1184,7 @@ class Database:
                 if recipe is None:
                     raise NoRecipeException(recipe_id)
                 session.delete(recipe)
+                session.commit()
         except NoRecipeException as exc:
             raise exc
         except Exception as exc:
@@ -1180,6 +1286,7 @@ class Database:
                             full_summary=info["full_summary"],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1250,6 +1357,7 @@ class Database:
                         raise NoRecipeException(recipe_id)
                     else:
                         session.delete(recipe)
+                session.commit()
         except NoRecipeException as exc:
             raise exc
         except Exception as exc:
@@ -1337,6 +1445,7 @@ class Database:
                         image=image,
                     )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1396,6 +1505,7 @@ class Database:
                 if ingredient is None:
                     raise NoIngredientException(ingredient_id)
                 session.delete(ingredient)
+                session.commit()
         except NoIngredientException as exc:
             raise exc
         except Exception as exc:
@@ -1494,6 +1604,7 @@ class Database:
                             image=info["image"],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1568,6 +1679,7 @@ class Database:
                         raise NoIngredientException(ingredient_id)
                     else:
                         session.delete(ingredient)
+                session.commit()
         except NoIngredientException as exc:
             raise exc
         except Exception as exc:
@@ -1601,6 +1713,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(Relationship(user1=user1_id, user2=user2_id))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1661,6 +1774,9 @@ class Database:
             user1_id (str): The ID of the first user in the relationship.
             user2_id (str): The ID of the second user in the relationship.
 
+        Returns:
+            True if the relationship was deleted and false otherwise.
+
         Raises:
             DatabaseException: If there was a problem querying the database.
             NoUserException: If either of the specified users do not exist.
@@ -1696,6 +1812,9 @@ class Database:
 
                 if relationship is not None:
                     session.delete(relationship)
+                    session.commit()
+                    return True
+                return False
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -1743,13 +1862,13 @@ class Database:
 
                 if first_user is not None:
                     for user in first_user:
-                        result.append(user.user1_obj)
+                        result.append(user.user2_obj)
 
                 second_user = session.query(Relationship).filter_by(user2=user_id).all()
 
                 if second_user is not None:
                     for user in second_user:
-                        result.append(user.user2_obj)
+                        result.append(user.user1_obj)
 
                 count = len(result)
 
@@ -1799,6 +1918,7 @@ class Database:
                 if request is not None:
                     return False
                 session.add(FriendRequest(src=src, target=target))
+                session.commit()
                 return True
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
@@ -1961,6 +2081,7 @@ class Database:
                 if request is None:
                     return False
                 session.delete(request)
+                session.commit()
                 return True
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
@@ -1995,6 +2116,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(Intolerance(user_id=user_id, intolerance=intolerance.value))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2068,6 +2190,7 @@ class Database:
                 )
                 if entry is not None:
                     session.delete(entry)
+                    session.commit()
                     return True
                 return False
         except Exception as exc:
@@ -2125,7 +2248,7 @@ class Database:
 
                 if intolerances is not None:
                     for entry in intolerances:
-                        result.append(entry)
+                        result.append(UserIntolerance.get_from_id(entry.intolerance))
                 return (result, count)
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
@@ -2171,6 +2294,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(SavedRecipe(user_id=user_id, recipe_id=recipe_id))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2246,6 +2370,7 @@ class Database:
                 )
                 if entry is not None:
                     session.delete(entry)
+                    session.commit()
                     return True
                 else:
                     return False
@@ -2361,6 +2486,7 @@ class Database:
             with self.session_generator() as session:
                 for i, recipe_id in enumerate(recipe_ids):
                     session.add(SavedRecipe(user_id=user_ids[i], recipe_id=recipe_id))
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2410,6 +2536,7 @@ class Database:
                     )
                     if recipe is not None:
                         session.delete(recipe)
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2540,7 +2667,9 @@ class Database:
 
     # ===== USER-SAVED INGREDIENTS ===== #
 
-    def add_ingredient(self, user_id: str, ingredient_info: dict) -> bool:
+    def add_ingredient(
+        self, user_id: str, ingredient_info: dict, liked: bool = True
+    ) -> bool:
         """
         Adds the specified ingredient to the user's list of saved ingredients.
 
@@ -2552,6 +2681,8 @@ class Database:
                 The format for this argument is specified in the `add_ingredient_info()` section.
                 If the specified ingredient does not exist in the global ingredient table,
                 this function will add it to the table.
+            liked (bool): Whether the user likes the ingredient. This value is optional and
+                is true by default.
 
         Returns:
             True if the ingredient was added and false otherwise.
@@ -2579,8 +2710,11 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.add(
-                    SavedIngredient(user_id=user_id, ingredient_id=ingredient_id)
+                    SavedIngredient(
+                        user_id=user_id, ingredient_id=ingredient_id, liked=liked
+                    )
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2657,6 +2791,7 @@ class Database:
                 )
                 if entry is not None:
                     session.delete(entry)
+                    session.commit()
                     return True
                 else:
                     return False
@@ -2678,8 +2813,9 @@ class Database:
 
         Returns:
             A tuple containing the list of Ingredient objects for which the user has
-            in their list of saved ingredients, or an empty list if the user
-            has no saved ingredients, and an integer describing the maximum number
+            in their list of saved ingredients (or an empty list if the user
+            has no saved ingredients), a list of booleans describing whether the user
+            likes the associated ingredient, and an integer describing the maximum number
             of available results.
 
         Raises:
@@ -2703,6 +2839,7 @@ class Database:
         try:
             with self.session_generator(expire_on_commit=False) as session:
                 result = []
+                liked = []
                 count = (
                     session.query(SavedIngredient).filter_by(user_id=user_id).count()
                 )
@@ -2720,11 +2857,14 @@ class Database:
                 if entries is not None:
                     for entry in entries:
                         result.append(entry.ingredient)
-                return (result, count)
+                        liked.append(entry.liked)
+                return (result, liked, count)
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def add_ingredients(self, user_ids: list[str], ingredient_infos: list[dict]):
+    def add_ingredients(
+        self, user_ids: list[str], ingredient_infos: list[dict], liked: list[bool]
+    ):
         """
         Adds each of the specified ingredients to their corresponding user.
 
@@ -2741,7 +2881,9 @@ class Database:
                 This list must have the same length as ingredient_infos.
             ingredient_infos (list[dict]): The list of ingredient information dictionaries
                 whose format is specified in `add_ingredient()`.
-                This list must have the same length as user_ids.
+                This list must have the same length as `user_ids`.
+            liked (list[bool]): The list of `liked` flags for each ingredient.
+                This list must have the same length as `user_ids`.
 
         Raises
             DatabaseException: If there was a problem querying the database.
@@ -2755,6 +2897,7 @@ class Database:
 
         processed_user_ids = []
         ingredient_ids = []
+        processed_liked = []
 
         for i, info in enumerate(ingredient_infos):
             ingredient_id: int = get_or_raise(
@@ -2766,6 +2909,7 @@ class Database:
                 # Only add it to the list if the user doesn't already have it
                 processed_user_ids.append(user_id)
                 ingredient_ids.append(ingredient_id)
+                processed_liked.append(liked[i])
 
             if not self.ingredient_info_exists(ingredient_id):
                 self.add_ingredient_info(info)
@@ -2779,9 +2923,12 @@ class Database:
                 for i, ingredient_id in enumerate(ingredient_ids):
                     session.add(
                         SavedIngredient(
-                            user_id=user_ids[i], ingredient_id=ingredient_id
+                            user_id=user_ids[i],
+                            ingredient_id=ingredient_id,
+                            liked=processed_liked[i],
                         )
                     )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2831,6 +2978,7 @@ class Database:
                     )
                     if ingredient is not None:
                         session.delete(ingredient)
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2992,6 +3140,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).update({"username": username})
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3023,6 +3172,7 @@ class Database:
         try:
             with self.session_generator() as session:
                 session.query(User).filter_by(id=user_id).update({"email": email})
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3060,6 +3210,7 @@ class Database:
                 session.query(Password).filter_by(user_id=user_id).update(
                     {"phrase": password}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3130,6 +3281,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"profile_image": profile_image}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3157,6 +3309,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"status": status.get_id()}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3191,6 +3344,7 @@ class Database:
                     user.update({"given_name": given_name})
                 if family_name is not None:
                     user.update({"family_name": family_name})
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3218,6 +3372,7 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"given_name": given_name}
                 )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3245,5 +3400,34 @@ class Database:
                 session.query(User).filter_by(id=user_id).update(
                     {"family_name": family_name}
                 )
+                session.commit()
+        except Exception as exc:
+            raise DatabaseException("Failed to query database") from exc
+
+    def set_profile_visibility(self, user_id: str, profile_visibility: int):
+        """
+        Sets the profile visibility for the specified user.
+
+        Args:
+            user_id (str): The ID of the target user.
+            profile_visibility (int): The profile visibility for the target user.
+
+        Raises:
+            DatabaseException: If there was a problem querying the database.
+            NoUserException: If the specified user does not exist.
+        """
+        if not self.user_exists(user_id):
+            raise NoUserException(user_id)
+
+        # pylint: disable=import-outside-toplevel
+        # This must be imported in this function
+        from .models import User
+
+        try:
+            with self.session_generator() as session:
+                session.query(User).filter_by(id=user_id).update(
+                    {"profile_visibility": profile_visibility}
+                )
+                session.commit()
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc

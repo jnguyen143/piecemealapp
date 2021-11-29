@@ -26,15 +26,25 @@ class NoCurrentUserException(Exception):
         super().__init__("No user is currently logged in")
 
 
-def get_json_data(request) -> dict:
+def get_json_data(request, request_type: str = "GET") -> dict:
     """
     Returns a JSON object representing the data in the provided request.
+
+    If `request_type` is `GET`, this function will look in the URL query arguments for data.
+    If `request_type` is `POST`, this function will look in the request body for data.
+    Otherwise, an exception will be raised.
 
     If the request does not have JSON data, this function raises an exception.
     """
 
     try:
-        data: dict = request.get_json()
+        data: dict = None
+        if request_type == "GET":
+            data = request.args.to_dict()
+        elif request_type == "POST":
+            data = request.get_json()
+        else:
+            raise InvalidEndpointArgsException("Invalid request type")
         if data is None:
             raise InvalidEndpointArgsException("Expected JSON data")
         return data

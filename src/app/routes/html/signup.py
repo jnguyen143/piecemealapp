@@ -8,7 +8,7 @@ from ...database.database import (
 from ... import util
 
 blueprint = Blueprint(
-    "bp_direct_signup",
+    "bp_html_signup",
     __name__,
     template_folder=util.get_templates_folder(),
     static_folder=util.get_static_folder(),

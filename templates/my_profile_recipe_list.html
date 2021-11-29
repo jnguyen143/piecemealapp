@@ -1,0 +1,69 @@
+<div style="margin-top:10px;">
+    {% for recipe in recipes %}
+    <div class="profile-recipe-container" recipe-id="{{recipe['id']}}">
+        <div class="row">
+            <div class="col-sm-auto">
+                <button class="btn btn-sm btn-danger delete-recipe-button" recipe-id="{{recipe['id']}}"
+                    style="vertical-align: middle;">
+                    <i class="bi-x-lg h5"></i>
+                </button>
+            </div>
+            <div class="col-sm-auto">
+                <img class="img-thumbnail" src="{{recipe['image']}}" alt="Image of {{recipe['name']}}"
+                    style="width:80px;" />
+            </div>
+            <div class="col">
+                <div class="pm-font-major h4">
+                    {{recipe["name"]}}
+                </div>
+                {% if "full_summary" in recipe and recipe["full_summary"] != "" %}
+                <div class="pm-font-minor">
+                    {{recipe["full_summary"]}}
+                </div>
+                {% else %}
+                <div class="pm-font-minor">
+                    {{recipe["summary"]}}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <hr />
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    (function () {
+        let buttons = document.getElementsByClassName('delete-recipe-button');
+        for (let button of buttons) {
+            button.addEventListener('click', (e) => {
+                const recipeId = e.target.hasAttribute('recipe-id') ? e.target.getAttribute('recipe-id')
+                    : e.target.parentNode.getAttribute('recipe-id');
+                openDeleteConfirmModal('recipe', () => {
+                    fetch('/api/user-recipes/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id: recipeId })
+                    }).then(response => response.json()).then(data => {
+                        if (data.success) {
+                            showToast('Successfully deleted recipe');
+                            let options = document.getElementsByClassName('profile-recipe-container');
+                            for (let option of options) {
+                                if (option.getAttribute('recipe-id') === recipeId) {
+                                    option.remove();
+                                    break;
+                                }
+                            }
+                        } else {
+                            showToast('Unable to delete the recipe at this time');
+                        }
+                    }).catch((err) => {
+                        console.log(`ERROR: ${err.stack}`);
+                    });
+                });
+            });
+        }
+    })();
+</script>
