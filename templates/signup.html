@@ -26,11 +26,11 @@
         <form id="default-signup-form" method="POST">
           <p>or create an account here</p>
           <input type="text" id="username" placeholder="Username" />
-          <input type="text" id="email" placeholder="Email" />
+          <input type="email" id="email" placeholder="Email" required minlength="8" />
           <input type="text" id="given_name" placeholder="First Name" />
           <input type="text" id="family_name" placeholder="Last Name" />
           <input type="password" id="password" placeholder="Password" />
-          <input type="password" id="passwordConfirm" placeholder="Confirm Password" />
+          <input type="password" id="confirm_password" placeholder="Confirm Password" />
           <button type="submit" value="Sign Up" class="account-button">Sign Up</button>
         </form>
       </div>
