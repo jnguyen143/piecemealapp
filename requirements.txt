@@ -8,3 +8,10 @@ pyOpenSSL
 psycopg2-binary
 argon2-cffi
 PyCryptodome
+google-auth
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+email-to
+pybase64
+apiclient
