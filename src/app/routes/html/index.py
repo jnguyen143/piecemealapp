@@ -86,15 +86,21 @@ def user_index_page(current_user):
     The index page for when a user is logged in.
     """
     target_recipes = []
+    has_recipes = False
 
     (recipes, _) = DATABASE.get_recipes(current_user.id)
+    print("Found database recipes: ", recipes)
     if len(recipes) > 0:
         # Select one of the recipes from user's profile randomly
         recipe_sample = random.choice(recipes)
+        data = recipe_sample.to_json()
+        recipe_sample_id = data["id"]
+        has_recipes = True
 
         # Get similar recipes based on selected sample
         try:
-            target_recipes = get_similar_recipes_from_spoonacular(recipe_sample)
+            target_recipes = get_similar_recipes_from_spoonacular(recipe_sample_id)
+
         except spoonacular.SpoonacularApiException:
             pass
     else:
@@ -106,7 +112,7 @@ def user_index_page(current_user):
     return render_template(
         "index2.html",
         recipes=target_recipes,
-        has_recipes=len(target_recipes) > 0,
+        has_recipes=has_recipes,
         userdata=current_user.to_json(),
     )
 

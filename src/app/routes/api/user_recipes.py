@@ -171,6 +171,7 @@ def add_user_recipe():
 
     try:
         data = get_json_data(request, "POST")
+
         recipe = util.get_or_raise(data, "recipe", InvalidEndpointArgsException())
 
         validate_recipe_object(recipe)

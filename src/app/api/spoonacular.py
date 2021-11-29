@@ -378,9 +378,8 @@ def search_recipes(
     """
     params = {"apiKey": get_api_key()}
 
-    print("Error 1")
     for search_filter in filters.keys():
-        print("Error 2")
+
         (key, value) = parse_recipe_search_filter(filters, search_filter)
         if key is not None and value is not None:
             params[key] = value
@@ -627,14 +626,16 @@ def get_similar_recipes(recipe_id: int, limit: int = 10) -> list:
     params = {"apiKey": get_api_key(), "number": limit}
 
     data = None
-    try:
-        data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/{recipe_id}/similar",
-            headers={"Content-Type": "application/json"},
-            params=params,
-        )
-    except (RequestException, MalformedResponseException) as e:
-        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
+
+    # try:
+    data = api_get_json(
+        SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/{recipe_id}/similar",
+        headers={"Content-Type": "application/json"},
+        params=params,
+    )
+
+    # except (RequestException, MalformedResponseException) as e:
+    #     raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
 
     if not data:
         return None
@@ -669,6 +670,7 @@ def get_similar_recipes(recipe_id: int, limit: int = 10) -> list:
             print("Error: Unable to retrieve recipe data")
         result.append(recipe_dict)
 
+    print("This is the result: ", result)
     return result
 
 
