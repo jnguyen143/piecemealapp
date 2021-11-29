@@ -50,13 +50,11 @@ def get_blueprint() -> Blueprint:
     return blueprint
 
 
+login_handler_client = None
 DATABASE: Database = None
 GOOGLE_ID = None
 GOOGLE_SECRET = None
 GOOGLE_URL = "https://accounts.google.com/.well-known/openid-configuration"
-
-# Used during the Google login flow
-login_handler_client = WebApplicationClient(GOOGLE_ID)
 
 
 def init(app: Flask, database: Database):
@@ -72,10 +70,14 @@ def init(app: Flask, database: Database):
     global DATABASE
     global GOOGLE_ID
     global GOOGLE_SECRET
+    global login_handler_client
 
     DATABASE = database
     GOOGLE_ID = getenv("GOOGLE_CLIENT_ID")
     GOOGLE_SECRET = getenv("GOOGLE_CLIENT_SECRET")
+
+    # Used during the Google login flow
+    login_handler_client = WebApplicationClient(GOOGLE_ID)
 
     app.register_blueprint(get_blueprint())
 
