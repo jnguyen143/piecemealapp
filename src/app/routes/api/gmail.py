@@ -5,7 +5,6 @@ the Service Account
 from __future__ import print_function
 from email.mime.text import MIMEText
 from googleapiclient.discovery import build
-from apiclient import errors
 import pybase64
 from google.oauth2 import service_account
 from os import getenv
@@ -134,5 +133,5 @@ def send_message(service, user_id, message):
 
         print("Message Id: %s" % message["id"])
 
-    except errors.HttpError as error:
+    except Exception as error:
         print("An error occurred: %s" % error)
