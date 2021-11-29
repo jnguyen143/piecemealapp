@@ -91,7 +91,7 @@ def user_index_page(current_user):
     if len(recipes) > 0:
         # Select one of the recipes from user's profile randomly
         recipe_sample = random.choice(recipes)
-        # recipe_sample = recipe_sample.recipe_id
+
         # Get similar recipes based on selected sample
         try:
             target_recipes = get_similar_recipes_from_spoonacular(recipe_sample)
