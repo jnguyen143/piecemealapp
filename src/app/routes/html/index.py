@@ -125,6 +125,9 @@ def general_index_page():
 
 
 @blueprint.route("/search-recipes", methods=["POST"])
+# pylint:disable=C0116
+# disabling missing function docstring warning,
+# as it does not affect the code functionality
 def search_recipes():
     data = get_json_data(request, "POST")
     # print(data["recipes"])
@@ -134,6 +137,9 @@ def search_recipes():
 
 
 @blueprint.route("/search-ingredients", methods=["POST"])
+# pylint:disable=C0116
+# disabling missing function docstring warning,
+# as it does not affect the code functionality
 def search_ingredients():
     data = get_json_data(request, "POST")
     print(data)
