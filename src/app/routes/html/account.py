@@ -1,7 +1,7 @@
 """
 This file contains user-facing endpoints relating to account pages.
 """
-from flask import Flask, Blueprint, render_template
+from flask import Flask, Blueprint, render_template, abort
 from flask_login import login_required
 from ...database.database import (
     Database,
@@ -59,6 +59,7 @@ def account():
     """
     Returns the account page.
     """
+    userdata = None
     try:
         current_user = get_current_user()
         userdata = current_user.to_json()
@@ -66,8 +67,8 @@ def account():
             x.to_json(shallow=True)
             for x in DATABASE.get_relationships_for_user(current_user.id)[0]
         ]
-        return render_template("account.html", userdata=userdata)
     except DatabaseException:
-        return None  # TODO: Handle exceptions
+        abort(500)
     except NoCurrentUserException:
-        return None  # TODO: Handle exceptions
+        abort(500)
+    return render_template("account.html", userdata=userdata)

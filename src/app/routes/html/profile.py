@@ -144,22 +144,3 @@ def profile():
         current_userdata=userdata,
         permissions=ProfileVisibility.to_json(current_user.profile_visibility),
     )
-
-    """current_user = get_current_user()
-    (recipes, _) = DATABASE.get_recipes(current_user.id)
-    (ingredients, _) = DATABASE.get_ingredients(current_user.id)
-
-    if len(recipes) == 0:
-        try:
-            recipes = spoonacular.get_recommended_recipes()
-        except spoonacular.SpoonacularApiException:
-            pass
-
-    return render_template(
-        "my_profile.html",
-        recipes=[recipe.to_json() for recipe in recipes],
-        has_recipes=len(recipes) > 0,
-        ingredients=[ingredient.to_json() for ingredient in ingredients],
-        has_ingredient=len(ingredients) > 0,
-        userdata=current_user.to_json(shallow=True),
-    )"""

@@ -7,7 +7,7 @@ visiting "/@<username>", where "<username>" is the user's username.
 
 from flask import Flask, Blueprint, render_template, abort
 
-from app.routes.routing_util import NoCurrentUserException, get_current_user
+from ..routing_util import NoCurrentUserException, get_current_user
 from ...database.database import (
     Database,
     DatabaseException,
@@ -126,6 +126,7 @@ def user_profile(username):
     except NoCurrentUserException:
         pass
 
+    userdata = None
     try:
         user = DATABASE.get_user_by_username(username)
 
@@ -170,13 +171,13 @@ def user_profile(username):
             or userdata["has_relationship_with_current"]
         ):
             userdata["friends"] = get_friends(user.id)
-
-        return render_template(
-            "profile_page.html",
-            userdata=userdata,
-            current_userdata=current_user,
-        )
     except NoUserException:
         abort(404)
     except DatabaseException:
         abort(500)
+
+    return render_template(
+        "profile_page.html",
+        userdata=userdata,
+        current_userdata=current_user,
+    )

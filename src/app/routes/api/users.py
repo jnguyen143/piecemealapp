@@ -104,11 +104,7 @@ def search_users():
 
         if search_by == "username":
             results = DATABASE.search_users_by_username(query, offset, limit)
-        elif (
-            search_by == "full_name"
-            or search_by == "given_name"
-            or search_by == "family_name"
-        ):
+        elif search_by in ("full_name", "given_name", "family_name"):
             results = DATABASE.search_users_by_name(query, offset, limit)
         else:
             return error_response(1, response_error_messages[1])
