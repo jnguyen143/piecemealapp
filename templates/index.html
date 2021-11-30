@@ -23,7 +23,7 @@
         </div>
 
         <select id="cuisine" name="cuisine">
-          <option value="">Select Cuisine Type</option>
+          <option value="">Cuisine Type</option>
           <option value="African">African</option>
           <option value="American">American</option>
           <option value="British"> British </option>
@@ -51,6 +51,48 @@
           <option value="Thai"> Thai </option>
           <option value="Vietnamese"> Vietnamese </option>
         </select>
+
+        <br>
+        <select id="intolerance" name="intolerance">
+          <option value="">Intolerance</option>
+          <option value="Dairy">Dairy</option>
+          <option value="Egg">Egg</option>
+          <option value="Gluten">Gluten</option>
+          <option value="Grain">Grain</option>
+          <option value="Peanut">Peanut</option>
+          <option value="Seafood">Seafood</option>
+          <option value="Sesame">Sesame</option>
+          <option value="Shellfish">Shellfish</option>
+          <option value="Soy">Soy</option>
+          <option value="Sulfite">Sulfite</option>
+          <option value="Tree Nut">Tree Nut</option>
+          <option value="Wheat">Wheat</option>
+        </select>
+        <br>
+        <select id="diet" name="diet">
+          <option value="">Diet</option>
+          <option value="Gluten Free">Gluten Free</option>
+          <option value="Ketogenic">Ketogenic</option>
+          <option value="Vegetarian">Vegetarian</option>
+          <option value="Lacto-Vegetarian">Lacto-Vegetarian</option>
+          <option value="Ovo-Vegetarian">Ovo-Vegetarian</option>
+          <option value="Vegan">Vegan</option>
+          <option value="Pescetarian">Pescetarian</option>
+          <option value="Paleo">Paleo</option>
+          <option value="Primal">Primal</option>
+          <option value="Low FODMAP">Low FODMAP</option>
+          <option value="Whole30">Whole30</option>
+        </select>
+        <br>
+        <select id="maxPrepTime" name="maxPrepTime">
+          <option value="">Prep Time</option>
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="60">1 hour</option>
+          <option value="90">1.5 hours</option>
+          <option value="120">2 hours</option>
+        </select>
+
         <button type="submit" id="search-recipe-button" class="search-button">Search</button>
       </form>
 
@@ -168,6 +210,14 @@
       function searchRecipes() {
         let input = document.getElementById('recipe-input').value;
         let cuisine = document.getElementById('cuisine').value;
+        let intolerance = document.getElementById('intolerance').value;
+        let diet = document.getElementById('diet').value;
+        let maxPrepTime = document.getElementById('maxPrepTime').value;
+        console.log(cuisine)
+        console.log(intolerance)
+        console.log(diet)
+
+        // to hide the suggested recipes div
         let btn = document.getElementById('search-recipe-button');
         let hideDiv = document.getElementById('hideDiv');
         btn.onclick = function () {
@@ -178,7 +228,10 @@
         }
         fetch('/api/recipe-info/search?' + new URLSearchParams({
           query: input,
-          cuisines: [cuisine]
+          cuisines: [cuisine],
+          intolerances: [intolerance],
+          diets: [diet],
+          max_prep_time: maxPrepTime
         })).then(response => response.json()).then(response => {
           fetch('/search-recipes', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
