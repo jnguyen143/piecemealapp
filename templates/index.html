@@ -13,10 +13,10 @@
 
       <img class="logo" src="../static/assets/logo.svg" />
 
-      <form class="recipes" action="/search_recipes" method="POST">
+      <form class="recipes" onsubmit="searchRecipes();return false;" method="GET">
         <p>Search for Recipes</p>
 
-        <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
+        <input type="text" id="recipe-input" placeholder="find potential recipes!" />
 
         <div class="filters">
           <p>Filter by:</p>
@@ -51,12 +51,12 @@
           <option value="Thai"> Thai </option>
           <option value="Vietnamese"> Vietnamese </option>
         </select>
-        <button type="submit" class="search-button">Search</button>
+        <button type="submit" id="search-recipe-button" class="search-button">Search</button>
       </form>
 
-      <form class="ingredients" action="/search_ingredients" method="POST">
+      <form class="ingredients" onsubmit="searchIngredients();return false;" method="POST">
         <p>Search for Ingredients</p>
-        <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
+        <input type="text" name="searchIngredients" id="ingredient-input" placeholder="search for ingredients!" />
         <button type="submit" class="search-button">Search</button>
       </form>
     </div>
@@ -69,12 +69,12 @@
       <a href="/signup">Register</a>
     </div>
 
-    <div id="content" class="account">
-      <div id="right-sub-container"></div>
+    <div id="content" class="right-sub-container">
+      <div id="search-data"></div>
 
     </div>
 
-    <div class="right-sub-container">
+    <div class="right-sub-container" id="hideDiv">
       <!-- If incoming data is from search route, display within right sub-container -->
       {%if search%}
       <div class="header">
@@ -163,8 +163,49 @@
 
     {% include "Toast.html" %}
 
-    <script src="../static/modules/index.js" type="module"></script>
+    <!-- <script src="../static/modules/index.js" type="module"></script> -->
+    <script>
+      function searchRecipes() {
+        let input = document.getElementById('recipe-input').value;
+        let cuisine = document.getElementById('cuisine').value;
+        let btn = document.getElementById('search-recipe-button');
+        let hideDiv = document.getElementById('hideDiv');
+        btn.onclick = function () {
+          if (hideDiv.style.display !== "none") {
+            hideDiv.style.display = "none";
 
+          }
+        }
+        fetch('/api/recipe-info/search?' + new URLSearchParams({
+          query: input,
+          cuisines: [cuisine]
+        })).then(response => response.json()).then(response => {
+          fetch('/search-recipes', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipes: response.recipes, input: input })
+          }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
+
+        });
+      }
+      // function searchIngredients() {
+
+      //   let ingredientInput = document.getElementById('ingredient-input').value;
+
+      //   fetch('/api/ingredient-info/search?' + new URLSearchParams({
+      //     query: ingredientInput,
+      //   })).then(response => response.json()).then(response => {
+      //     console.log(response.error_message)
+      //     fetch('/search-ingredients', {
+      //       method: 'POST', headers: { 'Content-Type': 'application/json' },
+      //       body: JSON.stringify({ ingredients: response.ingredients, input: input })
+      //     }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
+
+      //   });
+      // }
+
+
+
+    </script>
 </body>
 
 </html>

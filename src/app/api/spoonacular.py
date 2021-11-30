@@ -409,8 +409,17 @@ def search_recipes(
 
     try:
         for recipe in data["results"]:
+            summary = get_recipe_summary(recipe["id"])
+            recipe["summary"] = extract_sentence(summary)
+            recipe["full_summary"] = clean_summary(summary)
             recipes.append(
-                {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
+                {
+                    "id": recipe["id"],
+                    "name": recipe["title"],
+                    "image": recipe["image"],
+                    "summary": recipe["summary"],
+                    "full_summary": recipe["full_summary"],
+                }
             )
     except KeyError as exc:
         raise SpoonacularApiException("Malformed response") from exc

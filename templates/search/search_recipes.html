@@ -1,17 +1,13 @@
 <div class="right-sub-container">
     <!-- If incoming data is from search route, display within right sub-container -->
-    {%if search%}
-    <div class="header">
-        <h1>Search results for "{{keyword}}"</h1>
-    </div>
-
-    {%if recipe_search%}
-
     {%if not recipes%}
-    <div style="text-align: center;">
+    <div class="right-sub-container" style="text-align: center;">
         <p>Oops! Unable to display recipes at this time</p>
     </div>
     {%else%}
+    <div class="header">
+        <h1>Search results for "{{keyword}}"</h1>
+    </div>
     <div class="content">
         {%for recipe in recipes%}
         <div class="recipe">
@@ -27,4 +23,3 @@
         {%endfor%}
     </div>
     {%endif%}
-</div>
