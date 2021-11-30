@@ -134,12 +134,10 @@ def search_recipes():
     )
 
 
-# @blueprint.route("/search-ingredients", methods=["POST"])
-# def search_ingredients():
-#     data = get_json_data(request, "POST")
-#     print(data)
-#     return render_template(
-#         "search_ingredients.html",
-#         ingredients=data["ingredients"],
-#         keyword=data["input"],
-#     )
+@blueprint.route("/search-ingredients", methods=["POST"])
+def search_ingredients():
+    data = get_json_data(request, "POST")
+    print(data)
+    return render_template(
+        "search/search_ingredients.html", ingredients=data["ingredients"]
+    )

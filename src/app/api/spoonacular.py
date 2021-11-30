@@ -332,7 +332,7 @@ def parse_recipe_search_filter(filters, key):
             list_to_comma_separated_string([ingredient for ingredient in filters[key]]),
         )
     elif key == "max_prep_time":
-        if int(filters[key]) <= -1:
+        if int(float(filters[key])) <= -1:
             return (None, None)
         return ("maxReadyTime", int(filters[key]))
     else:

@@ -1,47 +1,22 @@
 <div class="header">
-    <h1>Welcome to pieceMeal</h1>
-    <p>Rediscover your appetite by exploring more than 1,000,000+ recipes. You can start by
-        checking out some of our most popular recipes below</p>
-
-    {%if not recipes%}
+    {%if not ingredients%}
     <div style="text-align: center;">
-        <p>Oops! Unable to display recipes at this time</p>
+        <p>Oops! Unable to display ingredients at this time</p>
     </div>
     {%else%}
     <div class="content">
-        {%for recipe in recipes%}
+        {%for ingredient in ingredients%}
         <div class="recipe">
             <div class="image">
-                <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+                <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
                 <button type="submit" class="add-button">ADD</button>
             </div>
             <div class="description">
-                <h2>{{recipe["name"]}}</h2>
-                <p>{{recipe["summary"]}}</p>
+                <h2>{{ingredient["name"]}}</h2>
+                <p>{{ingredient["summary"]}}</p>
             </div>
         </div>
         {%endfor%}
     </div>
     {%endif%}
-    <div class="header">
-        {%if not ingredients%}
-        <div style="text-align: center;">
-            <p>Oops! Unable to display ingredients at this time</p>
-        </div>
-        {%else%}
-        <div class="content">
-            {%for ingredient in ingredients%}
-            <div class="recipe">
-                <div class="image">
-                    <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
-                    <button type="submit" class="add-button">ADD</button>
-                </div>
-                <div class="description">
-                    <h2>{{ingredient["name"]}}</h2>
-                    <p>{{ingredient["summary"]}}</p>
-                </div>
-            </div>
-            {%endfor%}
-        </div>
-        {%endif%}
-    </div>
+</div>
