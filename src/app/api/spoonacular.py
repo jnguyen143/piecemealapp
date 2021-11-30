@@ -301,10 +301,11 @@ def parse_recipe_search_filter(filters, key):
     """
     Parses the search filters for recipe searching.
     """
+    result = None
     if key == "intolerances":
         if filters[key] is None:
             return (None, None)
-        return (
+        result = (
             "intolerances",
             list_to_comma_separated_string(
                 [intolerance.get_display_name() for intolerance in filters[key]]
@@ -313,30 +314,31 @@ def parse_recipe_search_filter(filters, key):
     elif key == "cuisines":
         if filters[key] is None:
             return (None, None)
-        return (
+        result = (
             "cuisine",
             list_to_comma_separated_string([str(cuisine) for cuisine in filters[key]]),
         )
     elif key == "diets":
         if filters[key] is None:
             return (None, None)
-        return (
+        result = (
             "diet",
             list_to_comma_separated_string([str(diet) for diet in filters[key]]),
         )
     elif key == "ingredients":
         if filters[key] is None:
             return (None, None)
-        return (
+        result = (
             "includeIngredients",
-            list_to_comma_separated_string([ingredient for ingredient in filters[key]]),
+            list_to_comma_separated_string(list(filters[key])),
         )
     elif key == "max_prep_time":
         if filters[key] <= -1:
             return (None, None)
-        return ("maxReadyTime", int(filters[key]))
+        result = ("maxReadyTime", int(filters[key]))
     else:
         raise SpoonacularApiException(f'Invalid recipe search filter "{key}"')
+    return result
 
 
 def search_recipes(
@@ -785,8 +787,7 @@ def parse_ingredient_search_filter(filters, key):
                 [intolerance.get_display_name() for intolerance in filters[key]]
             ),
         )
-    else:
-        raise SpoonacularApiException(f'Invalid ingredient search filter "{key}"')
+    raise SpoonacularApiException(f'Invalid ingredient search filter "{key}"')
 
 
 def search_ingredients(

@@ -1,16 +1,3 @@
-# pylint: disable=(C0114)
-# pylint: disable=(E0401)
-import unittest
-from unittest.mock import patch
-from random import seed, randint
-import sys
-import pathlib
-
-
-# pylint: disable=(W0105)
-# disabled error for string
-# comment below
-# being declared as useless
 """
 This file tests the functionality of `database.Database.get_recommended_user_ingredients()`.
 Given a dummy user with dummy saved ingredients, this file tests to make sure that
@@ -19,58 +6,56 @@ This file tests the `get_recommended_user_ingredients()' function with random du
 user data to ensure that it can handle any kind of input data.
 """
 
-# pylint: disable=(C0116)
-def init_app_module_dir():
-
-    path = str(
-        pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
-    )
-    sys.path.append(path)
-
+import unittest
+from unittest.mock import patch
+from random import seed, randint
+from .... import app
 
 INPUT = "input"
 EXPECTED_OUTPUT = "expected"
 
-# pylint: disable=(C0116)
+
 def generate_prefixed_string(prefix):
+    """
+    Generates a random string prefixed with the specified string.
+    """
     result = prefix
     for _ in range(1, 10):
         result += str(randint(0, 9))
     return result
 
 
-# pylint: disable=(C0115)
+# pylint: disable=too-few-public-methods
+# This is a POD class.
 class MockedSavedingredient:
-    # pylint: disable=(W0622)
-    # disabled built in error
-    def __init__(self, id, name, image):
-        # pylint: disable=(C0103)
-        # disabled snake case error
-        self.id = id
+    """
+    Represents a saved ingredient.
+    """
+
+    def __init__(self, ingredient_id, name, image):
+        self.id = ingredient_id
         self.name = name
         self.image = image
 
-    # pylint: disable=(C0116)
     def __repr__(self):
         return f"id={self.id}, name={self.name}, image={self.image}"
 
 
-# pylint: disable=(C0116)
 def generate_saved_ingredient():
-    # pylint: disable=(W0622)
-    # disabled built in error
-    # pylint: disable=(C0103)
-    # disabled snake case error
-    id = randint(0, 100000)
+    """
+    Generates a random saved ingredient.
+    """
+    ingredient_id = randint(0, 100000)
     name = generate_prefixed_string("saved_ingredient_")
     image = generate_prefixed_string("image_")
-    return MockedSavedingredient(id, name, image)
+    return MockedSavedingredient(ingredient_id, name, image)
 
 
-# pylint: disable=(C0116)
 def get_saved_ingredients_mock(seedval):
-    # Return a list of ingredient objects, which amounts to a dict of id, name, and image
-    # Return between 0 and 100 ingredients
+    """
+    Return a list of ingredient objects, which amounts to a dict of ingredient_id, name, and image
+    Return between 0 and 100 ingredients
+    """
     seed(seedval)
     result = []
     for _ in range(0, randint(0, 100)):
@@ -78,48 +63,59 @@ def get_saved_ingredients_mock(seedval):
     return result
 
 
-# pylint: disable=(C0116)
 def get_user_id_mock(seedval):
+    """
+    Returns a randomly generated user ID.
+    """
     seed(seedval)
     return generate_prefixed_string("user_")
 
 
-# pylint: disable=(C0116)
 def get_limit_mock(seedval):
+    """
+    Returns a randomly generated limit.
+    """
     seed(seedval)
     return randint(1, 10)
 
 
-# pylint: disable=(C0116)
 def get_expected_output(seedval):
+    """
+    Returns the expected output.
+    """
     saved_ingredients = get_saved_ingredients_mock(seedval)
     limit = get_limit_mock(seedval)
     return saved_ingredients[-limit:]
 
 
-# pylint: disable=(C0103)
-# disabled snake case error
-def ingredients_match(a, b):
-
+def ingredients_match(ingredient_a, ingredient_b):
+    """
+    Returns true if the two ingredients match.
+    """
     try:
-        return a.id == b.id and a.name == b.name and a.image == b.image
-    # pylint: disable=(W0702)
-    # disabled except error
-    except:
+        return (
+            ingredient_a.id == ingredient_b.id
+            and ingredient_a.name == ingredient_b.name
+            and ingredient_a.image == ingredient_b.image
+        )
+    except KeyError:
         return False
 
 
 def contains_ingredient(src, target):
+    """
+    Returns true if the source contains the target ingredient.
+    """
     for ingredient in src:
         if ingredients_match(ingredient, target):
             return True
     return False
 
 
-# pylint: disable=(C0115)
-
-
 def validate_input(ingredients, expected_output):
+    """
+    Returns true if the provided output matches the expected output.
+    """
     for ingredient in ingredients:
         if not contains_ingredient(expected_output, ingredient):
             return False
@@ -127,7 +123,16 @@ def validate_input(ingredients, expected_output):
 
 
 class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
+    """
+    Holds the actual test case.
+    """
+
+    # pylint: disable=invalid-name
+    # This name cannot conform to snake case due to the requirements from the parent class.
     def setUp(self):
+        """
+        Sets up the test.
+        """
         self.test_success_params = []
         for _ in range(0, 10):
             seedval = randint(0, 100)
@@ -143,26 +148,23 @@ class GetRecommendedUserIngredientsTestCase(unittest.TestCase):
                 }
             )
 
+    # pylint: disable=invalid-name
+    # This name cannot conform to snake case due to the requirements from the parent class.
     def runTest(self):
-
-        init_app_module_dir()
-        # pylint: disable=import-outside-toplevel
-        # This import must occur after the above function runs.
-        import app
-
-        # If the below comment is not present, pylance will generate
-        # an import warning. We know the import is valid because the
-        #  above function call injects the required module directory.
-        # pyright: reportMissingImports=false
-
+        """
+        Runs the test.
+        """
         app.init_app()
         for test in self.test_success_params:
             with patch(
-                "database.database.Database.get_saved_ingredients"
+                "app.database.database.Database.get_ingredients"
             ) as db_get_saved_ingredients:
-                db_get_saved_ingredients.return_value = test[INPUT]["saved_ingredients"]
+                db_get_saved_ingredients.return_value = (
+                    test[INPUT]["saved_ingredients"],
+                    0,
+                )
                 validation = validate_input(
-                    app.db.get_recommended_ingredients_from_user(
+                    app.DATABASE.get_user_top_ingredients(
                         test[INPUT]["user_id"], test[INPUT]["limit"]
                     ),
                     test[EXPECTED_OUTPUT],

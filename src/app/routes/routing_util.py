@@ -76,6 +76,15 @@ def get_current_user():
     """
     Returns the currently logged in user, or raises an exception if there is no user.
     """
-    if current_user is None or not current_user.is_authenticated:
-        raise NoCurrentUserException()
-    return current_user
+
+    # pylint: disable=singleton-comparison
+    # We have to also use the regular equality operator check
+    # because apparently Werkzeug implements it weird
+    if (
+        current_user is not None
+        and current_user != None
+        and current_user.is_authenticated
+    ):
+        return current_user
+
+    raise NoCurrentUserException()

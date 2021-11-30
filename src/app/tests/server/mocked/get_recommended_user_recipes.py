@@ -1,17 +1,3 @@
-# pylint: disable=(E0401)
-# pylint: disable=(C0114)
-# disabled missing module and import error
-import unittest
-from unittest.mock import patch
-from random import seed, randint
-import sys
-import pathlib
-
-
-# pylint: disable=(W0105)
-# disabled error for string
-# comment below
-# being declared as useless
 """
 This file tests the functionality of `database.Database.get_recommended_user_recipes()`.
 
@@ -22,34 +8,35 @@ This file tests `get_recommended_user_recipes()` with randomly generated dummy
 user data to ensure that it is robust enough to handle any kind of input data.
 """
 
-# pylint: disable=(C0116)
-def init_app_module_dir():
-
-    path = str(
-        pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
-    )
-    sys.path.append(path)
+import unittest
+from unittest.mock import patch
+from random import seed, randint
+from .... import app
 
 
 INPUT = "input"
 EXPECTED_OUTPUT = "expected"
 
-# pylint: disable=(C0116)
+
 def generate_prefixed_string(prefix):
+    """
+    Generates a random string prefixed with the specified string.
+    """
     result = prefix
     for _ in range(1, 10):
         result += str(randint(0, 9))
     return result
 
 
-# pylint: disable=(C0115)
+# pylint: disable=too-few-public-methods
+# This is a POD class.
 class MockedSavedRecipe:
-    # pylint: disable=(W0622)
-    # disabled built in error
-    def __init__(self, id, name, image):
-        # pylint: disable=(C0103)
-        # disabled snake case error
-        self.id = id
+    """
+    Represents a saved ingredient.
+    """
+
+    def __init__(self, recipe_id, name, image):
+        self.id = recipe_id
         self.name = name
         self.image = image
 
@@ -57,22 +44,21 @@ class MockedSavedRecipe:
         return f"id={self.id}, name={self.name}, image={self.image}"
 
 
-# pylint: disable=(C0116)
 def generate_saved_recipe():
-    # pylint: disable=(W0622)
-    # disabled built in error
-    # pylint: disable=(C0103)
-    # disabled snake case error
-    id = randint(0, 100000)
+    """
+    Returns a randomly generated recipe.
+    """
+    recipe_id = randint(0, 100000)
     name = generate_prefixed_string("saved_recipe_")
     image = generate_prefixed_string("image_")
-    return MockedSavedRecipe(id, name, image)
+    return MockedSavedRecipe(recipe_id, name, image)
 
 
-# pylint: disable=(C0116)
 def get_saved_recipes_mock(seedval):
-    # Return a list of recipe objects, which amounts to a dict of id, name, and image
-    # Return between 0 and 100 recipes
+    """
+    Return a list of recipe objects, which amounts to a dict of id, name, and image
+    Return between 0 and 100 recipes
+    """
     seed(seedval)
     result = []
     for _ in range(0, randint(0, 100)):
@@ -80,37 +66,49 @@ def get_saved_recipes_mock(seedval):
     return result
 
 
-# pylint: disable=(C0116)
 def get_user_id_mock(seedval):
+    """
+    Returns a randomly generated user ID.
+    """
     seed(seedval)
     return generate_prefixed_string("user_")
 
 
-# pylint: disable=(C0116)
 def get_limit_mock(seedval):
+    """
+    Returns a randomly generated limit.
+    """
     seed(seedval)
     return randint(1, 10)
 
 
-# pylint: disable=(C0116)
 def get_expected_output(seedval):
+    """
+    Returns the expected output for the test.
+    """
     saved_recipes = get_saved_recipes_mock(seedval)
     limit = get_limit_mock(seedval)
     return saved_recipes[-limit:]
 
 
-# pylint: disable=(C0103)
-# disabled snake case error
-def recipes_match(a, b):
+def recipes_match(recipe_a, recipe_b):
+    """
+    Returns true if the two recipes match.
+    """
     try:
-        return a.id == b.id and a.name == b.name and a.image == b.image
-    # pylint: disable=(W0702)
-    # disabled except error
-    except:
+        return (
+            recipe_a.id == recipe_b.id
+            and recipe_a.name == recipe_b.name
+            and recipe_a.image == recipe_b.image
+        )
+    except KeyError:
         return False
 
 
 def contains_recipe(src, target):
+    """
+    Returns true if the source contains the target recipe.
+    """
     for recipe in src:
         if recipes_match(recipe, target):
             return True
@@ -118,6 +116,9 @@ def contains_recipe(src, target):
 
 
 def validate_input(recipes, expected_output):
+    """
+    Returns true if the provided output matches the expected output.
+    """
     for recipe in recipes:
         if not contains_recipe(expected_output, recipe):
             return False
@@ -125,8 +126,16 @@ def validate_input(recipes, expected_output):
 
 
 class GetRecommendedUserRecipesTestCase(unittest.TestCase):
-    # pylint: disable=(C0116)
+    """
+    The class that holds the actual test.
+    """
+
+    # pylint: disable=invalid-name
+    # This name cannot conform to snake case due to the requirements from the parent class.
     def setUp(self):
+        """
+        Sets up the test.
+        """
         self.test_success_params = []
         for _ in range(0, 10):
             seedval = randint(0, 100)
@@ -142,24 +151,20 @@ class GetRecommendedUserRecipesTestCase(unittest.TestCase):
                 }
             )
 
+    # pylint: disable=invalid-name
+    # This name cannot conform to snake case due to the requirements from the parent class.
     def runTest(self):
-
-        init_app_module_dir()
-        import app
-
-        # If the below comment is not present, pylance will generate an
-        # import warning. We know the import is valid because the above
-        #  function call injects the required module directory.
-        # pyright: reportMissingImports=false
-
+        """
+        Runs the test.
+        """
         app.init_app()
         for test in self.test_success_params:
             with patch(
-                "database.database.Database.get_saved_recipes"
+                "app.database.database.Database.get_recipes"
             ) as db_get_saved_recipes:
-                db_get_saved_recipes.return_value = test[INPUT]["saved_recipes"]
+                db_get_saved_recipes.return_value = (test[INPUT]["saved_recipes"], 0)
                 validation = validate_input(
-                    app.db.get_recommended_recipes_from_user(
+                    app.DATABASE.get_user_top_recipes(
                         test[INPUT]["user_id"], test[INPUT]["limit"]
                     ),
                     test[EXPECTED_OUTPUT],
