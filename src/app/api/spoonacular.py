@@ -333,7 +333,7 @@ def parse_recipe_search_filter(filters, key):
             list_to_comma_separated_string(list(filters[key])),
         )
     elif key == "max_prep_time":
-        if filters[key] <= -1:
+        if int(float(filters[key])) <= -1:
             return (None, None)
         result = ("maxReadyTime", int(filters[key]))
     else:
@@ -411,8 +411,17 @@ def search_recipes(
 
     try:
         for recipe in data["results"]:
+            summary = get_recipe_summary(recipe["id"])
+            recipe["summary"] = extract_sentence(summary)
+            recipe["full_summary"] = clean_summary(summary)
             recipes.append(
-                {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
+                {
+                    "id": recipe["id"],
+                    "name": recipe["title"],
+                    "image": recipe["image"],
+                    "summary": recipe["summary"],
+                    "full_summary": recipe["full_summary"],
+                }
             )
     except KeyError as exc:
         raise SpoonacularApiException("Malformed response") from exc

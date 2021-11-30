@@ -1,0 +1,30 @@
+<div class="right-sub-container">
+    <!-- If incoming data is from search route, display within right sub-container -->
+    {%if search%}
+    <div class="header">
+        <h1>Search results for "{{keyword}}"</h1>
+    </div>
+
+    {%if recipe_search%}
+
+    {%if not recipes%}
+    <div style="text-align: center;">
+        <p>Oops! Unable to display recipes at this time</p>
+    </div>
+    {%else%}
+    <div class="content">
+        {%for recipe in recipes%}
+        <div class="recipe">
+            <div class="image">
+                <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+                <button type="submit" class="add-button">ADD</button>
+            </div>
+            <div class="description">
+                <h2>{{recipe["name"]}}</h2>
+                <p>{{recipe["summary"]}}</p>
+            </div>
+        </div>
+        {%endfor%}
+    </div>
+    {%endif%}
+</div>
