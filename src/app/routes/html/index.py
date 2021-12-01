@@ -9,6 +9,7 @@ from ...database.database import (
 from ... import util
 from ..routing_util import NoCurrentUserException, get_current_user, get_json_data
 from ...api import spoonacular
+from ...api import recipes as recommended
 
 blueprint = Blueprint(
     "bp_html_index",
@@ -85,29 +86,23 @@ def user_index_page(current_user):
     """
     The index page for when a user is logged in.
     """
-    target_recipes = []
-    has_recipes = False
+    target_recipes = recommended.get_recommended_recipes(DATABASE, limit=12)
 
-    (recipes, _) = DATABASE.get_recipes(current_user.id)
-    print("Found database recipes: ", recipes)
-    if len(recipes) > 0:
-        # Select one of the recipes from user's profile randomly
-        recipe_sample = random.choice(recipes)
-        data = recipe_sample.to_json()
-        recipe_sample_id = data["id"]
-        has_recipes = True
-
-        # Get similar recipes based on selected sample
-        try:
-            target_recipes = get_similar_recipes_from_spoonacular(recipe_sample_id)
-
-        except spoonacular.SpoonacularApiException:
-            pass
-    else:
-        try:
-            target_recipes = get_recommended_recipes_from_spoonacular()
-        except spoonacular.SpoonacularApiException:
-            pass
+    # (recipes, _) = DATABASE.get_recipes(current_user.id)
+    # if len(recipes) > 0:
+    #     # Select one of the recipes from user's profile randomly
+    #     recipe_sample = random.choice(recipes)
+    #     # recipe_sample = recipe_sample.recipe_id
+    #     # Get similar recipes based on selected sample
+    #     try:
+    #         target_recipes = get_similar_recipes_from_spoonacular(recipe_sample)
+    #     except spoonacular.SpoonacularApiException:
+    #         pass
+    # else:
+    #     try:
+    #         target_recipes = get_recommended_recipes_from_spoonacular()
+    #     except spoonacular.SpoonacularApiException:
+    #         pass
 
     return render_template(
         "index2.html",
@@ -148,7 +143,7 @@ def search_recipes():
 # as it does not affect the code functionality
 def search_ingredients():
     data = get_json_data(request, "POST")
-    print(data)
+
     return render_template(
         "search/search_ingredients.html", ingredients=data["ingredients"]
     )

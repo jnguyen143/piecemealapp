@@ -191,6 +191,8 @@ def parse_intolerances(data):
         intolerances = util.get_or_raise(
             data, "intolerances", InvalidEndpointArgsException()
         )
+        if not isinstance(intolerances, list):
+            intolerances = [intolerances]
         for intolerance in intolerances:
             result.append(UserIntolerance[str(intolerance).upper()])
     except (InvalidEndpointArgsException, KeyError):
@@ -207,6 +209,8 @@ def parse_cuisines(data):
     result = []
     try:
         cuisines = util.get_or_raise(data, "cuisines", InvalidEndpointArgsException())
+        if not isinstance(cuisines, list):
+            cuisines = [cuisines]
         for cuisine in cuisines:
             result.append(spoonacular.Cuisine[str(cuisine).upper()])
     except (InvalidEndpointArgsException, KeyError):
@@ -222,9 +226,12 @@ def parse_diets(data):
     result = []
     try:
         diets = util.get_or_raise(data, "diets", InvalidEndpointArgsException())
+        if not isinstance(diets, list):
+            diets = [diets]
         for diet in diets:
             result.append(spoonacular.Diet[str(diet).upper()])
-    except (InvalidEndpointArgsException, KeyError):
+    except (InvalidEndpointArgsException, KeyError) as error:
+        print(error, "!")
         return None
 
     return None if len(result) == 0 else result
@@ -235,6 +242,8 @@ def parse_ingredients(data):
     Parses ingredient filters from the input data for the search endpoint.
     """
     result = util.get_or_default(data, "ingredients", [])
+    if not isinstance(result, list):
+        result = [result]
     return None if len(result) == 0 else result
 
 
