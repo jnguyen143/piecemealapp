@@ -125,6 +125,8 @@ def get_friends():
 
 @blueprint.route("/api/friends/send-request", methods=["POST"])
 @login_required
+# pylint: disable=too-many-return-statements
+# We need all of the return statements.
 def send_friend_request():
     """
     Sends a friend request from the current user to the target user.
@@ -179,6 +181,8 @@ def send_friend_request():
 
 @blueprint.route("/api/friends/handle-request", methods=["POST"])
 @login_required
+# pylint: disable=too-many-return-statements
+# We need all of the return statements.
 def handle_friend_request():
     """
     Processes the request for the current user and the specified source user.
@@ -411,8 +415,7 @@ def delete_friend():
 
         if result:
             return success_response()
-        else:
-            return error_response(3, response_error_messages[3])
+        return error_response(3, response_error_messages[3])
     except (InvalidEndpointArgsException, InvalidArgumentException):
         return error_response(2, response_error_messages[2])
     except NoCurrentUserException:

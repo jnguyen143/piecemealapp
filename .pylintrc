@@ -1,2 +1,8 @@
+[MESSAGES CONTROL]
+# There are a lot of instances throughout the code where the same code needs to be written in each file and cannot be outsourced to a central file.
+# Pylint says there's a cyclic import in global_recipes.py, but I don't see one in there?
+# There's no problem with the actual running of the code and Pylint won't let me disable the error in the module only, so I have to disable it here.
+disable=duplicate-code, cyclic-import
+
 [FORMAT]
 good-names=i,j,k,x,id,db,e,n

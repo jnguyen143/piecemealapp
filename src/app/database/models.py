@@ -87,6 +87,9 @@ class User(DATABASE.Model, UserMixin):
 
         return result
 
+    def __repr__(self):
+        return "User"
+
 
 class Recipe(DATABASE.Model):
     """
@@ -126,6 +129,9 @@ class Recipe(DATABASE.Model):
             "full_summary": "" if self.full_summary is None else self.full_summary,
         }
 
+    def __repr__(self):
+        return "Recipe"
+
 
 class Ingredient(DATABASE.Model):
     """
@@ -156,6 +162,9 @@ class Ingredient(DATABASE.Model):
             This row instance as a JSON object.
         """
         return {"id": self.id, "name": self.name, "image": self.image}
+
+    def __repr__(self):
+        return "Ingredient"
 
 
 class SavedRecipe(DATABASE.Model):
@@ -200,6 +209,9 @@ class SavedRecipe(DATABASE.Model):
             return {"user_id": self.user_id, "recipe_id": self.recipe_id}
         return {"user_id": self.user_id, "recipe": self.recipe.to_json()}
 
+    def __repr__(self):
+        return "SavedRecipe"
+
 
 class SavedIngredient(DATABASE.Model):
     """
@@ -224,11 +236,7 @@ class SavedIngredient(DATABASE.Model):
         DATABASE.ForeignKey("ingredients.id", onupdate="CASCADE", ondelete="NO ACTION"),
         nullable=False,
     )
-    liked = DATABASE.Column(
-        DATABASE.Boolean,
-        nullable=False,
-        default=True
-    )
+    liked = DATABASE.Column(DATABASE.Boolean, nullable=False, default=True)
     ingredient = relationship(Ingredient, foreign_keys=[ingredient_id])
 
     def to_json(self, shallow: bool = True):
@@ -245,8 +253,19 @@ class SavedIngredient(DATABASE.Model):
             This row instance as a JSON object.
         """
         if shallow:
-            return {"user_id": self.user_id, "ingredient_id": self.ingredient_id, "liked": self.liked}
-        return {"user_id": self.user_id, "ingredient": self.ingredient.to_json(), "liked": self.liked}
+            return {
+                "user_id": self.user_id,
+                "ingredient_id": self.ingredient_id,
+                "liked": self.liked,
+            }
+        return {
+            "user_id": self.user_id,
+            "ingredient": self.ingredient.to_json(),
+            "liked": self.liked,
+        }
+
+    def __repr__(self):
+        return "SavedIngredient"
 
 
 class Intolerance(DATABASE.Model):
@@ -276,6 +295,9 @@ class Intolerance(DATABASE.Model):
             This row instance as a JSON object.
         """
         return {"user_id": self.user_id, "intolerance": self.intolerance}
+
+    def __repr__(self):
+        return "Intolerance"
 
 
 class Relationship(DATABASE.Model):
@@ -319,6 +341,9 @@ class Relationship(DATABASE.Model):
 
         return {"user1": self.user1_obj.to_json(), "user2": self.user2_obj.to_json()}
 
+    def __repr__(self):
+        return "Relationship"
+
 
 class Password(DATABASE.Model):
     """
@@ -358,6 +383,9 @@ class Password(DATABASE.Model):
             "user": self.user_obj.to_json(),
             "phrase": self.phrase,
         }
+
+    def __repr__(self):
+        return "Password"
 
 
 class FriendRequest(DATABASE.Model):
@@ -400,3 +428,6 @@ class FriendRequest(DATABASE.Model):
             return {"src": self.src, "target": self.target}
 
         return {"src": self.src_obj.to_json(), "target": self.target_obj.to_json()}
+
+    def __repr__(self):
+        return "FriendRequest"

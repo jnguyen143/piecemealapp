@@ -3,11 +3,11 @@ This file contains the GMAIL API authorization and automated email processing fo
 the Service Account
 """
 from __future__ import print_function
+from os import getenv
 from email.mime.text import MIMEText
 from googleapiclient.discovery import build
 import pybase64
 from google.oauth2 import service_account
-from os import getenv
 
 # Email sending confirmation email
 EMAIL_FROM = getenv("ADMIN_EMAIL")
@@ -27,9 +27,8 @@ def send_confirmation_email(new_user_email):
     email_to = new_user_email
     email_subject = "Welcome to pieceMeal!"
 
-    message_file = open("confirmation.txt", "r")
-    message = message_file.read()
-    message_file.close()
+    with open("confirmation.txt", "r", encoding="utf-8") as file:
+        message = file.read()
 
     email_content = message
 
@@ -107,7 +106,7 @@ def create_registration_confirm_message(sender, new_user, subject, message_text)
     message["to"] = new_user
     message["from"] = sender
     message["subject"] = subject
-    message_string = bytes("{}".format(message), "utf-8")
+    message_string = bytes(str(message), "utf-8")
     # return {"raw": pybase64.urlsafe_b64encode(message.as_string())}
     return {"raw": pybase64.urlsafe_b64encode(message_string).decode("utf-8")}
 
@@ -131,7 +130,9 @@ def send_message(service, user_id, message):
             service.users().messages().send(userId=user_id, body=message).execute()
         )
 
-        print("Message Id: %s" % message["id"])
+        print(f"Message Id: {message['id']}")
 
+    # pylint: disable=broad-except
+    # Gmail API could return any number of errors and we want to catch them all.
     except Exception as error:
-        print("An error occurred: %s" % error)
+        print(f"An error occurred: {error}")
