@@ -369,7 +369,7 @@ def init_signup():
             util.get_or_raise(
                 actual_data, "authentication", InvalidEndpointArgsException()
             )
-        )
+        ).get_id()
         print(f"Auth: {authentication}, t: {type(authentication)}")
         print(
             f"UA: {UserAuthentication.DEFAULT.get_id()}, t: {type(UserAuthentication.DEFAULT.get_id())}"
