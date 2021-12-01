@@ -9,7 +9,7 @@ import app.tests.server.unmocked.run_unmocked as run_unmocked_server  # pylint: 
 from app import app  # pylint: disable=import-error
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2 and sys.argv[1] == "--test" or sys.argv[1] == "-t":
+    if len(sys.argv) > 2 and (sys.argv[1] == "--test" or sys.argv[1] == "-t"):
         test_type = sys.argv[2]
         if test_type == "client_mocked":
             run_mocked_client.run()
