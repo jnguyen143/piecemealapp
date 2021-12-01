@@ -272,6 +272,8 @@ class EncryptionException(DatabaseException):
         )
 
 
+# pylint: disable=too-many-public-methods
+# All database-related methods must be contained in this class.
 class Database:
     """
     Contains all database-related calls.
@@ -298,7 +300,8 @@ class Database:
 
         if db_url is None:
             raise DatabaseException("Undefined database URL")
-        elif db_url.startswith("postgres:"):
+
+        if db_url.startswith("postgres:"):
             # Sometimes, the database URL may start with "postgres:"
             # instead of "postgresql:" (particularly with Heroku).
             # This line corrects that issue.
@@ -392,7 +395,8 @@ class Database:
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
-    def validate_email(self, email: str):
+    @classmethod
+    def validate_email(cls, email: str):
         """
         Checks the provided email for syntactic correctness
         and raises an `InvalidArgumentException` if the email is invalid.
@@ -403,7 +407,8 @@ class Database:
         ):
             raise InvalidArgumentException("email has invalid syntax")
 
-    def validate_username(self, username: str):
+    @classmethod
+    def validate_username(cls, username: str):
         """
         Checks the provided username for syntactic correctness
         and raises an `InvalidArgumentException` if the username is invalid.
@@ -415,7 +420,8 @@ class Database:
         if re.fullmatch(r"\b[a-zA-Z0-9_\-.$]+\b", username) is None:
             raise InvalidArgumentException("username has invalid syntax")
 
-    def validate_user_id(self, user_id: str):
+    @classmethod
+    def validate_user_id(cls, user_id: str):
         """
         Checks the provided user ID for syntactic correctness
         and raises an `InvalidArgumentException` if the user ID is invalid.
@@ -425,7 +431,8 @@ class Database:
         if re.fullmatch(r"\b[\u0020-\u007E]+\b", user_id) is None:
             raise InvalidArgumentException("user ID has invalid syntax")
 
-    def generate_encrypted_password(self, password: str) -> str:
+    @classmethod
+    def generate_encrypted_password(cls, password: str) -> str:
         """
         Generates an encrypted version of the provided unencrypted password.
 
@@ -451,8 +458,7 @@ class Database:
                 password = session.query(Password).filter_by(user_id=user_id).first()
                 if password is None:
                     raise NoUserException(user_id)
-                else:
-                    return password.phrase
+                return password.phrase
         except NoUserException as exc:
             raise exc
         except Exception as exc:
@@ -508,10 +514,12 @@ class Database:
             and the provided password was unable to be properly encrypted.
         """
 
-        auth: UserAuthentication = get_or_raise(
-            userdata,
-            "authentication",
-            InvalidArgumentException("expected authentication"),
+        auth: UserAuthentication = UserAuthentication.get_from_value(
+            get_or_raise(
+                userdata,
+                "authentication",
+                InvalidArgumentException("expected authentication"),
+            )
         )
 
         email: str = get_or_raise(
@@ -543,9 +551,9 @@ class Database:
         if self.user_exists(user_id):
             raise DuplicateUserException(user_id)
 
-        self.validate_email(email)
-        self.validate_username(username)
-        self.validate_user_id(user_id)
+        Database.validate_email(email)
+        Database.validate_username(username)
+        Database.validate_user_id(user_id)
 
         given_name = get_or_default(userdata, "given_name", "")
 
@@ -736,7 +744,7 @@ class Database:
                 # This lambda is necessary; we do not want the function to run
                 # unless the key is not present
                 user,
-                "user_id",
+                "id",
                 lambda: self.generate_user_id(),
             )
             username = get_or_default_func(
@@ -764,9 +772,9 @@ class Database:
             ):
                 raise DuplicateUserException(user_id)
 
-            self.validate_email(email)
-            self.validate_username(username)
-            self.validate_user_id(user_id)
+            Database.validate_email(email)
+            Database.validate_username(username)
+            Database.validate_user_id(user_id)
 
             processed_data.append(
                 {
@@ -781,7 +789,9 @@ class Database:
                         "/static/assets/default_user_profile_image.png",
                     ),
                     "authentication": authentication,
-                    "status": get_or_default(user, "status", UserStatus.UNVERIFIED),
+                    "status": get_or_default(
+                        user, "status", UserStatus.UNVERIFIED.get_id()
+                    ),
                     "password": get_or_default(user, "password", None),
                     "profile_visibility": get_or_default(user, "profile_visibility", 0),
                 }
@@ -812,7 +822,7 @@ class Database:
             raise DatabaseException("Failed to add users") from exc
 
         for user in processed_data:
-            if user["authentication"] == UserAuthentication.DEFAULT:
+            if user["authentication"] == UserAuthentication.DEFAULT.get_id():
                 password = user["password"]
                 if password is None:
                     raise InvalidArgumentException("expected password")
@@ -916,8 +926,7 @@ class Database:
                     user = session.query(User).filter_by(id=user_id).first()
                     if user is None:
                         raise NoUserException(user_id)
-                    else:
-                        session.delete(user)
+                    session.delete(user)
                 session.commit()
         except NoUserException as exc:
             raise exc
@@ -1355,8 +1364,7 @@ class Database:
                     recipe = session.query(Recipe).filter_by(id=recipe_id).first()
                     if recipe is None:
                         raise NoRecipeException(recipe_id)
-                    else:
-                        session.delete(recipe)
+                    session.delete(recipe)
                 session.commit()
         except NoRecipeException as exc:
             raise exc
@@ -1677,8 +1685,7 @@ class Database:
                     )
                     if ingredient is None:
                         raise NoIngredientException(ingredient_id)
-                    else:
-                        session.delete(ingredient)
+                    session.delete(ingredient)
                 session.commit()
         except NoIngredientException as exc:
             raise exc
@@ -1874,8 +1881,7 @@ class Database:
 
                 if limit == 0:
                     return (result[offset:], count)
-                else:
-                    return (result[offset : offset + limit], count)
+                return (result[offset : offset + limit], count)
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2372,8 +2378,7 @@ class Database:
                     session.delete(entry)
                     session.commit()
                     return True
-                else:
-                    return False
+                return False
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -2564,7 +2569,7 @@ class Database:
         if limit < 0:
             raise InvalidArgumentException("expected limit >= 0")
 
-        recipes = self.get_recipes(user_id)
+        recipes = self.get_recipes(user_id)[0]
 
         result = {}
 
@@ -2793,8 +2798,7 @@ class Database:
                     session.delete(entry)
                     session.commit()
                     return True
-                else:
-                    return False
+                return False
         except Exception as exc:
             raise DatabaseException("Failed to query database") from exc
 
@@ -3007,7 +3011,7 @@ class Database:
         if limit < 0:
             raise InvalidArgumentException("expected limit >= 0")
 
-        ingredients = self.get_ingredients(user_id)
+        ingredients = self.get_ingredients(user_id)[0]
 
         result = {}
 
@@ -3128,7 +3132,7 @@ class Database:
             DuplicateUserException: If the specified username is already taken.
             InvalidArgumentException: If the specified username is syntactically invalid.
         """
-        self.validate_username(username)
+        Database.validate_username(username)
 
         if not self.user_exists(user_id):
             raise NoUserException(user_id)
@@ -3160,7 +3164,7 @@ class Database:
             DuplicateUserException: If the specified email is already taken.
             InvalidArgumentException: If the specified email is syntactically invalid.
         """
-        self.validate_email(email)
+        Database.validate_email(email)
 
         if not self.user_exists(user_id):
             raise NoUserException(user_id)
@@ -3199,7 +3203,7 @@ class Database:
             raise NoUserException(user_id)
 
         if not encrypted:
-            password = self.generate_encrypted_password(password)
+            password = Database.generate_encrypted_password(password)
 
         # pylint: disable=import-outside-toplevel
         # This import is valid

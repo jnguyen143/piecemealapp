@@ -230,8 +230,7 @@ def delete_user_ingredient():
 
         if result:
             return success_response()
-        else:
-            return error_response(3, response_error_messages[3])
+        return error_response(3, response_error_messages[3])
     except (InvalidEndpointArgsException, InvalidArgumentException):
         return error_response(2, response_error_messages[2])
     except NoCurrentUserException:

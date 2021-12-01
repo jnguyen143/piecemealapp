@@ -4,34 +4,32 @@ This file tests the correctness of default login page.
 
 import unittest
 from unittest.mock import patch
-
-
-def init_app_module_dir():
-    import sys
-    import pathlib
-
-    path = str(
-        pathlib.Path(__file__).parent.parent.parent.parent.joinpath("src").resolve()
-    )
-    sys.path.append(path)
+from .... import app
+from ....routes.html import login
 
 
 class DefaultLoginTest(unittest.TestCase):
+    """
+    The test case class for the login test.
+    """
+
+    # pylint: disable=invalid-name
+    # This name cannot conform to snake case due to the requirements from the parent class.
     def setUp(self):
-        pass
+        """
+        Sets up the test.
+        No setup needs to be performed for this client test.
+        """
 
+    # pylint: disable=invalid-name
+    # This name cannot conform to snake case due to the requirements from the parent class.
     def runTest(self):
-        init_app_module_dir()
-        # If the below comment is not present, pylance will generate an import warning. We know the import is valid because the above function call injects the required module directory.
-        # pylint: disable=import-error
-        # This import is valid
-        import app  # pyright: reportMissingImports=false
-
+        """
+        Runs the test.
+        """
         app.init_app()
 
-        from routes import login
-
-        with patch("routes.login.get_login_auth_status") as auth_status:
+        with patch("app.routes.html.login.get_login_auth_status") as auth_status:
             auth_status.return_value = 0
 
             # Render page

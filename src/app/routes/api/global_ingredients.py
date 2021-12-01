@@ -148,7 +148,7 @@ def search_ingredients():
     limit = util.get_or_default(data, "limit", 10)
 
     try:
-        results = spoonacular.search_recipes(
+        results = spoonacular.search_ingredients(
             query,
             filters,
             sort_by,
@@ -157,9 +157,11 @@ def search_ingredients():
         )
 
         # Cache the results for future use
-        DATABASE.add_recipe_infos(results[0], ignore_duplicates=True)
+        DATABASE.add_ingredient_infos(results[0], ignore_duplicates=True)
 
-        return success_response(results)
+        return success_response(
+            {"ingredients": results[0], "total_results": results[1]}
+        )
     except (
         DatabaseException,
         spoonacular.SpoonacularApiException,

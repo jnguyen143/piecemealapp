@@ -2,12 +2,12 @@
 This file contains user-facing endpoints relating to index pages.
 """
 import random
-from flask import Flask, Blueprint, render_template
+from flask import Flask, Blueprint, render_template, request
 from ...database.database import (
     Database,
 )
 from ... import util
-from ..routing_util import NoCurrentUserException, get_current_user
+from ..routing_util import NoCurrentUserException, get_current_user, get_json_data
 from ...api import spoonacular
 
 blueprint = Blueprint(
@@ -128,3 +128,27 @@ def general_index_page():
         pass
 
     return render_template("index.html", recipes=recipes, len=len(recipes))
+
+
+@blueprint.route("/search-recipes", methods=["POST"])
+# pylint:disable=C0116
+# disabling missing function docstring warning,
+# as it does not affect the code functionality
+def search_recipes():
+    data = get_json_data(request, "POST")
+    # print(data["recipes"])
+    return render_template(
+        "search/search_recipes.html", recipes=data["recipes"], keyword=data["input"]
+    )
+
+
+@blueprint.route("/search-ingredients", methods=["POST"])
+# pylint:disable=C0116
+# disabling missing function docstring warning,
+# as it does not affect the code functionality
+def search_ingredients():
+    data = get_json_data(request, "POST")
+    print(data)
+    return render_template(
+        "search/search_ingredients.html", ingredients=data["ingredients"]
+    )

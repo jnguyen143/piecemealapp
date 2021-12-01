@@ -49,7 +49,7 @@ def get_blueprint() -> Blueprint:
     return blueprint
 
 
-login_handler_client = None
+LOGIN_HANDLER_CLIENT = None
 DATABASE: Database = None
 GOOGLE_ID = None
 GOOGLE_SECRET = None
@@ -69,14 +69,14 @@ def init(app: Flask, database: Database):
     global DATABASE
     global GOOGLE_ID
     global GOOGLE_SECRET
-    global login_handler_client
+    global LOGIN_HANDLER_CLIENT
 
     DATABASE = database
     GOOGLE_ID = getenv("GOOGLE_CLIENT_ID")
     GOOGLE_SECRET = getenv("GOOGLE_CLIENT_SECRET")
 
     # Used during the Google login flow
-    login_handler_client = WebApplicationClient(GOOGLE_ID)
+    LOGIN_HANDLER_CLIENT = WebApplicationClient(GOOGLE_ID)
 
     app.register_blueprint(get_blueprint())
 
@@ -163,7 +163,7 @@ def login_google(error_responses):
         google_provider = get_google_provider_cfg()
         authorization_endpoint = google_provider["authorization_endpoint"]
         dest_uri = request.url_root + "api/validate-login/callback"
-        request_uri = login_handler_client.prepare_request_uri(
+        request_uri = LOGIN_HANDLER_CLIENT.prepare_request_uri(
             authorization_endpoint,
             redirect_uri=dest_uri,
             scope=["openid", "email", "profile"],
@@ -237,10 +237,9 @@ def init_login():
 
     if authentication == UserAuthentication.DEFAULT:
         return login_default(actual_data, response_error_messages)
-    elif authentication == UserAuthentication.GOOGLE:
+    if authentication == UserAuthentication.GOOGLE:
         return login_google(response_error_messages)
-    else:
-        return error_response(2, response_error_messages[2])
+    return error_response(2, response_error_messages[2])
 
 
 def signup_default(data, error_responses):
@@ -295,7 +294,7 @@ def signup_google(error_responses):
         google_provider = get_google_provider_cfg()
         authorization_endpoint = google_provider["authorization_endpoint"]
         dest_uri = request.url_root + "api/validate-signup/callback"
-        request_uri = login_handler_client.prepare_request_uri(
+        request_uri = LOGIN_HANDLER_CLIENT.prepare_request_uri(
             authorization_endpoint,
             redirect_uri=dest_uri,
             scope=["openid", "email", "profile"],
@@ -376,10 +375,9 @@ def init_signup():
 
     if authentication == UserAuthentication.DEFAULT:
         return signup_default(actual_data, response_error_messages)
-    elif authentication == UserAuthentication.GOOGLE:
+    if authentication == UserAuthentication.GOOGLE:
         return signup_google(response_error_messages)
-    else:
-        return error_response(2, response_error_messages[2])
+    return error_response(2, response_error_messages[2])
 
 
 def validate_with_google(google_provider, code):
@@ -389,7 +387,7 @@ def validate_with_google(google_provider, code):
     """
     token_endpoint = google_provider["token_endpoint"]
 
-    token_url, headers, body = login_handler_client.prepare_token_request(
+    token_url, headers, body = LOGIN_HANDLER_CLIENT.prepare_token_request(
         token_endpoint,
         authorization_response=request.url,
         redirect_url=request.base_url,
@@ -413,7 +411,7 @@ def get_google_user_info(google_provider):
     Returns the user information for the user associated with the client object.
     """
     userinfo_endpoint = google_provider["userinfo_endpoint"]
-    uri, headers, body = login_handler_client.add_token(userinfo_endpoint)
+    uri, headers, body = LOGIN_HANDLER_CLIENT.add_token(userinfo_endpoint)
     response = requests.get(uri, headers=headers, data=body)
 
     if not response.ok:
@@ -449,7 +447,7 @@ def validate_login_callback():
         code = request.args.get("code")
         google_provider = get_google_provider_cfg()
         response = validate_with_google(google_provider, code)
-        login_handler_client.parse_request_body_response(json.dumps(response))
+        LOGIN_HANDLER_CLIENT.parse_request_body_response(json.dumps(response))
         userinfo = get_google_user_info(google_provider)
     # pylint: disable=broad-except
     # We don't want to pass any exceptions to the caller.
@@ -481,7 +479,7 @@ def validate_signup_callback():
         code = request.args.get("code")
         google_provider = get_google_provider_cfg()
         response = validate_with_google(google_provider, code)
-        login_handler_client.parse_request_body_response(json.dumps(response))
+        LOGIN_HANDLER_CLIENT.parse_request_body_response(json.dumps(response))
         userinfo = get_google_user_info(google_provider)
     # pylint: disable=broad-except
     # We don't want to pass any exceptions to the caller.

@@ -4,9 +4,8 @@ This file contains endpoints related to user recipe data.
 from random import randrange
 from flask import Blueprint, request, Flask
 from flask_login import login_required
-from app.api import spoonacular
+from ...api import spoonacular
 
-from app.api.spoonacular import SpoonacularApiException
 from ...database.database import (
     Database,
     DatabaseException,
@@ -228,8 +227,7 @@ def delete_user_recipe():
 
         if result:
             return success_response()
-        else:
-            return error_response(3, response_error_messages[3])
+        return error_response(3, response_error_messages[3])
     except (InvalidEndpointArgsException, InvalidArgumentException):
         return error_response(2, response_error_messages[2])
     except NoCurrentUserException:
@@ -470,7 +468,7 @@ def get_recommended_recipes():
         return error_response(1, response_error_messages[1])
     except InvalidEndpointArgsException:
         return error_response(2, response_error_messages[2])
-    except (DatabaseException, SpoonacularApiException):
+    except (DatabaseException, spoonacular.SpoonacularApiException):
         return error_response(0, response_error_messages[0])
 
     return success_response({"recipes": recipes})

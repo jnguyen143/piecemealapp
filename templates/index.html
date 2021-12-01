@@ -13,17 +13,17 @@
 
       <img class="logo" src="../static/assets/logo.svg" />
 
-      <form class="recipes" action="/search_recipes" method="POST">
+      <form class="recipes" onsubmit="searchRecipes();return false;" method="GET">
         <p>Search for Recipes</p>
 
-        <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
+        <input type="text" id="recipe-input" placeholder="find potential recipes!" />
 
         <div class="filters">
           <p>Filter by:</p>
         </div>
 
         <select id="cuisine" name="cuisine">
-          <option value="">Select Cuisine Type</option>
+          <option value="">Cuisine Type</option>
           <option value="African">African</option>
           <option value="American">American</option>
           <option value="British"> British </option>
@@ -51,12 +51,54 @@
           <option value="Thai"> Thai </option>
           <option value="Vietnamese"> Vietnamese </option>
         </select>
-        <button type="submit" class="search-button">Search</button>
+
+        <br>
+        <select id="intolerance" name="intolerance">
+          <option value="">Intolerance</option>
+          <option value="Dairy">Dairy</option>
+          <option value="Egg">Egg</option>
+          <option value="Gluten">Gluten</option>
+          <option value="Grain">Grain</option>
+          <option value="Peanut">Peanut</option>
+          <option value="Seafood">Seafood</option>
+          <option value="Sesame">Sesame</option>
+          <option value="Shellfish">Shellfish</option>
+          <option value="Soy">Soy</option>
+          <option value="Sulfite">Sulfite</option>
+          <option value="Tree Nut">Tree Nut</option>
+          <option value="Wheat">Wheat</option>
+        </select>
+        <br>
+        <select id="diet" name="diet">
+          <option value="">Diet</option>
+          <option value="Gluten Free">Gluten Free</option>
+          <option value="Ketogenic">Ketogenic</option>
+          <option value="Vegetarian">Vegetarian</option>
+          <option value="Lacto-Vegetarian">Lacto-Vegetarian</option>
+          <option value="Ovo-Vegetarian">Ovo-Vegetarian</option>
+          <option value="Vegan">Vegan</option>
+          <option value="Pescetarian">Pescetarian</option>
+          <option value="Paleo">Paleo</option>
+          <option value="Primal">Primal</option>
+          <option value="Low FODMAP">Low FODMAP</option>
+          <option value="Whole30">Whole30</option>
+        </select>
+        <!-- <br>
+        <select id="maxPrepTime" name="maxPrepTime">
+          <option>Prep Time</option>
+          <option value=15>15 minutes</option>
+          <option value=30>30 minutes</option>
+          <option value=60>1 hour</option>
+          <option value=90>1.5 hours</option>
+          <option value=120>2 hours</option>
+        </select> -->
+
+        <button type="submit" id="search-recipe-button" class="search-button">Search</button>
       </form>
 
-      <form class="ingredients" action="/search_ingredients" method="POST">
+      <form class="ingredients" onsubmit="searchIngredients();return false;" method="POST">
         <p>Search for Ingredients</p>
-        <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
+        <input type="text" name="searchIngredients" id="ingredient-input" placeholder="search for ingredients!" />
         <button type="submit" class="search-button">Search</button>
       </form>
     </div>
@@ -69,7 +111,12 @@
       <a href="/signup">Register</a>
     </div>
 
-    <div class="right-sub-container">
+    <div id="content" class="right-sub-container">
+      <div id="search-data"></div>
+
+    </div>
+
+    <div class="right-sub-container" id="hideDiv">
       <!-- If incoming data is from search route, display within right sub-container -->
       {%if search%}
       <div class="header">
@@ -158,8 +205,60 @@
 
     {% include "Toast.html" %}
 
-    <script src="../static/modules/index.js" type="module"></script>
+    <!-- <script src="../static/modules/index.js" type="module"></script> -->
+    <script>
+      function searchRecipes() {
+        let input = document.getElementById('recipe-input').value;
+        let cuisine = document.getElementById('cuisine').value;
+        let intolerance = document.getElementById('intolerance').value;
+        let diet = document.getElementById('diet').value;
+        // let maxPrepTime = document.getElementById('maxPrepTime').value;
+        console.log(cuisine)
+        console.log(intolerance)
+        console.log(diet)
 
+        // to hide the suggested recipes div
+        let btn = document.getElementById('search-recipe-button');
+        let hideDiv = document.getElementById('hideDiv');
+        btn.onclick = function () {
+          if (hideDiv.style.display !== "none") {
+            hideDiv.style.display = "none";
+
+          }
+        }
+        fetch('/api/recipe-info/search?' + new URLSearchParams({
+          query: input,
+          cuisines: [cuisine],
+          intolerances: [intolerance],
+          diets: [diet],
+          // max_prep_time: maxPrepTime
+        })).then(response => response.json()).then(response => {
+          fetch('/search-recipes', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipes: response.recipes, input: input })
+          }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
+
+        });
+      }
+      function searchIngredients() {
+
+        let ingredientInput = document.getElementById('ingredient-input').value;
+        console.log(ingredientInput)
+        fetch('/api/ingredient-info/search?' + new URLSearchParams({
+          query: ingredientInput,
+        })).then(response => response.json()).then(response => {
+          console.log(response.error_message)
+          fetch('/search-ingredients', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ingredients: response.ingredients, input: input })
+          }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
+
+        });
+      }
+
+
+
+    </script>
 </body>
 
 </html>
