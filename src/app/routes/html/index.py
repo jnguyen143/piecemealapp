@@ -1,7 +1,6 @@
 """
 This file contains user-facing endpoints relating to index pages.
 """
-import random
 from flask import Flask, Blueprint, render_template, request
 from ...database.database import (
     Database,
@@ -107,7 +106,6 @@ def user_index_page(current_user):
     return render_template(
         "index2.html",
         recipes=target_recipes,
-        has_recipes=has_recipes,
         userdata=current_user.to_json(),
     )
 

@@ -1,8 +1,7 @@
 """this file contains functions for looking up recipes"""
 from random import randrange
 import math
-from app.database.database import InvalidArgumentException
-from ..database.database import Database
+from ..database.database import Database, InvalidArgumentException
 from . import spoonacular
 from ..routes.routing_util import InvalidEndpointArgsException, get_current_user
 
@@ -282,6 +281,9 @@ def extract_friends_similar_recipes(database, distribution, limit, num_sources_l
         if len(result) == actual_limit:
             break
 
+        if len(friend_data["recipes"]) == 0:
+            continue
+
         # Choose a random recipe from the friend's list of top recipes
         model_recipe = friend_data["recipes"][randrange(0, len(friend_data["recipes"]))]
 
@@ -340,4 +342,4 @@ def extract_random_recipes(database, distribution, limit, num_sources_left):
 
     recipes = database.get_random_recipe_infos(actual_limit)
 
-    return [recipe for recipe in recipes]
+    return list(recipes)
