@@ -57,6 +57,7 @@ def api_get_json(url: str, headers: dict = None, params: dict = None) -> dict:
     response = None
     try:
         response = requests.get(url, headers=headers, params=params)
+
     except Exception as e:
         raise RequestException(f"Failed to make GET request: {str(e)}") from e
 

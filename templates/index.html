@@ -71,34 +71,34 @@
         <br>
         <select id="diet" name="diet">
           <option value="">Diet</option>
-          <option value="Gluten Free">Gluten Free</option>
-          <option value="Ketogenic">Ketogenic</option>
-          <option value="Vegetarian">Vegetarian</option>
-          <option value="Lacto-Vegetarian">Lacto-Vegetarian</option>
-          <option value="Ovo-Vegetarian">Ovo-Vegetarian</option>
-          <option value="Vegan">Vegan</option>
-          <option value="Pescetarian">Pescetarian</option>
-          <option value="Paleo">Paleo</option>
-          <option value="Primal">Primal</option>
-          <option value="Low FODMAP">Low FODMAP</option>
-          <option value="Whole30">Whole30</option>
+          <option value="gluten free">Gluten Free</option>
+          <option value="ketogenic">Ketogenic</option>
+          <option value="vegetarian">Vegetarian</option>
+          <option value="lacto-vegetarian">Lacto-Vegetarian</option>
+          <option value="ovo-vegetarian">Ovo-Vegetarian</option>
+          <option value="vegan">Vegan</option>
+          <option value="pescetarian">Pescetarian</option>
+          <option value="paleo">Paleo</option>
+          <option value="primal">Primal</option>
+          <option value="low fodmap">Low FODMAP</option>
+          <option value="whole30">Whole30</option>
         </select>
-        <!-- <br>
-        <select id="maxPrepTime" name="maxPrepTime">
-          <option>Prep Time</option>
+        <br>
+        <select id="maxPrepTime">
+          <option value=-1>Prep Time</option>
           <option value=15>15 minutes</option>
           <option value=30>30 minutes</option>
           <option value=60>1 hour</option>
           <option value=90>1.5 hours</option>
           <option value=120>2 hours</option>
-        </select> -->
+        </select>
 
         <button type="submit" id="search-recipe-button" class="search-button">Search</button>
       </form>
 
       <form class="ingredients" onsubmit="searchIngredients();return false;" method="POST">
         <p>Search for Ingredients</p>
-        <input type="text" name="searchIngredients" id="ingredient-input" placeholder="search for ingredients!" />
+        <input type="text" id="ingredient-input" placeholder="search for ingredients!" />
         <button type="submit" class="search-button">Search</button>
       </form>
     </div>
@@ -116,7 +116,7 @@
 
     </div>
 
-    <div class="right-sub-container" id="hideDiv">
+    <div class="right-sub-container" id="changeDiv">
       <!-- If incoming data is from search route, display within right sub-container -->
       {%if search%}
       <div class="header">
@@ -212,26 +212,18 @@
         let cuisine = document.getElementById('cuisine').value;
         let intolerance = document.getElementById('intolerance').value;
         let diet = document.getElementById('diet').value;
-        // let maxPrepTime = document.getElementById('maxPrepTime').value;
+        let maxPrepTime = parseInt(document.getElementById('maxPrepTime').value, 10);
         console.log(cuisine)
         console.log(intolerance)
         console.log(diet)
+        console.log(maxPrepTime)
 
-        // to hide the suggested recipes div
-        let btn = document.getElementById('search-recipe-button');
-        let hideDiv = document.getElementById('hideDiv');
-        btn.onclick = function () {
-          if (hideDiv.style.display !== "none") {
-            hideDiv.style.display = "none";
-
-          }
-        }
         fetch('/api/recipe-info/search?' + new URLSearchParams({
           query: input,
           cuisines: [cuisine],
           intolerances: [intolerance],
           diets: [diet],
-          // max_prep_time: maxPrepTime
+          max_prep_time: maxPrepTime
         })).then(response => response.json()).then(response => {
           fetch('/search-recipes', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -241,19 +233,26 @@
         });
       }
       function searchIngredients() {
+        try {
+          let ingredientInput = document.getElementById('ingredient-input').value;
 
-        let ingredientInput = document.getElementById('ingredient-input').value;
-        console.log(ingredientInput)
-        fetch('/api/ingredient-info/search?' + new URLSearchParams({
-          query: ingredientInput,
-        })).then(response => response.json()).then(response => {
-          console.log(response.error_message)
-          fetch('/search-ingredients', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ingredients: response.ingredients, input: input })
-          }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
 
-        });
+          fetch('/api/ingredient-info/search?' + new URLSearchParams({
+            query: ingredientInput,
+            limit: 12
+          })).then(response => response.json()).then(response => {
+            console.log(response.error_message)
+            fetch('/search-ingredients', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ingredients: response.ingredients, input: ingredientInput })
+            }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
+
+          });
+        } catch (error) {
+          console.log(error)
+        }
+
+
       }
 
 

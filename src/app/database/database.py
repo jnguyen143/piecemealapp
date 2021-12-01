@@ -2648,7 +2648,7 @@ class Database:
         processed_friend_ids = []
         result = []
 
-        friends = self.get_relationships_for_user(user_id)
+        friends = self.get_relationships_for_user(user_id)[0]
 
         friend_count = min(len(friends), friend_limit)
 
@@ -2664,7 +2664,7 @@ class Database:
                 tries += 1
             if friends[index].id in processed_friend_ids:
                 continue
-            recipes = self.get_user_top_recipes(friends[index], limit_per_friend)
+            recipes = self.get_user_top_recipes(friends[index].id, limit_per_friend)
             result.append({"user": friends[index], "recipes": recipes})
             processed_friend_ids.append(friends[index].id)
 
