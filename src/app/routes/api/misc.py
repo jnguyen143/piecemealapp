@@ -12,7 +12,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA256
 
-from ...api.gmail import send_confirmation_email
+# from ...api.gmail import send_confirmation_email
 from ...database.database import (
     Database,
     DatabaseException,
@@ -271,7 +271,7 @@ def signup_default(data, error_responses):
 
         user = DATABASE.get_user_by_username(username)
 
-        send_confirmation_email(email)
+        # send_confirmation_email(email)
 
         login_user(user)
 
@@ -279,9 +279,9 @@ def signup_default(data, error_responses):
     except InvalidEndpointArgsException:
         return error_response(1, error_responses[1])
     except DuplicateUserException:
-        return error_response(4, error_responses[4])
-    except InvalidArgumentException:
         return error_response(3, error_responses[3])
+    except InvalidArgumentException:
+        return error_response(1, error_responses[1])
     except DatabaseException:
         return error_response(0, error_responses[0])
 
@@ -500,7 +500,7 @@ def validate_signup_callback():
 
         user = DATABASE.get_user_by_id(userinfo["id"])
 
-        send_confirmation_email(userinfo["email"])
+        # send_confirmation_email(userinfo["email"])
 
         login_user(user)
 
