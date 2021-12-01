@@ -1,10 +1,11 @@
 import { showToast } from './Toast.js'; // eslint-disable-line import/extensions
 
-// eslint-disable-next-line no-restricted-syntax
-document.getElementById("secretbutton").addEventListener('click', secretevent => {
+// eslint-disable-next-line no-restricted-syntax, no-unused-vars
+document.getElementById('secretbutton').addEventListener('click', (secretevent) => {
+  // eslint-disable-next-line no-restricted-syntax
   for (const btn of document.getElementsByClassName('add-button')) {
     btn.addEventListener('click', (event) => {
-      console.log(event.target.attributes)
+      console.log(event.target.attributes);
       if (event.target.hasAttribute('ingredient-id')) {
         // Add ingredient
         const id = event.target.getAttribute('ingredient-id');
@@ -44,7 +45,7 @@ document.getElementById("secretbutton").addEventListener('click', secretevent =>
               image,
               summary,
               full_summary, // eslint-disable-line camelcase
-            }
+            },
           }),
         }).then((response) => response.json()).then((response) => {
           if (response.success) {
@@ -58,7 +59,7 @@ document.getElementById("secretbutton").addEventListener('click', secretevent =>
       }
     });
   }
-})
+});
 document.getElementById('secretbutton').click();
 // eslint-disable-next-line no-restricted-syntax
 for (const btn of document.getElementsByClassName('delete-button')) {
