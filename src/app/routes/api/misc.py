@@ -370,10 +370,6 @@ def init_signup():
                 actual_data, "authentication", InvalidEndpointArgsException()
             )
         ).get_id()
-        print(f"Auth: {authentication}, t: {type(authentication)}")
-        print(
-            f"UA: {UserAuthentication.DEFAULT.get_id()}, t: {type(UserAuthentication.DEFAULT.get_id())}"
-        )
     except (InvalidEndpointArgsException, ValueError):
         return error_response(1, response_error_messages[1])
 
