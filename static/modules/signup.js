@@ -48,10 +48,9 @@ document.getElementById('google-signup-form').onsubmit = () => {
 
   return false;
 };
+/*
 const email = document.getElementById('email');
 const emailError = document.querySelector('#mail + span.error');
-
-
 
 email.addEventListener('input', function (event) {
   if (email.validity.valid) {
@@ -61,7 +60,6 @@ email.addEventListener('input', function (event) {
     showError();
   }
 });
-
 
 form.addEventListener('submit', function (event) {
   if (!email.validity.valid) {
@@ -112,7 +110,7 @@ Password.onkeyup = function () {
     capital.classList.add("invalid");
   }
 
-  // Validates numbers in password  
+  // Validates numbers in password
   var numbers = /[0-9]/g;
   if (Password.value.match(numbers)) {
     number.classList.remove("invalid");
@@ -129,4 +127,4 @@ Password.onkeyup = function () {
     length.classList.remove("valid");
     length.classList.add("invalid");
   }
-}
+} */
