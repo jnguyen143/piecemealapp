@@ -1,60 +1,65 @@
 import { showToast } from './Toast.js'; // eslint-disable-line import/extensions
 
 // eslint-disable-next-line no-restricted-syntax
-for (const btn of document.getElementsByClassName('add-button')) {
-  btn.addEventListener('click', (event) => {
-    if (event.target.hasAttribute('ingredient-id')) {
-      // Add ingredient
-      const id = event.target.getAttribute('ingredient-id');
-      const name = event.target.getAttribute('ingredient-name');
-      const image = event.target.getAttribute('ingredient-image');
-      fetch('/api/save-ingredient', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id, name, image }),
-      }).then((response) => response.json()).then((response) => {
-        if (response.result === 0) {
-          showToast('Successfully added ingredient');
-        } else {
+document.getElementById("secretbutton").addEventListener('click', secretevent => {
+  for (const btn of document.getElementsByClassName('add-button')) {
+    btn.addEventListener('click', (event) => {
+      console.log(event.target.attributes)
+      if (event.target.hasAttribute('ingredient-id')) {
+        // Add ingredient
+        const id = event.target.getAttribute('ingredient-id');
+        const name = event.target.getAttribute('ingredient-name');
+        const image = event.target.getAttribute('ingredient-image');
+        fetch('/api/user-ingredients/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ingredient: { id, name, image } }),
+        }).then((response) => response.json()).then((response) => {
+          if (response.success) {
+            showToast('Successfully added ingredient');
+          } else {
+            showToast('Error adding ingredient');
+          }
+        }).catch(() => {
           showToast('Error adding ingredient');
-        }
-      }).catch(() => {
-        showToast('Error adding ingredient');
-      });
-    } else {
-      // Add recipe
-      const id = event.target.getAttribute('recipe-id');
-      const name = event.target.getAttribute('recipe-name');
-      const image = event.target.getAttribute('recipe-image');
-      const summary = event.target.getAttribute('recipe-summary');
-      const full_summary = event.target.getAttribute('recipe-full-summary'); // eslint-disable-line camelcase
-      fetch('/api/save-recipe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id,
-          name,
-          image,
-          summary,
-          full_summary, // eslint-disable-line camelcase
-        }),
-      }).then((response) => response.json()).then((response) => {
-        if (response.result === 0) {
-          showToast('Successfully added recipe');
-        } else {
+        });
+      } else {
+        // Add recipe
+        const id = event.target.getAttribute('recipe-id');
+        const name = event.target.getAttribute('recipe-name');
+        const image = event.target.getAttribute('recipe-image');
+        const summary = event.target.getAttribute('recipe-summary');
+        const full_summary = event.target.getAttribute('recipe-full-summary'); // eslint-disable-line camelcase
+        fetch('/api/user-recipes/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            recipe: {
+              id,
+              name,
+              image,
+              summary,
+              full_summary, // eslint-disable-line camelcase
+            }
+          }),
+        }).then((response) => response.json()).then((response) => {
+          if (response.success) {
+            showToast('Successfully added recipe');
+          } else {
+            showToast('Error adding recipe');
+          }
+        }).catch(() => {
           showToast('Error adding recipe');
-        }
-      }).catch(() => {
-        showToast('Error adding recipe');
-      });
-    }
-  });
-}
-
+        });
+      }
+    });
+  }
+})
+document.getElementById('secretbutton').click();
 // eslint-disable-next-line no-restricted-syntax
 for (const btn of document.getElementsByClassName('delete-button')) {
   btn.addEventListener('click', (event) => {

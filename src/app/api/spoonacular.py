@@ -315,14 +315,14 @@ def parse_recipe_search_filter(filters, key):
             return (None, None)
         return (
             "cuisine",
-            list_to_comma_separated_string([str(cuisine) for cuisine in filters[key]]),
+            list_to_comma_separated_string([cuisine.value for cuisine in filters[key]]),
         )
     elif key == "diets":
         if filters[key] is None:
             return (None, None)
         return (
             "diet",
-            list_to_comma_separated_string([str(diet) for diet in filters[key]]),
+            list_to_comma_separated_string([diet.value for diet in filters[key]]),
         )
     elif key == "ingredients":
         if filters[key] is None:
@@ -334,7 +334,7 @@ def parse_recipe_search_filter(filters, key):
     elif key == "max_prep_time":
         if int(float(filters[key])) <= -1:
             return (None, None)
-        return ("maxReadyTime", int(filters[key]))
+        return ("maxReadyTime", int(float((filters[key]))))
     else:
         raise SpoonacularApiException(f'Invalid recipe search filter "{key}"')
 
@@ -378,6 +378,7 @@ def search_recipes(
     params = {"apiKey": get_api_key()}
 
     for search_filter in filters.keys():
+        print(search_filter)
         (key, value) = parse_recipe_search_filter(filters, search_filter)
         if key is not None and value is not None:
             params[key] = value
@@ -629,7 +630,7 @@ def get_similar_recipes(recipe_id: int, limit: int = 10) -> list:
         UndefinedApiKeyException: If the Spoonacular API key is undefined.
         SpoonacularApiException: If there was a problem completing the request.
     """
-
+    limit = int(limit)
     params = {"apiKey": get_api_key(), "number": limit}
 
     data = None
@@ -639,7 +640,9 @@ def get_similar_recipes(recipe_id: int, limit: int = 10) -> list:
             headers={"Content-Type": "application/json"},
             params=params,
         )
+
     except (RequestException, MalformedResponseException) as e:
+        print(e)
         raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
 
     if not data:
@@ -873,7 +876,7 @@ def search_ingredients(
         ingredients.append(
             {
                 "id": ingredient["id"],
-                "name": ingredient["title"],
+                "name": ingredient["name"],
                 "image": image_url_prefix + str(ingredient["image"]),
             }
         )
