@@ -166,7 +166,6 @@ body {
   font-weight: bold;
   text-align: center;
   margin: 0 auto;
-  text-align: center;
   display: flex;
   flex-flow: column;
   overflow-x: hidden; 
