@@ -294,8 +294,12 @@ def extract_friends_similar_recipes(database, distribution, limit, num_sources_l
             int(math.ceil(actual_limit / len(top_recipes))),
         )
 
+        if similar_recipes is None:
+            continue
+
         # Cache the results
-        database.add_ingredient_infos(similar_recipes, ignore_duplicates=True)
+        if similar_recipes is not None and len(similar_recipes) > 0:
+            database.add_ingredient_infos(similar_recipes, ignore_duplicates=True)
 
         for recipe in similar_recipes:
             if len(result) == actual_limit:
