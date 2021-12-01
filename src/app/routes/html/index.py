@@ -1,7 +1,6 @@
 """
 This file contains user-facing endpoints relating to index pages.
 """
-import random
 from flask import Flask, Blueprint, render_template, request
 from ...database.database import (
     Database,
