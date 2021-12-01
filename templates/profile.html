@@ -131,16 +131,18 @@
 
       {%endif%}
 
-      <!-- If incoming data is from profile route, display based on if user has saved items to profile -->
+      <!-- If incoming data is from profile route, display based on if user has saved
+        ingredients or recipes or provide random selection to add to profile -->
       {%else%}
 
-      {%if has_recipes == False%}
+      {%if user_recipes == False%}
       <div class="header">
         <h1>Your Saved Recipes</h1>
+        <p></p>
         <p>Looks like you don't have any favorite recipes yet. Check out the suggested recipes below!</p>
       </div>
       <div class="content">
-        {%for recipe in recipes%}
+        {%for recipe in userdata["recipes"]%}
         <div class="recipe">
           <div class="image">
             <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
@@ -159,7 +161,7 @@
         <h1>Your Saved Recipes</h1>
       </div>
       <div class="content">
-        {%for recipe in recipes%}
+        {%for recipe in userdata["recipes"]%}
         <div class="recipe">
           <div class="image">
             <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">

@@ -6,6 +6,8 @@ from flask_login import login_required
 from ...database.database import Database, DatabaseException, ProfileVisibility
 from ... import util
 from ..routing_util import get_current_user
+from ...api import spoonacular
+
 
 blueprint = Blueprint(
     "bp_html_profile",
@@ -93,6 +95,24 @@ def get_saved_ingredients(user_id):
         return ([], [])
 
 
+def get_recommended_recipes_from_spoonacular():
+    """
+    Returns recommended recipes from Spoonacular.
+
+    This function is necessary for some unit tests.
+    """
+    return spoonacular.get_recommended_recipes()
+
+
+def get_recommended_ingredients_from_spoonacular():
+    """
+    Returns recommended ingredients from Spoonacular.
+
+    This function is necessary for some unit tests
+    """
+    return spoonacular.get_recommended_ingredients()
+
+
 def get_friends(user_id):
     """
     Returns a list of friends for the specified user.
@@ -129,12 +149,29 @@ def profile():
 
     userdata = current_user.to_json()
 
+    user_recipes = True
+    user_ingredients = True
+
+    # When user access his profile, profile saved data for recipes and ingredients
+    # will be displayed
     userdata["recipes"] = get_saved_recipes(current_user.id)
+
+    # If user has no recipes saved, handle by getting randomly selected recipes
+    if len(userdata["recipes"]) == 0:
+        userdata["recipes"] = get_recommended_recipes_from_spoonacular()
+        user_recipes = False
 
     (liked_ingredients, disliked_ingredients) = get_saved_ingredients(current_user.id)
     userdata["liked_ingredients"] = liked_ingredients
-    userdata["disliked_ingredients"] = disliked_ingredients
 
+    # If user has no ingredients saved, obtain recommended ingredients
+    if len(userdata["liked_ingredients"]) == 0:
+        userdata["liked_ingredients"] = get_recommended_ingredients_from_spoonacular()
+        user_ingredients = False
+
+    # The variables below do not need to be address when empty as the html will
+    # not need to display random data for them
+    userdata["disliked_ingredients"] = disliked_ingredients
     userdata["intolerances"] = get_intolerances(current_user.id)
     userdata["friends"] = get_friends(current_user.id)
     userdata["friend_requests"] = get_friend_requests(current_user.id)
@@ -142,5 +179,7 @@ def profile():
     return render_template(
         "my_profile.html",
         current_userdata=userdata,
+        user_recipes=user_recipes,
+        user_ingredients=user_ingredients,
         permissions=ProfileVisibility.to_json(current_user.profile_visibility),
     )
