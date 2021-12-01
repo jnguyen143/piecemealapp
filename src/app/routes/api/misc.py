@@ -260,7 +260,7 @@ def signup_default(data, error_responses):
 
         DATABASE.add_user(
             {
-                "authentication": UserAuthentication.DEFAULT,
+                "authentication": UserAuthentication.DEFAULT.get_id(),
                 "username": username,
                 "email": email,
                 "password": password,
@@ -363,7 +363,7 @@ def init_signup():
     except Exception:
         return error_response(1, response_error_messages[1])
 
-    authentication = UserAuthentication.DEFAULT
+    authentication = UserAuthentication.DEFAULT.get_id()
     try:
         authentication = UserAuthentication.get_from_value(
             util.get_or_raise(
@@ -373,9 +373,9 @@ def init_signup():
     except (InvalidEndpointArgsException, ValueError):
         return error_response(1, response_error_messages[1])
 
-    if authentication == UserAuthentication.DEFAULT:
+    if authentication == UserAuthentication.DEFAULT.get_id():
         return signup_default(actual_data, response_error_messages)
-    if authentication == UserAuthentication.GOOGLE:
+    if authentication == UserAuthentication.GOOGLE.get_id():
         return signup_google(response_error_messages)
     return error_response(2, response_error_messages[2])
 
