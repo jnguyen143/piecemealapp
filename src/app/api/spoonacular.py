@@ -840,6 +840,7 @@ def parse_ingredient_search_filter(filters, key):
     raise SpoonacularApiException(f'Invalid ingredient search filter "{key}"')
 
 
+# pylint: disable=too-many-locals
 def search_ingredients(
     query: str,
     filters: dict = None,

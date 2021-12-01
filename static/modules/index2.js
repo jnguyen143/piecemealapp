@@ -5,7 +5,6 @@ document.getElementById('secretbutton').addEventListener('click', (secretevent) 
   // eslint-disable-next-line no-restricted-syntax
   for (const btn of document.getElementsByClassName('add-button')) {
     btn.addEventListener('click', (event) => {
-      console.log(event.target.attributes);
       if (event.target.hasAttribute('ingredient-id')) {
         // Add ingredient
         const id = event.target.getAttribute('ingredient-id');

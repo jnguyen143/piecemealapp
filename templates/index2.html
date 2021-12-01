@@ -23,7 +23,7 @@
         <!--<a href="/account">My Account Settings</a>-->
       </div>
       <form class="recipes" onsubmit="searchRecipes();return false;" method="GET">
-        <p>Search for Recipes</p>
+        <p><b>Search for Recipes</b></p>
 
         <input type="text" id="recipe-input" placeholder="find potential recipes!" />
 
@@ -105,7 +105,7 @@
         <button type="submit" id="search-recipe-button" class="search-button">Search</button>
       </form>
       <form class="ingredients" onsubmit="searchIngredients();return false;" method="POST">
-        <p>Search for Ingredients</p>
+        <p><b>Search for Ingredients</b></p>
         <input type="text" id="ingredient-input" placeholder="search for ingredients!" />
         <button type="submit" class="search-button">Search</button>
       </form>
@@ -230,6 +230,7 @@
   <script src="../static/modules/index2.js" type="module"></script>
   <script src="../static/modules/logout.js"></script>
   <script>
+    document.getElementById('secretbutton').click();
 
     function searchRecipes() {
       let input = document.getElementById('recipe-input').value;
@@ -256,6 +257,7 @@
         }).then(response => response.text()).then(response => {
           document.getElementById('changeDiv').innerHTML = "";
           document.getElementById('search-data').innerHTML = response;
+          document.getElementById('secretbutton').click();
         })
       });
     }

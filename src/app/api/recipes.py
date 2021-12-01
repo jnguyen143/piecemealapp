@@ -289,7 +289,9 @@ def extract_friends_similar_recipes(database, distribution, limit, num_sources_l
 
         # Get similar recipes to the chosen model recipe
         similar_recipes = spoonacular.get_similar_recipes(
-            model_recipe.id, int(math.ceil(actual_limit / len(top_recipes)))
+            # pylint: disable=c-extension-no-member
+            model_recipe.id,
+            int(math.ceil(actual_limit / len(top_recipes))),
         )
 
         # Cache the results
