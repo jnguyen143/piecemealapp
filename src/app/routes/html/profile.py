@@ -101,7 +101,7 @@ def get_recommended_recipes_from_spoonacular():
 
     This function is necessary for some unit tests.
     """
-    return spoonacular.get_recommended_recipes()
+    return spoonacular.get_random_recipes()
 
 
 def get_recommended_ingredients_from_spoonacular():

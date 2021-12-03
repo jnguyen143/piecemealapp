@@ -1,18 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-@import "bootstrap/scss/functions";
-@import "bootstrap/scss/variables";
-@import "bootstrap/scss/utilities";
-
 /*Body styling*/
 
 body {
-  background-image: url("../assets/img2.jpg");
   background-color: rgb(48, 44, 44);
+  background-image: url("../assets/img2.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   font-family: 'Lato', sans-serif;
+}
+
+/*User data navigation link style*/
+
+.nav-link {
+  color: gray;
+}
+
+.nav-link:hover {
+  color: green;
 }
 
 /*Navigation menu container and styling*/
@@ -21,7 +27,8 @@ body {
   border-top-right-radius: 10px;
   margin-top: 50px;
   text-align: center;
-  min-width: 400px;
+  min-width: 700px;
+  width: 100vw;
 }
 
 .nav_menu a {
@@ -69,7 +76,7 @@ body {
   border-top-right-radius: 10px;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  overflow-x: hidden; 
+  overflow-x: hidden;
 }
 
 /*All forms styling*/
@@ -107,7 +114,7 @@ select {
   background: white;
   margin: auto;
   padding: 5px;
-  width:150px;
+  width: 150px;
   border: none;
   font-family: Arial;
   border-radius: 4px;

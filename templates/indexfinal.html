@@ -238,6 +238,11 @@
       let intolerance = document.getElementById('intolerance').value;
       let diet = document.getElementById('diet').value;
       let maxPrepTime = parseInt(document.getElementById('maxPrepTime').value, 10);
+      console.log(cuisine)
+      console.log(intolerance)
+      console.log(diet)
+      console.log(maxPrepTime)
+
 
       fetch('/api/recipe-info/search?' + new URLSearchParams({
         query: input,
@@ -257,22 +262,25 @@
       });
     }
     function searchIngredients() {
+
       let ingredientInput = document.getElementById('ingredient-input').value;
 
       fetch('/api/ingredient-info/search?' + new URLSearchParams({
         query: ingredientInput,
         limit: 12
       })).then(response => response.json()).then(response => {
+        console.log(response.error_message)
         fetch('/search-ingredients', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ingredients: response.ingredients, input: ingredientInput })
-        }).then(response => response.text()).then(response => {
-          document.getElementById('changeDiv').innerHTML = "";
-          document.getElementById('search-data').innerHTML = response;
-          document.getElementById('secretbutton').click();
-        });
+        }).then(response => response.text()).then(response => document.getElementById('search-data').innerHTML = response);
+
       });
+      document.getElementById('secretbutton').click();
     }
+
+
+
   </script>
 </body>
 

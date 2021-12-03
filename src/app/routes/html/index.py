@@ -69,7 +69,7 @@ def get_recommended_recipes_from_spoonacular():
 
     This function is necessary for some unit tests.
     """
-    return spoonacular.get_recommended_recipes()
+    return spoonacular.get_random_recipes()
 
 
 def get_similar_recipes_from_spoonacular(recipe_id):
@@ -85,7 +85,11 @@ def user_index_page(current_user):
     """
     The index page for when a user is logged in.
     """
-    target_recipes = recommended.get_recommended_recipes(DATABASE, limit=12)
+    target_recipes = []
+    try:
+        target_recipes = recommended.get_recommended_recipes(DATABASE, limit=12)
+    except spoonacular.SpoonacularApiException:
+        pass
 
     # (recipes, _) = DATABASE.get_recipes(current_user.id)
     # if len(recipes) > 0:
@@ -129,7 +133,6 @@ def general_index_page():
 # as it does not affect the code functionality
 def search_recipes():
     data = get_json_data(request, "POST")
-    # print(data["recipes"])
     return render_template(
         "search/search_recipes.html", recipes=data["recipes"], keyword=data["input"]
     )
