@@ -13,7 +13,9 @@
         <div class="recipe">
             <div class="image">
                 <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-                <button type="submit" class="add-button">ADD</button>
+                <button type="submit" class="add-button" recipe-id="{{recipe['id']}}" recipe-name="{{recipe['name']}}"
+                    recipe-image="{{recipe['image']}}" recipe-summary="{{recipe['summary']}}"
+                    recipe-full-summary="{{recipe['full-summary']}}">ADD</button>
             </div>
             <div class="description">
                 <h2>{{recipe["name"]}}</h2>

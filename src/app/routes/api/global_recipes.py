@@ -230,8 +230,7 @@ def parse_diets(data):
             diets = [diets]
         for diet in diets:
             result.append(spoonacular.Diet[str(diet).upper()])
-    except (InvalidEndpointArgsException, KeyError) as error:
-        print(error, "!")
+    except (InvalidEndpointArgsException, KeyError):
         return None
 
     return None if len(result) == 0 else result

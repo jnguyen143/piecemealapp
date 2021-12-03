@@ -17,8 +17,8 @@
   <div class="row">
     <div class="nav_menu">
       <a href="/">Home</a>
-      <a active href="/Profile" id="logged-out" value="False">Profile</a>
-      <a href="/Logout">Logout</a>
+      <a href="/profile" id="logged-out" value="False">Profile</a>
+      <a href="/logout">Logout</a>
     </div>
   </div>
 
@@ -64,26 +64,33 @@
             </ul>
           </div>
         </nav>
-      </div>
 
-      <div class="row bg-white pb-5">
-        <div class="col-3 border-end mx-0" style="min-width:300px;">
-          <div class="row pl-2">
-            <div class="col">
-              <img src="{{current_userdata['profile_image']}}" class="rounded-circle"
-                alt="{{current_userdata['username']}} Profile Picture" style="width:200px; padding:15px" />
-            </div>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/profile">My Profile</a>
+                <!--<a class="dropdown-item" href="/account">Settings</a>-->
+                <a class="dropdown-item text-danger" href="/logout">Log Out</a>
+              </div>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/signup">Sign Up</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
 
-            <div class="col pm-font-minor h-100 px-4 pt-2">
-              <p class="mb-0 h5"><strong>Username:</strong></p>
-              <p class="font-weight-normal">@{{current_userdata["username"]}}</p>
-              <p class="my-0 h5"><strong>Display Name:</strong></p>
-              <p class="font-weight-normal">{{current_userdata["given_name"]}} {{current_userdata["family_name"]}}
-              </p>
-              <p class="my-0 h5"><strong>Member Since:</strong></p>
-              <p class="font-weight-normal">{{current_userdata["display_creation_date"]}}</p>
-            </div>
-          </div>
+      <div class="row">
+
+        <div class="col bg-white pr-4">
+
+          <div class="row">
+            <div class="col-4 pb-4 border-end" style="min-width:300px;">
+              <div class="row">
+                <div class="col-sm-auto">
+                  <img src="{{current_userdata['profile_image']}}" class="rounded-circle"
+                    alt="{{current_userdata['username']}} Profile Picture" style="width:200px; padding:15px" />
+                </div>
 
           <div class="row mt-4 mx-0">
             <div class="col">

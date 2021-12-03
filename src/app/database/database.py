@@ -160,6 +160,7 @@ class UserAuthentication(Enum):
         """
         Returns the enum instance associated with the provided value.
         """
+        value = int(value)
         for member in cls:
             if value == member.get_id():
                 return member

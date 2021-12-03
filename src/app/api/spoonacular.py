@@ -13,15 +13,18 @@ from os import getenv
 import re
 from random import sample
 
+from ..util import get_or_default, get_or_raise
+
 from .common import (
     api_get_json,
     RequestException,
     MalformedResponseException,
     UndefinedApiKeyException,
+    ApiException,
 )
 
 
-class SpoonacularApiException(Exception):
+class SpoonacularApiException(ApiException):
     """
     Raised if there is a problem making a Spoonacular API call.
     """
@@ -129,6 +132,15 @@ class SortCriteria(Enum):
     PROTEIN = "protein"
     SUGAR = "sugar"
     SODIUM = "sodium"
+
+    def __init__(self, identifier):
+        self._value_ = identifier
+
+    def get_id(self) -> str:
+        """
+        Returns the identifier needed by Spoonacular.
+        """
+        return str(self.value)
 
 
 class Recipe:
@@ -381,7 +393,6 @@ def search_recipes(
     params = {"apiKey": get_api_key()}
 
     for search_filter in filters.keys():
-        print(search_filter)
         (key, value) = parse_recipe_search_filter(filters, search_filter)
         if key is not None and value is not None:
             params[key] = value
@@ -431,119 +442,6 @@ def search_recipes(
     return (recipes, total_results)
 
 
-# pylint: disable=too-many-arguments
-def search_recipes_old(
-    ingredients: list[str],
-    intolerances: list[Intolerance] = None,
-    cuisines: list[Cuisine] = None,
-    diets: list[Diet] = None,
-    max_prep_time: int = -1,
-    sort_by: SortCriteria = None,
-    offset: int = 0,
-    limit: int = 12,
-) -> list:
-    """
-    Searches for recipes using the specified criteria and returns a list of JSON-encoded recipes.
-
-    Args:
-        ingredients (list[str]): A list of ingredients.
-        intolerances (list[Intolerance]): A list of intolerances. This argument is optional.
-        cuisines (list[Cuisine]): A list of cuisines. This argument is optional.
-        diets (list[Diet]): A list of diets. This argument is optional.
-        max_prep_time (int): The max amount of time it should take to prepare
-            and cook the recipe. This argument is optional.
-        sort_by (SortCriteria): The method to use to sort
-            the returned recipes. This argument is optional.
-        offset (int): The offset into the total amount of
-            search results to start retrieving recipes.
-            This argument is optional and by default is 0.
-        limit (int): The maximum number of recipes to get.
-            This argument is optional and by default is 10.
-
-    Returns:
-        A list of JSON-encoded recipes. If no recipes were found that
-            matched the given criteria, this function will return an empty list.
-        Each recipe object consists of the following values:
-            - id (int): The ID of the recipe.
-            - name (str): The display name of the recipe.
-            - image (str): The URL of the image for the recipe.
-            - summary (str): First sentence of summary content.
-            - full_summary (str): Complete summary string for recipe.
-
-    Raises:
-        UndefinedApiKeyException: If the Spoonacular API key is undefined.
-        SpoonacularApiException: If there was a problem completing the search request.
-    """
-
-    params = {"apiKey": get_api_key()}
-
-    params["includeIngredients"] = list_to_comma_separated_string(ingredients)
-
-    if intolerances is not None:
-        params["intolerances"] = list_to_comma_separated_string(intolerances)
-
-    if cuisines is not None:
-        params["cuisine"] = list_to_comma_separated_string(cuisines)
-
-    if diets is not None:
-        params["diet"] = list_to_comma_separated_string(diets)
-
-    if max_prep_time > -1:
-        params["maxReadyTime"] = max_prep_time
-
-    if sort_by is not None:
-        params["sort"] = str(sort_by)
-
-    params["offset"] = offset
-    params["number"] = limit
-
-    data = None
-
-    # combines ingredients param to properly search the website
-    #
-    try:
-        data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT
-            + "recipes/complexSearch?query="
-            + ingredients,
-            headers={"Content-Type": "application/json"},
-            params=params,
-        )
-    except (RequestException, MalformedResponseException) as e:
-        raise SpoonacularApiException(
-            f"Failed to make recipe search request: {str(e)}"
-        ) from e
-
-    recipes = []
-    for recipe in data["results"]:
-        recipe_dict = {}
-        try:
-            recipe_dict["id"] = recipe["id"]
-            recipe_dict["name"] = recipe["title"]
-            # The following try/KeyError is meant to address issues regarding unavailable images
-            # and summary during the API in case we still need to show content. This ensures the
-            # found recipe is included instead of causing an empty return or dictionary keyerror
-            # during html display
-            try:
-                recipe_dict["image"] = recipe["image"]
-                summary = get_recipe_summary(recipe["id"])
-                recipe_dict["summary"] = extract_sentence(summary)
-                recipe_dict["full_summary"] = clean_summary(summary)
-            except KeyError:
-                recipe_dict["image"] = "../static/assets/noimage.jpg"
-                recipe_dict[
-                    "summary"
-                ] = "Try this recipe to add variety into your diet!"
-                recipe_dict[
-                    "full_summary"
-                ] = "Try this recipe to add variety into your diet!"
-        except KeyError:
-            print("Unable to extract recipe data")
-        recipes.append(recipe_dict)
-
-    return recipes
-
-
 def get_recipe(recipe_id: int) -> Recipe:
     """
     Returns a `Recipe` object associated with the specified ID.
@@ -577,6 +475,39 @@ def get_recipe(recipe_id: int) -> Recipe:
     return Recipe(data)
 
 
+def extract_recipe_json_data(json_data: dict) -> dict:
+    """
+    Extracts the recipe information from the provided JSON object and returns a dictionary
+    containing the fields that PieceMeal needs.
+    """
+    recipe_dict = {
+        "id": get_or_raise(
+            json_data,
+            "id",
+            SpoonacularApiException(
+                "Failed to make recipe request (received invalid data)"
+            ),
+        ),
+        "name": get_or_raise(
+            json_data,
+            "title",
+            SpoonacularApiException(
+                "Failed to make recipe request (received invalid data)"
+            ),
+        ),
+        "image": get_or_default(json_data, "image", "../static/assets/noimage.jpg"),
+    }
+
+    try:
+        summary = json_data["summary"]
+        recipe_dict["summary"] = extract_sentence(summary)
+        recipe_dict["full_summary"] = clean_summary(summary)
+    except KeyError:
+        recipe_dict["summary"] = "Try this recipe to add variety into your diet!"
+        recipe_dict["full_summary"] = "Try this recipe to add variety into your diet!"
+    return recipe_dict
+
+
 def get_recipe_as_json(recipe_id: int) -> list:
     """
     Returns a list of JSON-encoded data associated with the specified ID.
@@ -605,10 +536,7 @@ def get_recipe_as_json(recipe_id: int) -> list:
     except (RequestException, MalformedResponseException) as e:
         raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
 
-    if not data:
-        return None
-
-    return data
+    return extract_recipe_json_data(data)
 
 
 def get_similar_recipes(recipe_id: int, limit: int = 10) -> list:
@@ -643,113 +571,14 @@ def get_similar_recipes(recipe_id: int, limit: int = 10) -> list:
             headers={"Content-Type": "application/json"},
             params=params,
         )
-
     except (RequestException, MalformedResponseException) as e:
-        print(e)
         raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
-
-    if not data:
-        return None
 
     result = []
     for recipe in data:
         # We are using the get_recipe function because the similar_recipes endpoint
         # does not produce the full content that is available for each recipe
-        extended_recipe = get_recipe_as_json(recipe["id"])
-        recipe_dict = {}
-        try:
-            recipe_dict["id"] = extended_recipe["id"]
-            recipe_dict["name"] = extended_recipe["title"]
-            # The following try/KeyError is meant to address issues regarding unavailable images
-            # and summary during the API in case we still need to show content. This ensures the
-            # found recipe is included instead of causing an empty return or dictionary keyerror
-            # during html display
-            try:
-                recipe_dict["image"] = extended_recipe["image"]
-                summary = extended_recipe["summary"]
-                recipe_dict["summary"] = extract_sentence(summary)
-                recipe_dict["full_summary"] = clean_summary(summary)
-            except KeyError:
-                recipe_dict["image"] = "../static/assets/noimage.jpg"
-                recipe_dict[
-                    "summary"
-                ] = "Try this recipe to add variety into your diet!"
-                recipe_dict[
-                    "full_summary"
-                ] = "Try this recipe to add variety into your diet!"
-        except KeyError:
-            print("Error: Unable to retrieve recipe data")
-        result.append(recipe_dict)
-
-    print("This is the result: ", result)
-    return result
-
-
-def get_recommended_recipes(
-    offset: int = 0,
-    limit: int = 10,
-) -> list:
-    """
-    Returns a list of randomly recommended recipes.
-
-    Args:
-        "number" for representing the maximum amount of recipes
-
-    Returns:
-        A list of JSON-encoded recipes.
-        Each recipe object consists of the following values:
-            - id (int): The ID of the recipe.
-            - name (str): The display name of the recipe.
-            - image (str): The URL of the image for the recipe.
-
-    Raises:
-        UndefinedApiKeyException: If the Spoonacular API key is undefined.
-        SpoonacularApiException: If there was a problem completing the request.
-    """
-
-    params = {"apiKey": get_api_key()}
-    params["offset"] = offset
-    params["number"] = limit
-
-    data = None
-    try:
-        data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT + "recipes/random?",
-            headers={"Content-Type": "application/json"},
-            params=params,
-        )
-    except (RequestException, MalformedResponseException) as e:
-        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
-
-    if not data:
-        return None
-
-    result = []
-    for recipe in data["recipes"]:
-        recipe_dict = {}
-        try:
-            recipe_dict["id"] = recipe["id"]
-            recipe_dict["name"] = recipe["title"]
-            # The following try/KeyError is meant to address issues regarding unavailable images
-            # and summary during the API in case we still need to show content. This ensures the
-            # found recipe is included instead of causing an empty return or dictionary keyerror
-            # during html display
-            try:
-                recipe_dict["image"] = recipe["image"]
-                recipe_dict["full_summary"] = clean_summary(recipe["summary"])
-                recipe_dict["summary"] = extract_sentence(recipe["summary"])
-            except KeyError:
-                recipe_dict["image"] = "../static/assets/noimage.jpg"
-                recipe_dict[
-                    "full_summary"
-                ] = "Add some variety to you diet by trying this recipe!"
-                recipe_dict[
-                    "summary"
-                ] = "Add some variety to you diet by trying this recipe!"
-        except KeyError:
-            print("Error: Unable to retrieve recipe data")
-
-        result.append(recipe_dict)
+        result.append(get_recipe_as_json(recipe["id"]))
 
     return result
 
@@ -757,6 +586,16 @@ def get_recommended_recipes(
 def get_random_recipes(limit: int = 10):
     """
     Returns a random list of recipes.
+
+    Args:
+        limit (int): The maximum number of results to return.
+            This argument is optional and is 10 by default.
+
+    Returns:
+        A list of JSON-encoded recipes.
+
+    Raises:
+        SpoonacularApiException: If there was a problem completing the request.
     """
 
     params = {"apiKey": get_api_key()}
@@ -774,25 +613,17 @@ def get_random_recipes(limit: int = 10):
     except (RequestException, MalformedResponseException) as exc:
         raise SpoonacularApiException("Failed to make recipe request") from exc
 
-    if data is None:
-        raise SpoonacularApiException("Malformed response")
-
-    try:
-        result = []
-
+    result = []
+    if "recipes" in data:
         for recipe in data["recipes"]:
-            result.append(
-                {"id": recipe["id"], "name": recipe["title"], "image": recipe["image"]}
-            )
+            result.append(extract_recipe_json_data(recipe))
 
-        return result
-    except KeyError as exc:
-        raise SpoonacularApiException("Malformed response") from exc
+    return result
 
 
 def get_recipe_summary(recipe_id: int) -> str:
     """
-    Returns a `Recipe's summary as an object associated with the specified ID.
+    Returns a Recipe's summary as an object associated with the specified ID.
 
     Args:
         id (int) - The ID of the recipe to get a summary for.
@@ -840,6 +671,7 @@ def parse_ingredient_search_filter(filters, key):
     raise SpoonacularApiException(f'Invalid ingredient search filter "{key}"')
 
 
+# pylint: disable=too-many-locals
 def search_ingredients(
     query: str,
     filters: dict = None,
@@ -884,7 +716,7 @@ def search_ingredients(
                 params[key] = value
 
     if sort_by is not None:
-        params["sort"] = str(sort_by)
+        params["sort"] = sort_by.get_id()
 
     params["offset"] = offset
     params["number"] = limit
@@ -902,11 +734,6 @@ def search_ingredients(
             "Failed to make ingredient search request"
         ) from exc
 
-    if data is None:
-        raise SpoonacularApiException(
-            "Failed to make ingredient search request (malformed response)"
-        )
-
     total_results = data["totalResults"]
 
     ingredients = []
@@ -914,21 +741,18 @@ def search_ingredients(
     image_url_prefix = "https://spoonacular.com/cdn/ingredients_500x500/"
 
     for ingredient in data["results"]:
-        ingredient_dict = {}
+        ingredient_dict = {
+            "id": get_or_raise(
+                ingredient, "id", SpoonacularApiException("Unable to retrieve data")
+            ),
+            "name": get_or_raise(
+                ingredient, "name", SpoonacularApiException("Unable to retrieve data")
+            ),
+        }
         try:
-            ingredient_dict["id"] = ingredient["id"]
-            ingredient_dict["name"] = ingredient["name"]
-            # The following try/KeyError is meant to address issues regarding unavailable images
-            # and summary during the API in case we still need to show content. This ensures the
-            # found ingredient is included instead of causing an empty return or dictionary keyerror
-            # during html display
-            try:
-                ingredient_dict["image"] = image_url_prefix + str(ingredient["image"])
-            except KeyError:
-                ingredient_dict["image"] = "../static/assets/noimage.jpg"
-
+            ingredient_dict["image"] = image_url_prefix + str(ingredient["image"])
         except KeyError:
-            print("Error: Unable to retrieve recipe data")
+            ingredient_dict["image"] = "../static/assets/noimage.jpg"
 
         ingredients.append(ingredient_dict)
 
@@ -978,81 +802,8 @@ def get_recommended_ingredients():
         data = search_ingredients(ingredient)
         try:
             ingredients.append(data[1])
-        except KeyError:
-            print("No results for ingredient")
-
-    return ingredients
-
-
-def search_ingredients_old(
-    query: str,
-    intolerances: list[Intolerance] = None,
-    sort_by: SortCriteria = None,
-    offset: int = 0,
-    limit: int = 12,
-) -> list:
-    """
-    Searches for ingredients using the specified criteria
-        and returns a list of JSON-encoded recipes.
-
-    Args:
-        query (str): The search query to use to search for ingredients.
-        intolerances (list[Intolerance]): A list of intolerances. This argument is optional.
-        sort_by (SortCriteria): The method to use to sort the
-            returned ingredients. This argument is optional.
-        offset (int): The offset into the total amount of search results to start
-            retrieving ingredients. This argument is optional and by default is 0.
-        limit (int): The maximum number of ingredients to get.
-            This argument is optional and by default is 10.
-
-    Returns:
-        A list of JSON-encoded ingredients. If no ingredients were
-            found that matched the given criteria, this function will return an empty list.
-        Each ingredient object consists of the following values:
-            - id (int): The ID of the ingredient.
-            - name (str): The display name of the ingredient.
-            - image (str): The URL of the image for the ingredient.
-
-    Raises:
-        UndefinedApiKeyException: If the Spoonacular API key is undefined.
-        SpoonacularApiException: If there was a problem completing the search request.
-    """
-
-    params = {"apiKey": get_api_key()}
-
-    params["query"] = query
-
-    if intolerances is not None:
-        params["intolerances"] = list_to_comma_separated_string(intolerances)
-
-    if sort_by is not None:
-        params["sort"] = str(sort_by)
-
-    params["offset"] = offset
-    params["number"] = limit
-
-    data = None
-    try:
-        data = api_get_json(
-            SPOONACULAR_API_ROOT_ENDPOINT + "food/ingredients/search",
-            headers={"Content-Type": "application/json"},
-            params=params,
-        )
-    except (RequestException, MalformedResponseException) as e:
-        raise SpoonacularApiException(
-            f"Failed to make ingredient request: {str(e)}"
-        ) from e
-    # ingredients = data
-    ingredients = []
-    image_url = "https://spoonacular.com/cdn/ingredients_250x250/"
-    for ingredient in data["results"]:
-        ingredients.append(
-            {
-                "id": ingredient["id"],
-                "name": ingredient["name"],
-                "image": image_url + ingredient["image"],
-            }
-        )
+        except KeyError as exc:
+            raise SpoonacularApiException("Failed to get ingredient data") from exc
 
     return ingredients
 

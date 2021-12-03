@@ -1,8 +1,7 @@
 """this file contains functions for looking up recipes"""
 from random import randrange
 import math
-from app.database.database import InvalidArgumentException
-from ..database.database import Database
+from ..database.database import Database, InvalidArgumentException
 from . import spoonacular
 from ..routes.routing_util import InvalidEndpointArgsException, get_current_user
 
@@ -210,7 +209,9 @@ def extract_recently_liked_recipes(database, distribution, limit, num_sources_le
     """
     user = get_current_user()
 
-    actual_limit = get_limit_from_distribution(distribution, limit, num_sources_left)
+    actual_limit = int(
+        get_limit_from_distribution(distribution, limit, num_sources_left)
+    )
 
     model_recipes = database.get_user_top_recipes(user.id, 3)
 
@@ -240,7 +241,9 @@ def extract_friends_recipes(database, distribution, limit, num_sources_left):
     """
     user = get_current_user()
 
-    actual_limit = get_limit_from_distribution(distribution, limit, num_sources_left)
+    actual_limit = int(
+        get_limit_from_distribution(distribution, limit, num_sources_left)
+    )
 
     top_recipes = database.get_friend_top_recipes(
         user.id, limit_per_friend=actual_limit
@@ -271,7 +274,9 @@ def extract_friends_similar_recipes(database, distribution, limit, num_sources_l
     """
     user = get_current_user()
 
-    actual_limit = get_limit_from_distribution(distribution, limit, num_sources_left)
+    actual_limit = int(
+        get_limit_from_distribution(distribution, limit, num_sources_left)
+    )
 
     top_recipes = database.get_friend_top_recipes(
         user.id, limit_per_friend=actual_limit
@@ -282,16 +287,25 @@ def extract_friends_similar_recipes(database, distribution, limit, num_sources_l
         if len(result) == actual_limit:
             break
 
+        if len(friend_data["recipes"]) == 0:
+            continue
+
         # Choose a random recipe from the friend's list of top recipes
         model_recipe = friend_data["recipes"][randrange(0, len(friend_data["recipes"]))]
 
         # Get similar recipes to the chosen model recipe
         similar_recipes = spoonacular.get_similar_recipes(
-            model_recipe.id, int(math.ceil(actual_limit / len(top_recipes)))
+            # pylint: disable=c-extension-no-member
+            model_recipe.id,
+            int(math.ceil(actual_limit / len(top_recipes))),
         )
 
+        if similar_recipes is None:
+            continue
+
         # Cache the results
-        database.add_ingredient_infos(similar_recipes, ignore_duplicates=True)
+        if similar_recipes is not None and len(similar_recipes) > 0:
+            database.add_ingredient_infos(similar_recipes, ignore_duplicates=True)
 
         for recipe in similar_recipes:
             if len(result) == actual_limit:
@@ -307,7 +321,9 @@ def extract_ingredients_recipes(database, distribution, limit, num_sources_left)
     """
     user = get_current_user()
 
-    actual_limit = get_limit_from_distribution(distribution, limit, num_sources_left)
+    actual_limit = int(
+        get_limit_from_distribution(distribution, limit, num_sources_left)
+    )
 
     # Get random top 3 ingredients
     top_ingredients = database.get_user_top_ingredients(user.id, 3)
@@ -336,8 +352,10 @@ def extract_random_recipes(database, distribution, limit, num_sources_left):
     """
     Extracts random recipes.
     """
-    actual_limit = get_limit_from_distribution(distribution, limit, num_sources_left)
+    actual_limit = int(
+        get_limit_from_distribution(distribution, limit, num_sources_left)
+    )
 
     recipes = database.get_random_recipe_infos(actual_limit)
 
-    return [recipe for recipe in recipes]
+    return list(recipes)

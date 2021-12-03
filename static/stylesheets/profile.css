@@ -1,8 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-@import "bootstrap/scss/functions";
-@import "bootstrap/scss/variables";
-@import "bootstrap/scss/utilities";
-
 /*Body styling*/
 
 body {
@@ -53,6 +49,36 @@ body {
   color: white;
 }
 
+/*main-container helper to set fixed sidebar*/
+
+.main-container {
+  height: 100vh;
+  min-width: 320px;
+  max-width: 30%;
+}
+
+/*Right side container for all content type formatting*/
+
+.main-nav-container {
+  width: 85vw;
+  min-width: 650px;
+  font-weight: bold;
+  margin: 0 auto;
+}
+
+/*Right side sub-container for all content type formatting*/
+
+.sub-container {
+  min-width: 100%;
+  background-color: #ffe6d3f1;
+  font-weight: bold;
+  margin: 0 auto;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  overflow-x: hidden;
+}
+
 /*All forms styling*/
 
 form {
@@ -69,4 +95,60 @@ input[type=text] {
   border: none;
   border-radius: 4px;
   text-align: center;
+}
+
+/*Searchbox styling*/
+
+input[type=password] {
+  padding: 8px 10px;
+  margin: 10px auto;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/*Styling for select dropdown option menu for cuisine types*/
+
+select {
+  background: white;
+  margin: auto;
+  padding: 5px;
+  width: 150px;
+  border: none;
+  font-family: Arial;
+  border-radius: 4px;
+}
+
+/*Filter button styling*/
+
+.filter-button {
+  margin: 10px;
+  padding: 4px 6px;
+  background: #FFB659;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.filter-button:hover {
+  background: #c46d04;
+}
+
+/*Search button styling*/
+
+.search-button {
+  padding: 6px 10px;
+  width: 100px;
+  margin: 8px auto;
+  background: #FB8C00;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+}
+
+.search-button:hover {
+  background: #c46d04;
 }

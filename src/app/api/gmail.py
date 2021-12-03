@@ -9,6 +9,19 @@ from googleapiclient.discovery import build
 import pybase64
 from google.oauth2 import service_account
 
+from .common import ApiException
+
+
+class GmailApiException(ApiException):
+    """
+    Represents a Gmail-related API exception.
+    """
+
+    def __init__(self, message=""):
+        super().__init__()
+        self.message = message
+
+
 # Email sending confirmation email
 EMAIL_FROM = getenv("ADMIN_EMAIL")
 
@@ -27,8 +40,10 @@ def send_confirmation_email(new_user_email):
     email_to = new_user_email
     email_subject = "Welcome to pieceMeal!"
 
-    with open("confirmation.txt", "r", encoding="utf-8") as file:
-        message = file.read()
+    message = """\
+"Welcome to pieceMeal! \nThank you for creating a new account with us.
+Please sign in at https://www.piecemealapp2.com to complete your profile"
+    """
 
     email_content = message
 
@@ -126,13 +141,9 @@ def send_message(service, user_id, message):
     """
 
     try:
-        message = (
-            service.users().messages().send(userId=user_id, body=message).execute()
-        )
-
-        print(f"Message Id: {message['id']}")
+        service.users().messages().send(userId=user_id, body=message).execute()
 
     # pylint: disable=broad-except
     # Gmail API could return any number of errors and we want to catch them all.
     except Exception as error:
-        print(f"An error occurred: {error}")
+        raise GmailApiException() from error

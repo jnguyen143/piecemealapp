@@ -5,6 +5,16 @@ This file defines common types and functions used across all or multiple API fil
 import requests
 
 
+class ApiException(Exception):
+    """
+    A general class for all API exceptions.
+    """
+
+    def __init__(self, message=""):
+        super().__init__()
+        self.message = message
+
+
 class UndefinedApiKeyException(Exception):
     """
     Raised when an API call is made but the required key to make the call has not been defined.
@@ -68,6 +78,8 @@ def api_get_json(url: str, headers: dict = None, params: dict = None) -> dict:
 
     try:
         result = response.json()
+        if result is None:
+            raise Exception("Expected JSON data, received None")
         return result
     except Exception as e:
         raise MalformedResponseException(f"Malformed JSON; details: {str(e)}") from e
