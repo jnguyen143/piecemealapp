@@ -105,9 +105,8 @@ def user_index_page(current_user):
     #         pass
 
     return render_template(
-        "index2.html",
+        "indexfinal.html",
         recipes=target_recipes,
-        has_recipes=has_recipes,
         userdata=current_user.to_json(),
     )
 
