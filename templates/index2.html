@@ -269,7 +269,6 @@
         query: ingredientInput,
         limit: 12
       })).then(response => response.json()).then(response => {
-        console.log(response.error_message)
         fetch('/search-ingredients', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ingredients: response.ingredients, input: ingredientInput })
