@@ -88,10 +88,7 @@ def user_index_page(current_user):
     target_recipes = []
     try:
         target_recipes = recommended.get_recommended_recipes(DATABASE, limit=12)
-    except spoonacular.SpoonacularApiException as exc:
-        import traceback
-
-        print(traceback.format_exc())
+    except spoonacular.SpoonacularApiException:
         pass
 
     # (recipes, _) = DATABASE.get_recipes(current_user.id)
