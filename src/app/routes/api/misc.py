@@ -226,7 +226,9 @@ def init_login():
         return error_response(1, response_error_messages[1])
 
     authentication = UserAuthentication.DEFAULT
+
     try:
+
         authentication = UserAuthentication.get_from_value(
             util.get_or_raise(
                 actual_data, "authentication", InvalidEndpointArgsException()

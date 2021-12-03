@@ -2,13 +2,23 @@
 /*Body styling*/
 
 body {
-  background-image: url("../assets/img2.jpg");
   background-color: rgb(48, 44, 44);
+  background-image: url("../assets/img2.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   font-family: 'Lato', sans-serif;
+}
+
+/*User data navigation link style*/
+
+.nav-link {
+  color: gray;
+}
+
+.nav-link:hover {
+  color: green;
 }
 
 /*Navigation menu container and styling*/
@@ -17,7 +27,8 @@ body {
   border-top-right-radius: 10px;
   margin-top: 50px;
   text-align: center;
-  min-width: 400px;
+  min-width: 700px;
+  width: 100vw;
 }
 
 .nav_menu a {
