@@ -69,7 +69,7 @@ def get_recommended_recipes_from_spoonacular():
 
     This function is necessary for some unit tests.
     """
-    return spoonacular.get_recommended_recipes()
+    return spoonacular.get_random_recipes()
 
 
 def get_similar_recipes_from_spoonacular(recipe_id):
@@ -129,7 +129,6 @@ def general_index_page():
 # as it does not affect the code functionality
 def search_recipes():
     data = get_json_data(request, "POST")
-    # print(data["recipes"])
     return render_template(
         "search/search_recipes.html", recipes=data["recipes"], keyword=data["input"]
     )

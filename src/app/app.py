@@ -83,5 +83,5 @@ def start_app():
         raise Exception("Application not initialized")
     # Disabling because os.getenv is retrieving a port and not a string
     # pylint: disable=W1508
-    APP_OBJ.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
-    # APP_OBJ.run(debug=True)
+    # APP_OBJ.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+    APP_OBJ.run(debug=True)
