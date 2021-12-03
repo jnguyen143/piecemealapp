@@ -158,6 +158,7 @@ Args
 - `sort_by (str)`: The criteria to use to sort the results. This argument is optional.
 - `offset (int)`: The offset into the results to start at. This argument is optional and by default is 0.
 - `limit (int)`: The maximum number of results to return. This argument is optional and by default is 10.
+- `use_saved_intolerances (bool)`: Whether to use saved intolerances as a filter when searching for recipes if a user is logged in. This argument is optional and by default is true.
 
 Returns
 
