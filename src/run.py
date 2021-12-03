@@ -11,7 +11,7 @@ from app import app  # pylint: disable=import-error
 if __name__ == "__main__":
 
     # Change index back to 1 before deployment - SME
-    if len(sys.argv) > 2 and sys.argv[0] == "--test" or sys.argv[0] == "-t":
+    if len(sys.argv) > 2 and (sys.argv[1] == "--test" or sys.argv[1] == "-t"):
         test_type = sys.argv[2]
         if test_type == "client_mocked":
             run_mocked_client.run()
@@ -24,6 +24,3 @@ if __name__ == "__main__":
     else:
         app.init_app()
         app.start_app()
-
-    # app.init_app()
-    # app.start_app()

@@ -14,390 +14,330 @@
 
 <body style="background-color: black">
 
-  <div class="main-nav-container">
+  <div class="row">
     <div class="nav_menu">
       <a href="/">Home</a>
       <a href="/Profile" id="logged-out" value="False">Profile</a>
       <a href="/Logout">Logout</a>
     </div>
+  </div>
 
-    <div class="sub-container">
+  <div class="row mx-0">
+    <div class="container-fuild vw-100 mx-0" style="min-width:700px;">
+      <div class="row">
+        <nav class=" navbar navbar-expand-lg bg-light navbar-fixed pm-font-minor">
+          <div class="container-fluid d-flex justify-content-between">
+            <a class="navbar-brand" href="/">
+              <img src="../static/assets/logo.png" alt="PieceMeal Logo" style="width:150px; padding-left: 20px;" />
+            </a>
 
-      <nav class=" navbar navbar-expand-lg bg-light navbar-fixed pm-font-minor">
-        <div class="container-fluid d-flex justify-content-between">
-          <a class="navbar-brand" href="/">
-            <img src="../static/assets/logo.png" alt="PieceMeal Logo" style="width:150px; padding-left: 20px;" />
-          </a>
-
-          <div class="navbar-header flex-fill" style="float:none;">
-            <div class="navbar-brand" style="display: block; text-align: center; float: none;">
-              <div class="h1 pm-font-major-3">
-                My Profile
+            <div class="navbar-header flex-fill" style="float:none;">
+              <div class="navbar-brand" style="display: block; text-align: center; float: none;">
+                <div class="h1 pm-font-major-3">
+                  My Profile
+                </div>
               </div>
+            </div>
+
+            <ul class="navbar-nav">
+              {% if current_user.is_authenticated %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                  <img src="{{current_userdata['profile_image']}}"
+                    alt="{{current_userdata['username']}} Profile Picture" style="width:50px;" class="rounded-circle" />
+                </a>
+                <div class="dropdown-menu" style="min-width:1rem; transform:translateX(-15%);">
+                  <div class="text-center" id="current-user-info" current-user-id="{{current_userdata['id']}}">
+                    {{current_userdata['username']}}
+                  </div>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="/profile">My Profile</a>
+                  <a class="dropdown-item" href="/account">Settings</a>
+                  <a class="dropdown-item text-danger" href="/logout">Log Out</a>
+                </div>
+              </li>
+              {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="/signup">Sign Up</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      <div class="row bg-white pb-5">
+        <div class="col-3 border-end mx-0" style="min-width:300px;">
+          <div class="row pl-2">
+            <div class="col">
+              <img src="{{current_userdata['profile_image']}}" class="rounded-circle"
+                alt="{{current_userdata['username']}} Profile Picture" style="width:200px; padding:15px" />
+            </div>
+
+            <div class="col pm-font-minor h-100 px-4 pt-2">
+              <p class="mb-0 h5"><strong>Username:</strong></p>
+              <p class="font-weight-normal">@{{current_userdata["username"]}}</p>
+              <p class="my-0 h5"><strong>Display Name:</strong></p>
+              <p class="font-weight-normal">{{current_userdata["given_name"]}} {{current_userdata["family_name"]}}
+              </p>
+              <p class="my-0 h5"><strong>Member Since:</strong></p>
+              <p class="font-weight-normal">{{current_userdata["display_creation_date"]}}</p>
             </div>
           </div>
 
-          <ul class="navbar-nav">
-            {% if current_user.is_authenticated %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                <img src="{{current_userdata['profile_image']}}" alt="{{current_userdata['username']}} Profile Picture"
-                  style="width:50px;" class="rounded-circle" />
-              </a>
-              <div class="dropdown-menu" style="min-width:1rem; transform:translateX(-15%);">
-                <div class="text-center" id="current-user-info" current-user-id="{{current_userdata['id']}}">
-                  {{current_userdata['username']}}
-                </div>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="/profile">My Profile</a>
-                <a class="dropdown-item" href="/account">Settings</a>
-                <a class="dropdown-item text-danger" href="/logout">Log Out</a>
+          <div class="row mt-4 mx-0">
+            <div class="col">
+              <div class="h3 pm-font-major-2 pb-1">
+                Public Information
               </div>
+
+              <div class="form-check form-switch">
+                {% if permissions["name"] %}
+                <input class="form-check-input " type="checkbox" id="perm-switch-name" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-name">
+                {% endif %}
+                <label class="form-check-label" for="perm-switch-name">
+                  Show Display Name
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                {% if permissions["creation_date"] %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-creation-date" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-creation-date">
+                {% endif %}
+                <label class="form-check-label" for="perm-switch-creation-date">
+                  Show Account Creation Date
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                {% if permissions["intolerances"] %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-intolerances" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-intolerances">
+                {% endif %}
+                <label class="form-check-label" for="perm-switch-intolerances">
+                  Show Intolerances
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                {% if permissions["saved_recipes"] %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-saved-recipes" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-saved-recipes">
+                {% endif %}
+                <label class="form-check-label" for="perm-switch-saved-recipes">
+                  Show Saved Recipes
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                {% if permissions["saved_ingredients"] %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-saved-ingredients" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-saved-ingredients">
+                {% endif %}
+                <label class="form-check-label" for="perm-switch-saved-ingredients">
+                  Show Saved Ingredients
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                {% if permissions["friends"] %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-friends" checked>
+                {% else %}
+                <input class="form-check-input" type="checkbox" id="perm-switch-friends">
+                {% endif %}
+                <label class="form-check-label" for="perm-switch-friends">
+                  Show Friend List
+                </label>
+              </div>
+
+              <button id="perm-switch-button" style="margin-top:3%;" type="button" class="btn btn-success" disabled>Save
+                Changes</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col mx-0 px-0 pm-font-minor" style="min-width:500px;">
+          <ul class="nav nav-tabs nav-fill" id="profile-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="recipes-tab" data-bs-toggle="tab" data-bs-target="#recipes"
+                type="button" role="tab" aria-controls="recipes" aria-selected="true">
+                Saved Recipes
+              </button>
             </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="/signup">Sign Up</a>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="ingredients-tab" data-bs-toggle="tab" data-bs-target="#ingredients"
+                type="button" role="tab" aria-controls="ingredients" aria-selected="false">
+                Saved Ingredients
+              </button>
             </li>
-            {% endif %}
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="intolerances-tab" data-bs-toggle="tab" data-bs-target="#intolerances"
+                type="button" role="tab" aria-controls="intolerances" aria-selected="false">
+                Intolerances
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends" type="button"
+                role="tab" aria-controls="friends" aria-selected="false">
+                Friends
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="friend-requests-tab" data-bs-toggle="tab" data-bs-target="#friend-requests"
+                type="button" role="tab" aria-controls="friend-requests" aria-selected="false">
+                Friend Requests
+                {% if current_userdata["friend_requests"] | length > 0 %}
+                <span class="badge bg-danger ms-1 align-top">
+                  {% if current_userdata["friend_requests"] | length > 99 %}
+                  99+
+                  {% else %}
+                  {{current_userdata["friend_requests"] | length}}
+                  {% endif %}
+                </span>
+                {% endif %}
+              </button>
+            </li>
           </ul>
-        </div>
-      </nav>
 
-      <div class="row">
-        <div class="col-3 text-center px-2 pm-font-minor" style="width: 250px">
-
-          <form class="recipes" action="/search_recipes" method="POST">
-            <p>Search for Recipes</p>
-
-            <input type="text" name="searchRecipes" placeholder="find potential recipes!" />
-
-            <div class="filters">
-              <p>Filter by:</p>
-            </div>
-
-            <select id="cuisine" name="cuisine">
-              <option value="">Cuisine Type</option>
-              <option value="African">African</option>
-              <option value="American">American</option>
-              <option value="British"> British </option>
-              <option value="Cajun"> Cajun </option>
-              <option value="Caribbean"> Caribbean </option>
-              <option value="Chinese"> Chinese </option>
-              <option value="EasternEuropean"> EasternEuropean </option>
-              <option value="European"> European </option>
-              <option value="French"> French </option>
-              <option value="German"> German </option>
-              <option value="Greek"> Greek </option>
-              <option value="Indian"> Indian </option>
-              <option value="Irish"> Irish </option>
-              <option value="Italian"> Italian </option>
-              <option value="Japanese"> Japanese </option>
-              <option value="Jewish"> Jewish </option>
-              <option value="Korean"> Korean </option>
-              <option value="LatinAmerican"> Latin American </option>
-              <option value="Mediterranean"> Mediterranean </option>
-              <option value="Mexican"> Mexican </option>
-              <option value="MiddleEastern"> Middle Eastern </option>
-              <option value="Nordic"> Nordic </option>
-              <option value="Southern"> Southern </option>
-              <option value="Spanish"> Spanish </option>
-              <option value="Thai"> Thai </option>
-              <option value="Vietnamese"> Vietnamese </option>
-            </select>
-            <button type="submit" class="search-button">Search</button>
-          </form>
-
-          <form class="ingredients" action="/search_ingredients" method="POST">
-            <p>Search for Ingredients</p>
-            <input type="text" name="searchIngredients" placeholder="search for ingredients!" />
-            <button type="submit" class="search-button">Search</button>
-          </form>
-
-        </div>
-
-        <div class="col bg-white pr-4">
-
-          <div class="row">
-            <div class="col-4 pb-4 border-end" style="min-width:300px;">
-              <div class="row">
-                <div class="col-sm-auto">
-                  <img src="{{current_userdata['profile_image']}}" class="rounded-circle"
-                    alt="{{current_userdata['username']}} Profile Picture" style="width:200px; padding:15px" />
-                </div>
-
-                <div class="col pm-font-minor px-4 pt-2">
-                  <p class="mb-0 h5"><strong>Username:</strong></p>
-                  <p class="font-weight-normal">@{{current_userdata["username"]}}</p>
-                  <p class="my-0 h5"><strong>Display Name:</strong></p>
-                  <p class="font-weight-normal">{{current_userdata["given_name"]}} {{current_userdata["family_name"]}}
-                  </p>
-                  <p class="my-0 h5"><strong>Member Since:</strong></p>
-                  <p class="font-weight-normal">{{current_userdata["display_creation_date"]}}</p>
-                </div>
+          <div class="tab-content px-4" id="profile-tabs-content">
+            <div class="tab-pane fade" id="intolerances" role="tabpanel" aria-labelledby="intolerances-tab">
+              {% if current_userdata["intolerances"] | length == 0 %}
+              <div class="text-center p-5 h5">
+                You don't have any saved intolerances.
               </div>
+              {% else %}
+              {% with intolerances=current_userdata["intolerances"] %}
+              {% include "my_profile_intolerance_list.html" %}
+              {% endwith %}
+              {% endif %}
 
-              <div class="row p-2 mt-4 px-3">
-                <div class="col">
-                  <div class="h3 pm-font-major-2 pb-1">
-                    Public Information
-                  </div>
-
-                  <div class="form-check form-switch">
-                    {% if permissions["name"] %}
-                    <input class="form-check-input " type="checkbox" id="perm-switch-name" checked>
-                    {% else %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-name">
-                    {% endif %}
-                    <label class="form-check-label" for="perm-switch-name">
-                      Show Display Name
-                    </label>
-                  </div>
-
-                  <div class="form-check form-switch">
-                    {% if permissions["creation_date"] %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-creation-date" checked>
-                    {% else %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-creation-date">
-                    {% endif %}
-                    <label class="form-check-label" for="perm-switch-creation-date">
-                      Show Account Creation Date
-                    </label>
-                  </div>
-
-                  <div class="form-check form-switch">
-                    {% if permissions["intolerances"] %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-intolerances" checked>
-                    {% else %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-intolerances">
-                    {% endif %}
-                    <label class="form-check-label" for="perm-switch-intolerances">
-                      Show Intolerances
-                    </label>
-                  </div>
-
-                  <div class="form-check form-switch">
-                    {% if permissions["saved_recipes"] %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-saved-recipes" checked>
-                    {% else %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-saved-recipes">
-                    {% endif %}
-                    <label class="form-check-label" for="perm-switch-saved-recipes">
-                      Show Saved Recipes
-                    </label>
-                  </div>
-
-                  <div class="form-check form-switch">
-                    {% if permissions["saved_ingredients"] %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-saved-ingredients" checked>
-                    {% else %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-saved-ingredients">
-                    {% endif %}
-                    <label class="form-check-label" for="perm-switch-saved-ingredients">
-                      Show Saved Ingredients
-                    </label>
-                  </div>
-
-                  <div class="form-check form-switch">
-                    {% if permissions["friends"] %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-friends" checked>
-                    {% else %}
-                    <input class="form-check-input" type="checkbox" id="perm-switch-friends">
-                    {% endif %}
-                    <label class="form-check-label" for="perm-switch-friends">
-                      Show Friend List
-                    </label>
-                  </div>
-
-                  <button id="perm-switch-button" style="margin-top:3%;" type="button" class="btn btn-success"
-                    disabled>Save
-                    Changes</button>
+              <div class="row d-flex justify-content-center">
+                <div class="col d-flex justify-content-center">
+                  <form onsubmit="addIntolerance(); return false;">
+                    <label for="intolerances-selection">Add an intolerance:</label>
+                    <select class="ms-2" name="intolerances-selection" id="intolerances-selection">
+                      <option value="0">Dairy</option>
+                      <option value="1">Egg</option>
+                      <option value="2">Gluten</option>
+                      <option value="3">Grain</option>
+                      <option value="4">Peanut</option>
+                      <option value="5">Seafood</option>
+                      <option value="6">Sesame</option>
+                      <option value="7">Shellfish</option>
+                      <option value="8">Soy</option>
+                      <option value="9">Sulfite</option>
+                      <option value="10">Tree Nut</option>
+                      <option value="11">Wheat</option>
+                    </select>
+                    <input class="btn btn-primary ms-3" type="submit" value="Add">
+                  </form>
                 </div>
               </div>
             </div>
-
-            <div class="col ml-0 pm-font-minor">
-              <ul class="nav nav-tabs nav-fill" id="profile-tabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="recipes-tab" data-bs-toggle="tab" data-bs-target="#recipes"
-                    type="button" role="tab" aria-controls="recipes" aria-selected="true">
-                    Saved Recipes
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="ingredients-tab" data-bs-toggle="tab" data-bs-target="#ingredients"
-                    type="button" role="tab" aria-controls="ingredients" aria-selected="false">
-                    Saved Ingredients
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="intolerances-tab" data-bs-toggle="tab" data-bs-target="#intolerances"
-                    type="button" role="tab" aria-controls="intolerances" aria-selected="false">
-                    Intolerances
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends" type="button"
-                    role="tab" aria-controls="friends" aria-selected="false">
-                    Friends
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="friend-requests-tab" data-bs-toggle="tab"
-                    data-bs-target="#friend-requests" type="button" role="tab" aria-controls="friend-requests"
-                    aria-selected="false">
-                    Friend Requests
-                    {% if current_userdata["friend_requests"] | length > 0 %}
-                    <span class="badge bg-danger ms-1 align-top">
-                      {% if current_userdata["friend_requests"] | length > 99 %}
-                      99+
-                      {% else %}
-                      {{current_userdata["friend_requests"] | length}}
-                      {% endif %}
-                    </span>
-                    {% endif %}
-                  </button>
-                </li>
-              </ul>
-
-              <div class="tab-content" id="profile-tabs-content">
-                <div class="tab-pane fade" id="intolerances" role="tabpanel" aria-labelledby="intolerances-tab">
-                  {% if current_userdata["intolerances"] | length == 0 %}
-                  <div class="text-center p-5 h5">
-                    You don't have any saved intolerances.
-                  </div>
-                  {% else %}
-                  {% with intolerances=current_userdata["intolerances"] %}
-                  {% include "my_profile_intolerance_list.html" %}
-                  {% endwith %}
-                  {% endif %}
-
-                  <div class="row d-flex justify-content-center">
-                    <div class="col d-flex justify-content-center">
-                      <form onsubmit="addIntolerance(); return false;">
-                        <label for="intolerances-selection">Add an intolerance:</label>
-                        <select class="ms-2" name="intolerances-selection" id="intolerances-selection">
-                          <option value="0">Dairy</option>
-                          <option value="1">Egg</option>
-                          <option value="2">Gluten</option>
-                          <option value="3">Grain</option>
-                          <option value="4">Peanut</option>
-                          <option value="5">Seafood</option>
-                          <option value="6">Sesame</option>
-                          <option value="7">Shellfish</option>
-                          <option value="8">Soy</option>
-                          <option value="9">Sulfite</option>
-                          <option value="10">Tree Nut</option>
-                          <option value="11">Wheat</option>
-                        </select>
-                        <input class="btn btn-primary ms-3" type="submit" value="Add">
-                      </form>
-                    </div>
-                  </div>
-                </div>
-                <div class="tab-pane fade show active" id="recipes" role="tabpanel" aria-labelledby="recipes-tab">
-                  {% if user_recipes == False%}
-                  <div class="text-center h5 p-5">
-                    You don't have any saved recipes. Try searching for some to add instead!
-                  </div>
-                  {% else %}
-                  {% with recipes=current_userdata["recipes"] %}
-                  {% include "my_profile_recipe_list.html" %}
-                  {% endwith %}
-                  {% endif %}
-                </div>
-                <div class="tab-pane fade" id="ingredients" role="tabpanel" aria-labelledby="ingredients-tab">
-                  {% with liked_ingredients=current_userdata["liked_ingredients"] %}
-                  {% with disliked_ingredients=current_userdata["disliked_ingredients"] %}
-                  {% include "my_profile_ingredient_list.html" %}
-                  {% endwith %}
-                  {% endwith %}
-                </div>
-                <div class="tab-pane fade" id="friends" role="tabpanel" aria-labelledby="friends-tab">
-                  {% if current_userdata["friends"] | length == 0 %}
-                  <div class="text-center p-5 h5">
-                    You don't have any friends added.
-                  </div>
-                  {% else %}
-                  {% with friends=current_userdata["friends"] %}
-                  {% include "my_profile_friend_list.html" %}
-                  {% endwith %}
-                  {% endif %}
-                  <div class="container-fluid w-100">
-                    <form class="d-flex w-100 justify-content-center" method="GET"
-                      onsubmit="onSearchBoxChange(); return false;" onfocusout="closeSearchBox();" id="search-box-form">
-                      <div class="d-flex w-100 flex-fill justify-content-center">
-                        <div class="w-100 row row-cols-2">
-                          <div class="col flex-grow-1">
-                            <input id="search-box" class="form-control" type="text" autocomplete="off"
-                              oninput="onSearchBoxChange();" placeholder="Search for Users">
-                          </div>
-                          <div class="col-sm-auto">
-                            <button class="btn btn-primary form-control" type="submit"><i
-                                class="bi-search"></i></button>
-                          </div>
-                          <div class="col flex-grow-1" id="search-results-div">
-                            <div class="dropdown w-100">
-                              <button class="btn btn-secondary dropdown-toggle d-none" type="button"
-                                id="search-results-button" data-bs-toggle="dropdown" aria-expanded="false"
-                                data-bs-reference="parent">
-                              </button>
-                              <div id="search-results" class="dropdown-menu w-100"
-                                aria-labelledby="search-results-button" style="max-height: 40vh; overflow-y: auto;">
-                              </div>
-                            </div>
+            <div class="tab-pane fade show active" id="recipes" role="tabpanel" aria-labelledby="recipes-tab">
+              {% if user_recipes == False%}
+              <div class="text-center h5 p-5">
+                You don't have any saved recipes. Try searching for some to add instead!
+              </div>
+              {% else %}
+              {% with recipes=current_userdata["recipes"] %}
+              {% include "my_profile_recipe_list.html" %}
+              {% endwith %}
+              {% endif %}
+            </div>
+            <div class="tab-pane fade" id="ingredients" role="tabpanel" aria-labelledby="ingredients-tab">
+              {% with liked_ingredients=current_userdata["liked_ingredients"] %}
+              {% with disliked_ingredients=current_userdata["disliked_ingredients"] %}
+              {% include "my_profile_ingredient_list.html" %}
+              {% endwith %}
+              {% endwith %}
+            </div>
+            <div class="tab-pane fade" id="friends" role="tabpanel" aria-labelledby="friends-tab">
+              {% if current_userdata["friends"] | length == 0 %}
+              <div class="text-center p-5 h5">
+                You don't have any friends added.
+              </div>
+              {% else %}
+              {% with friends=current_userdata["friends"] %}
+              {% include "my_profile_friend_list.html" %}
+              {% endwith %}
+              {% endif %}
+              <div class="container-fluid w-100">
+                <form class="d-flex w-100 justify-content-center" method="GET"
+                  onsubmit="onSearchBoxChange(); return false;" onfocusout="closeSearchBox();" id="search-box-form">
+                  <div class="d-flex w-100 flex-fill justify-content-center">
+                    <div class="w-100 row row-cols-2">
+                      <div class="col flex-grow-1">
+                        <input id="search-box" class="form-control" type="text" autocomplete="off"
+                          oninput="onSearchBoxChange();" placeholder="Search for Users">
+                      </div>
+                      <div class="col-sm-auto">
+                        <button class="btn btn-primary form-control" type="submit"><i class="bi-search"></i></button>
+                      </div>
+                      <div class="col flex-grow-1" id="search-results-div">
+                        <div class="dropdown w-100">
+                          <button class="btn btn-secondary dropdown-toggle d-none" type="button"
+                            id="search-results-button" data-bs-toggle="dropdown" aria-expanded="false"
+                            data-bs-reference="parent">
+                          </button>
+                          <div id="search-results" class="dropdown-menu w-100" aria-labelledby="search-results-button"
+                            style="max-height: 40vh; overflow-y: auto;">
                           </div>
                         </div>
                       </div>
-                    </form>
+                    </div>
                   </div>
-                </div>
-
-                <div class="tab-pane fade" id="friend-requests" role="tabpanel" aria-labelledby="friend-requests-tab">
-                  {% if current_userdata["friend_requests"] | length == 0 %}
-                  <div class="text-center p-5 h5">
-                    You don't have any friend requests.
-                  </div>
-                  {% else %}
-                  {% with friend_requests=current_userdata["friend_requests"] %}
-                  {% include "my_profile_friend_request_list.html" %}
-                  {% endwith %}
-                  {% endif %}
-                </div>
+                </form>
               </div>
             </div>
-          </div>
-          <!-- </div> -->
 
-          <div id="page-modal" class="modal pm-font-minor" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Confirm Deletion</h5>
-                  <button type="button" class="btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <p id="modal-message"></p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
-                    id="modal-delete-button">Delete</button>
-                </div>
+            <div class="tab-pane fade" id="friend-requests" role="tabpanel" aria-labelledby="friend-requests-tab">
+              {% if current_userdata["friend_requests"] | length == 0 %}
+              <div class="text-center p-5 h5">
+                You don't have any friend requests.
               </div>
-            </div>
-          </div>
-
-          <div class="pm-font-minor toast-container position-absolute bottom-0 end-0 p-3">
-            <div id="toast-div" class="toast align-items-center hide" role="alert" aria-live="assertive"
-              aria-atomic="true">
-              <div class="d-flex">
-                <div class="toast-body" id="toast-message"></div>
-                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
+              {% else %}
+              {% with friend_requests=current_userdata["friend_requests"] %}
+              {% include "my_profile_friend_request_list.html" %}
+              {% endwith %}
+              {% endif %}
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
+  <div id="page-modal" class="modal pm-font-minor" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Deletion</h5>
+          <button type="button" class="btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modal-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="modal-delete-button">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pm-font-minor toast-container position-absolute bottom-0 end-0 p-3">
+    <div id="toast-div" class="toast align-items-center hide" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body" id="toast-message"></div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
   </div>
