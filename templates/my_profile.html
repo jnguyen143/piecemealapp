@@ -17,7 +17,7 @@
   <div class="row">
     <div class="nav_menu">
       <a href="/">Home</a>
-      <a href="/Profile" id="logged-out" value="False">Profile</a>
+      <a active href="/Profile" id="logged-out" value="False">Profile</a>
       <a href="/Logout">Logout</a>
     </div>
   </div>
@@ -220,7 +220,8 @@
 
               <div class="row d-flex justify-content-center">
                 <div class="col d-flex justify-content-center">
-                  <form onsubmit="addIntolerance(); return false;">
+                  <form onsubmit="addIntolerance(); return false;"
+                    style="background: rgb(216, 216, 216); padding: 20px;">
                     <label for="intolerances-selection">Add an intolerance:</label>
                     <select class="ms-2" name="intolerances-selection" id="intolerances-selection">
                       <option value="0">Dairy</option>
@@ -236,7 +237,7 @@
                       <option value="10">Tree Nut</option>
                       <option value="11">Wheat</option>
                     </select>
-                    <input class="btn btn-primary ms-3" type="submit" value="Add">
+                    <input class="btn btn-success ms-3" type="submit" value="Add">
                   </form>
                 </div>
               </div>
@@ -270,20 +271,20 @@
               {% endwith %}
               {% endif %}
               <div class="container-fluid w-100">
-                <form class="d-flex w-100 justify-content-center" method="GET"
-                  onsubmit="onSearchBoxChange(); return false;" onfocusout="closeSearchBox();" id="search-box-form">
+                <form class="d-flex justify-content-center" method="GET" onsubmit="onSearchBoxChange(); return false;"
+                  onfocusout="closeSearchBox();" id="search-box-form">
                   <div class="d-flex w-100 flex-fill justify-content-center">
-                    <div class="w-100 row row-cols-2">
-                      <div class="col flex-grow-1">
+                    <div class="row px-2 py-2" style="background: rgb(216, 216, 216)">
+                      <div class="col-10">
                         <input id="search-box" class="form-control" type="text" autocomplete="off"
                           oninput="onSearchBoxChange();" placeholder="Search for Users">
                       </div>
-                      <div class="col-sm-auto">
-                        <button class="btn btn-primary form-control" type="submit"><i class="bi-search"></i></button>
+                      <div class="col-sm-auto my-auto">
+                        <button class="btn btn-success form-control" type="submit"><i class="bi-search"></i></button>
                       </div>
                       <div class="col flex-grow-1" id="search-results-div">
                         <div class="dropdown w-100">
-                          <button class="btn btn-secondary dropdown-toggle d-none" type="button"
+                          <button class="btn btn-success dropdown-toggle d-none" type="button"
                             id="search-results-button" data-bs-toggle="dropdown" aria-expanded="false"
                             data-bs-reference="parent">
                           </button>
@@ -444,7 +445,7 @@
             let containerDivCol = document.createElement('div');
             containerDivCol.classList.add('col');
             let requestButton = document.createElement('button');
-            requestButton.classList.add('btn', 'btn-primary', 'me-2');
+            requestButton.classList.add('btn', 'btn-success', 'me-2');
             let requestButtonIcon = document.createElement('i');
             requestButtonIcon.classList.add('bi-person-plus', 'h4');
             requestButton.appendChild(requestButtonIcon);

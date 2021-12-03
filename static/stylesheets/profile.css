@@ -24,10 +24,6 @@ body {
 .nav-link:hover {
   color: green;
 }
-.nav-link.active {
-  color: green;
-}
-
 
 /*Navigation menu container and styling*/
 
@@ -57,25 +53,6 @@ body {
   color: white;
 }
 
-/*main-container for all content*/
-
-.main-container {
-  min-width: 650px;
-  height: 100vh;
-  font-weight: bold;
-  margin: 0 auto;
-}
-
-/*Right side sub-container for all content type formatting*/
-
-.sub-container {
-  min-width: 100%;
-  background-color: #ffe6d3f1;
-  font-weight: bold;
-  margin: 0 auto;
-  border-top-right-radius: 10px;
-}
-
 /*All forms styling*/
 
 form {
@@ -92,60 +69,4 @@ input[type=text] {
   border: none;
   border-radius: 4px;
   text-align: center;
-}
-
-/*Searchbox styling*/
-
-input[type=password] {
-  padding: 8px 10px;
-  margin: 10px auto;
-  font-size: 14px;
-  border: none;
-  border-radius: 4px;
-  text-align: center;
-}
-
-/*Styling for select dropdown option menu for cuisine types*/
-
-select {
-  background: white;
-  margin: auto;
-  padding: 5px;
-  width:150px;
-  border: none;
-  font-family: Arial;
-  border-radius: 4px;
-}
-
-/*Filter button styling*/
-
-.filter-button {
-  margin: 10px;
-  padding: 4px 6px;
-  background: #FFB659;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.filter-button:hover {
-  background: #c46d04;
-}
-
-/*Search button styling*/
-
-.search-button {
-  padding: 6px 10px;
-  width: 100px;
-  margin: 8px auto;
-  background: #FB8C00;
-  font-size: 17px;
-  border: none;
-  cursor: pointer;
-  border-radius: 20px;
-}
-
-.search-button:hover {
-  background: #c46d04;
 }
