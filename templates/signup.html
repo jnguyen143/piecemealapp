@@ -7,6 +7,16 @@
   <link rel="stylesheet" type="text/css" href='../static/stylesheets/signup.css'>
   <script src="../static/modules/forge.min.js"></script>
   <script type="module" src="../static/modules/signup.js"></script>
+  <script type="text/javascript">
+    function check(input) {
+      const password = document.getElementById("password")
+      if (input.value === password.value) {
+        input.setCustomValidity('');
+      } else {
+        input.setCustomValidity('Passwords do not match');
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -29,9 +39,12 @@
           <input type="email" id="email" placeholder="Email" required />
           <input type="text" id="given_name" placeholder="First Name" required />
           <input type="text" id="family_name" placeholder="Last Name" required />
-          <input type="password" id="password" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+          <input type="password" name="password" id="password" placeholder="Password"
+            pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
             title="Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
             required />
+          <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password"
+            oninput="check(this)" title="Passwords must match" required />
 
           <button type="submit" value="Sign Up" class="account-button">Sign Up</button>
         </form>
