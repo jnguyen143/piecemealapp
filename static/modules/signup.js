@@ -48,4 +48,3 @@ document.getElementById('google-signup-form').onsubmit = () => {
 
   return false;
 };
-
