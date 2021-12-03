@@ -9,7 +9,14 @@
         <div class="recipe">
             <div class="image">
                 <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
-                <button type="submit" class="add-button" ingredient-id="{{ingredient['id']}}">ADD</button>
+                <div style="display: flex; flex-flow: row;">
+                    <button type="submit" class="add-button like-button" ingredient-id="{{ingredient['id']}}"
+                        ingredient-name="{{ingredient['name']}}" ingredient-image="{{ingredient['image']}}"
+                        style="margin-right: 5px;">LIKE</button>
+                    <button type="submit" class="add-button dislike-button" ingredient-id="{{ingredient['id']}}"
+                        ingredient-name="{{ingredient['name']}}"
+                        ingredient-image="{{ingredient['image']}}">DISLIKE</button>
+                </div>
             </div>
             <div class="description">
                 <h2>{{ingredient["name"]}}</h2>

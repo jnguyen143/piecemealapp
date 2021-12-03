@@ -85,7 +85,11 @@ def user_index_page(current_user):
     """
     The index page for when a user is logged in.
     """
-    target_recipes = recommended.get_recommended_recipes(DATABASE, limit=12)
+    target_recipes = []
+    try:
+        target_recipes = recommended.get_recommended_recipes(DATABASE, limit=12)
+    except spoonacular.SpoonacularApiException:
+        pass
 
     # (recipes, _) = DATABASE.get_recipes(current_user.id)
     # if len(recipes) > 0:
@@ -104,7 +108,7 @@ def user_index_page(current_user):
     #         pass
 
     return render_template(
-        "indexfinal.html",
+        "index2.html",
         recipes=target_recipes,
         userdata=current_user.to_json(),
     )
