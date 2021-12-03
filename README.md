@@ -22,6 +22,7 @@ The following packages are required to run the app, all of which are provided in
 * Requests: utilized for formatting data pulled from user
 * requests_oauthlib: connects the Google API functions to Flask in a more comprehensive form
 * pyOpenSSL: enables secure connection with https (required for bypassing warning)
+* Google APIs: Various Google API packages that enable the Gmail service to work
 
 ## Installation
 Run the command `pip3 install -r requirements.txt.` to install the dependencies required for running the app.
@@ -32,4 +33,4 @@ keypair = RSA.generate(2048)
 with open("private_key.pem", "wb") as f:
     f.write(keypair.exportKey())
 with open("public_key.pem", "wb") as f:
-    f.write(keypair.publickey().exportKey()) ```
+    f.write(keypair.publickey().exportKey()) 
