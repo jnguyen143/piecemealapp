@@ -27,8 +27,10 @@ def send_confirmation_email(new_user_email):
     email_to = new_user_email
     email_subject = "Welcome to pieceMeal!"
 
-    with open("confirmation.txt", "r", encoding="utf-8") as file:
-        message = file.read()
+    message = """\
+"Welcome to pieceMeal! \nThank you for creating a new account with us.
+Please sign in at https://www.piecemealapp2.com to complete your profile"
+    """
 
     email_content = message
 
