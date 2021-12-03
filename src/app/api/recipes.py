@@ -333,17 +333,20 @@ def extract_ingredients_recipes(database, distribution, limit, num_sources_left)
     for ingredient in top_ingredients:
         if len(result) == actual_limit:
             break
-        recipes = spoonacular.get_recipes_by_ingredients(
-            [ingredient.name], actual_limit / len(top_ingredients)
-        )
+        try:
+            recipes = spoonacular.get_recipes_by_ingredients(
+                [ingredient.name], actual_limit / len(top_ingredients)
+            )
 
-        # Cache the recipes
-        database.add_recipe_infos(recipes, ignore_duplicates=True)
+            # Cache the recipes
+            database.add_recipe_infos(recipes, ignore_duplicates=True)
 
-        for recipe in recipes:
-            if len(result) == actual_limit:
-                break
-            result.append(recipe)
+            for recipe in recipes:
+                if len(result) == actual_limit:
+                    break
+                result.append(recipe)
+        except spoonacular.SpoonacularApiException:
+            continue
 
     return result
 

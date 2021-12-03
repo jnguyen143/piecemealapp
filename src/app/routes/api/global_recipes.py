@@ -12,10 +12,12 @@ from ...database.database import (
 )
 from ... import util
 from ..routing_util import (
+    NoCurrentUserException,
     get_json_data,
     success_response,
     error_response,
     InvalidEndpointArgsException,
+    get_current_user,
 )
 from ...api import spoonacular
 from ...api.common import UndefinedApiKeyException
@@ -125,6 +127,8 @@ def search_recipes():
             This argument is optional and by default is 0.
         limit (int): The maximum number of results to return.
             This argument is optional and by default is 10.
+        use_saved_intolerances (bool): Whether to use saved intolerances as a filter.
+            This argument is optional and by default is true.
 
     Returns:
     On success, a JSON object containing the following fields:
@@ -146,6 +150,7 @@ def search_recipes():
     query = None
     filters = {}
     sort_by = None
+    use_saved_ingredients = True
     try:
         data = get_json_data(request)
         query = util.get_or_raise(data, "query", InvalidEndpointArgsException())
@@ -154,12 +159,27 @@ def search_recipes():
         filters["diets"] = parse_diets(data)
         filters["ingredients"] = parse_ingredients(data)
         sort_by = parse_sort_criteria(data)
+        use_saved_ingredients = util.get_or_default(data, "use_saved_ingredients", True)
     except InvalidEndpointArgsException:
         return error_response(1, response_error_messages[1])
 
     filters["max_prep_time"] = util.get_or_default(data, "max_prep_time", -1)
     offset = util.get_or_default(data, "offset", 0)
     limit = util.get_or_default(data, "limit", 12)
+
+    if use_saved_ingredients:
+        try:
+            user_id = get_current_user().id
+
+            if "intolerances" not in filters or filters["intolerances"] is None:
+                filters["intolerances"] = []
+
+            intolerances = DATABASE.get_intolerances(user_id)[0]
+
+            for intolerance in intolerances:
+                filters["intolerances"].append(intolerance)
+        except NoCurrentUserException:
+            pass
 
     try:
         results = spoonacular.search_recipes(

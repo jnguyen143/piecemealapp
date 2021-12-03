@@ -102,6 +102,12 @@
           <option value=120>2 hours</option>
         </select>
 
+        <br />
+        <div>
+          <label for="use-saved-intolerances">Use Saved Intolerances:</label>
+          <input type="checkbox" id="use-saved-intolerances" value="Use Saved Intolerances" />
+        </div>
+
         <button type="submit" id="search-recipe-button" class="search-button">Search</button>
       </form>
       <form class="ingredients" onsubmit="searchIngredients();return false;" method="POST">
@@ -238,13 +244,15 @@
       let intolerance = document.getElementById('intolerance').value;
       let diet = document.getElementById('diet').value;
       let maxPrepTime = parseInt(document.getElementById('maxPrepTime').value, 10);
+      let useSavedIntolerances = document.getElementById('use-saved-intolerances').checked;
 
       fetch('/api/recipe-info/search?' + new URLSearchParams({
         query: input,
         cuisines: [cuisine],
         intolerances: [intolerance],
         diets: [diet],
-        max_prep_time: maxPrepTime
+        max_prep_time: maxPrepTime,
+        use_saved_intolerances: useSavedIntolerances
       })).then(response => response.json()).then(response => {
         fetch('/search-recipes', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
