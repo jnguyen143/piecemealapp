@@ -466,7 +466,7 @@ def validate_login_callback():
         DATABASE.set_name(user.id, userinfo["given_name"], userinfo["family_name"])
 
         login_user(user)
-        return redirect("/")
+        return redirect("/home")
     except DatabaseException:
         return redirect("/login?login-auth-status=2")
 
@@ -506,6 +506,6 @@ def validate_signup_callback():
 
         login_user(user)
 
-        return redirect("/")
+        return redirect("/home")
     except DatabaseException:
         return redirect("/signup?signup-auth-status=2")

@@ -261,8 +261,11 @@ form {
   margin-bottom: 40px;
   display: flex;
   flex-flow: column;
+  text-align:center;
 }
-
+.filters{
+  text-align: center;
+}
 /*Searchbox styling*/
 
 input[type=text] {
@@ -333,6 +336,24 @@ input[type=submit] {
 
 .search-button:hover {
   background: #c46d04;
+}
+
+/*Add button styling*/
+
+.add-recipe-button {
+  margin: 5px auto;
+  padding: 5px;
+  background: #ffe6d3f1;
+  font-size: 14px;
+  color: #c46d04;
+  border: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.add-recipe-button:hover {
+  color: white;
+  background: #FB8C00;
 }
 
 /*Add button styling*/

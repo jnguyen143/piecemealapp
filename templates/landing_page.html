@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Error - PieceMeal</title>
+    <title>Welcome to PieceMeal</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -16,26 +16,28 @@
             <img src="../static/assets/logo.png" alt="PieceMeal Logo" style="width:200px;" />
         </a>
         <div class="display-3 pm-font-major text-white text-center" style="font-weight:bold; margin-top:4%;">
-            {{header}}
-        </div>
-        <div class="h4 pm-font-major text-center" style="font-style:italic; margin-top:2%; color:rgb(150, 150, 150);">
-            &quot;{{tagline}}&quot;
+            Welcome to PieceMeal
         </div>
         <div class="h4 pm-font-minor text-white text-center" style="margin-top:8%;">
-            {% if message|length == 1 %}
-            {{message[0]}}
-            {% else %}
-            {% for m in message %}
-            {{m}}
+            Welcome to pieceMeal! Your one stop destination to rediscover your appetite. What makes us special? We make
+            cooking an activity to stay connected amidst the pandemic, while offering new and innovative recipes to fit
+            your lifestyle. When you're ready, click the button below to discover all that we have to offer. Enjoy!
             <br />
-            {% endfor %}
-            {% endif %}
+            <br />
+
+            The functionality of this app includes but is not limited to searching for recipes by ingredients, filtering
+            by diets, intolerances, cuisines and prep-time. This app also allows users to make profiles and find their
+            friends. Finding friends allows you to see what they have saved and save it to your own profile. Users can
+            also save recipes and ingredients to their profile and pieceMeal will return recommended recipes, based on
+            what they have saved.
+            <br />
+            <br />
+
+            This app was made by William Garland, Sara Edwards, Jensen Nguyen and Suzanne Alexander
         </div>
         <div class="d-flex justify-content-center" style="margin-top:8%;">
             <button type="button" class="btn-lg btn-secondary pm-font-minor"
-                onclick="window.location.href = '/home';">Back
-                to
-                Home</button>
+                onclick="window.location.href = '/home';">Rediscover Your Appetite</button>
         </div>
     </div>
 
