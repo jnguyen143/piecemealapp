@@ -261,8 +261,11 @@ form {
   margin-bottom: 40px;
   display: flex;
   flex-flow: column;
+  text-align:center;
 }
-
+.filters{
+  text-align: center;
+}
 /*Searchbox styling*/
 
 input[type=text] {

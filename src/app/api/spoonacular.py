@@ -424,7 +424,14 @@ def search_recipes(
 
     try:
         for recipe in data["results"]:
+
             summary = get_recipe_summary(recipe["id"])
+            try:
+                recipe_card = get_recipe_card(recipe["id"])
+                recipe["recipe_card"] = recipe_card
+            except SpoonacularApiException:
+                recipe["recipe_card"] = ""
+            # print(recipe_card)
             recipe["summary"] = extract_sentence(summary)
             recipe["full_summary"] = clean_summary(summary)
             recipes.append(
@@ -434,6 +441,7 @@ def search_recipes(
                     "image": recipe["image"],
                     "summary": recipe["summary"],
                     "full_summary": recipe["full_summary"],
+                    "recipe_card": recipe["recipe_card"],
                 }
             )
     except KeyError as exc:
@@ -505,6 +513,10 @@ def extract_recipe_json_data(json_data: dict) -> dict:
     except KeyError:
         recipe_dict["summary"] = "Try this recipe to add variety into your diet!"
         recipe_dict["full_summary"] = "Try this recipe to add variety into your diet!"
+    try:
+        recipe_dict["recipe_card"] = get_recipe_card(recipe_dict["id"])
+    except (KeyError, SpoonacularApiException):
+        recipe_dict["recipe_card"] = ""
     return recipe_dict
 
 
@@ -880,3 +892,39 @@ def get_recipes_by_ingredients(ingredients: list[str], limit: int):
         return result
     except KeyError as exc:
         raise SpoonacularApiException("Malformed response") from exc
+
+
+def get_recipe_card(recipe_id: int) -> str:
+    """
+    Returns a URL to an image for recipe instructions associated with the specified ID.
+
+    Args:
+        id (int) - The ID of the recipe to get a summary for.
+
+    Returns:
+        A string URL to JPG image
+
+    Raises:
+        UndefinedApiKeyException: If the Spoonacular API key is undefined.
+        SpoonacularApiException: If there was a problem completing the request.
+    """
+
+    params = {"apiKey": get_api_key()}
+
+    data = None
+    try:
+        data = api_get_json(
+            SPOONACULAR_API_ROOT_ENDPOINT + f"recipes/{recipe_id}/card",
+            headers={"Content-Type": "application/json"},
+            params=params,
+        )
+    except (RequestException, MalformedResponseException, KeyError) as e:
+        raise SpoonacularApiException(f"Failed to make recipe request: {str(e)}") from e
+
+    if not data:
+        return None
+
+    if "url" in data:
+        return data["url"]
+
+    return None
