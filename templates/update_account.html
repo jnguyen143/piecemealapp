@@ -1,18 +1,14 @@
 <div style="margin-top: 10px; margin-left:40px; text-align: left">
 
-  <form class="account-update" method="POST">
+  <form class="account-update" onsubmit="updateAccount(); return false;">
     <p style="margin-bottom: 0">Enter new username:</p>
-    <input type="text" id="username" placeholder="Provide new username" style="border: 1px;" />
+    <input type="text" id="update-username" placeholder="Provide new username" style="border: 1px;" />
     <p style="margin-bottom: 0">Enter new email:</p>
-    <input type="text" id="email" placeholder="Provide new email" />
+    <input type="text" id="update-email" placeholder="Provide new email" />
     <p style="margin-bottom: 0">Enter new given name:</p>
-    <input type="text" id="given name" placeholder="Provide new given name" />
+    <input type="text" id="update-given-name" placeholder="Provide new given name" />
     <p style="margin-bottom: 0">Enter new lastname:</p>
-    <input type="text" id="ingredient-input" placeholder="Provide new lastname" />
-    <p style="margin-bottom: 0">Upload new picture:</p>
-    <input type="text" id="ingredient-input" placeholder="Needs to figure it out" />
-    <p style="margin-bottom: 0">Change profile visibility:</p>
-    <input type="text" id="ingredient-input" placeholder="Figure it out" />
+    <input type="text" id="update-family-name" placeholder="Provide new lastname" />
 
     <button type="submit" class="update-account"
       style="background-color: coral; color: white; border: none; padding: 3px; border-radius: 5px;">Update</button>
@@ -20,3 +16,48 @@
   </form>
 
 </div>
+
+<script>
+  function updateAccount() {
+    let username = document.getElementById('update-username').value;
+    let email = document.getElementById('update-email').value;
+    let givenName = document.getElementById('update-given-name').value;
+    let familyName = document.getElementById('update-family-name').value;
+
+    let obj = {};
+
+    if (username !== "") {
+      obj.username = username;
+    }
+
+    if (email !== "") {
+      obj.email = email;
+    }
+
+    if (givenName !== "") {
+      obj.given_name = givenName;
+    }
+
+    if (familyName !== "") {
+      obj.family_name = familyName;
+    }
+
+    if (Object.keys(obj).length > 0) {
+      fetch('/api/account-info/update', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(obj)
+      }).then(response => response.json()).then(response => {
+        if (response.success) {
+          showToast('Account info updated!');
+        } else {
+          showToast("Couldn't update account info");
+        }
+      }).catch((err) => {
+        showToast("Couldn't update account info");
+      });
+    }
+  }
+</script>

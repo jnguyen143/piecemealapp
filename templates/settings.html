@@ -207,25 +207,7 @@
     crossorigin="anonymous"></script>
 
   <script>
-    (function () {
-      let button = document.getElementById('friends-tab');
-      button.addEventListener('click', (e) => {
-        if (e.target.hasAttribute('profile-needs-reload')) {
-          window.location.reload();
-        }
-      });
-    })();
-  </script>
 
-  <script>
-    function openDeleteConfirmModal(type, func) {
-      document.getElementById('modal-message').textContent = `Are you sure you want to delete the selected ${type}?`;
-      document.getElementById('modal-delete-button').addEventListener('click', (e) => {
-        func();
-      });
-      let modalElement = new bootstrap.Modal(document.getElementById('page-modal'));
-      modalElement.show();
-    }
   </script>
 
   <script>
@@ -235,122 +217,6 @@
       let toast = new bootstrap.Toast(toastElement);
       toast.show();
     }
-  </script>
-
-  <script>
-    function getCurrentPermissionStates() {
-      let name = document.getElementById('perm-switch-name').hasAttribute('checked');
-      let creationDate = document.getElementById('perm-switch-creation-date').hasAttribute('checked');
-      let intolerances = document.getElementById('perm-switch-intolerances').hasAttribute('checked');
-      let savedRecipes = document.getElementById('perm-switch-saved-recipes').hasAttribute('checked');
-      let savedIngredients = document.getElementById('perm-switch-saved-ingredients').hasAttribute('checked');
-      let friends = document.getElementById('perm-switch-friends').hasAttribute('checked');
-
-      return {
-        name,
-        creationDate,
-        intolerances,
-        savedRecipes,
-        savedIngredients,
-        friends
-      };
-    }
-
-    function savePermissionStates() {
-      let perms = getCurrentPermissionStates();
-
-      let btn = document.getElementById('perm-switch-button');
-      btn.setAttribute('perm-state-name', perms.name);
-      btn.setAttribute('perm-state-creation-date', perms.creationDate);
-      btn.setAttribute('perm-state-intolerances', perms.intolerances);
-      btn.setAttribute('perm-state-saved-recipes', perms.savedRecipes);
-      btn.setAttribute('perm-state-saved-ingredients', perms.savedIngredients);
-      btn.setAttribute('perm-state-friends', perms.friends);
-    }
-
-    function getSavedPermissionStates() {
-      let btn = document.getElementById('perm-switch-button');
-      let name = btn.getAttribute('perm-state-name') === 'true';
-      let creationDate = btn.getAttribute('perm-state-creation-date') === 'true';
-      let intolerances = btn.getAttribute('perm-state-intolerances') === 'true';
-      let savedRecipes = btn.getAttribute('perm-state-saved-recipes') === 'true';
-      let savedIngredients = btn.getAttribute('perm-state-saved-ingredients') === 'true';
-      let friends = btn.getAttribute('perm-state-friends') === 'true';
-
-      return {
-        name,
-        creationDate,
-        intolerances,
-        savedRecipes,
-        savedIngredients,
-        friends
-      }
-    }
-
-    function permissionStatesChanged() {
-      let currentPerms = getCurrentPermissionStates();
-      let savedPerms = getSavedPermissionStates();
-
-      for (const [key, value] of Object.entries(currentPerms)) {
-        if (currentPerms[key] !== savedPerms[key])
-          return true;
-      }
-
-      return false;
-    }
-  </script>
-
-  <script>
-    savePermissionStates();
-
-    let permissionCheckBoxes = document.getElementsByClassName('form-check-input');
-    for (let permissionCheckBox of permissionCheckBoxes) {
-      permissionCheckBox.addEventListener('change', (e) => {
-        if (e.target.hasAttribute('checked'))
-          e.target.removeAttribute('checked');
-        else
-          e.target.setAttribute('checked', true);
-
-        if (permissionStatesChanged())
-          document.getElementById('perm-switch-button').removeAttribute('disabled');
-        else
-          document.getElementById('perm-switch-button').setAttribute('disabled', true);
-      });
-    }
-
-    document.getElementById('perm-switch-button').addEventListener('click', (e) => {
-      let perms = getCurrentPermissionStates();
-
-      let permissions = perms.name ? 1 : 0;
-      if (perms.creationDate)
-        permissions |= 0x02;
-      if (perms.intolerances)
-        permissions |= 0x04;
-      if (perms.savedRecipes)
-        permissions |= 0x08;
-      if (perms.savedIngredients)
-        permissions |= 0x10;
-      if (perms.friends)
-        permissions |= 0x20;
-
-      fetch('/api/account/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ profile_visibility: permissions })
-      }).then(response => response.json()).then(data => {
-        if (data.success) {
-          document.getElementById('perm-switch-button').setAttribute('disabled', true);
-          savePermissionStates();
-          showToast('Profile visibility updated successfully');
-        } else {
-          showToast('Sorry, we couldn\'t process your request at this time.')
-        }
-      }).catch((e) => {
-        console.log(`ERROR: ${e}`);
-      });
-    });
   </script>
 </body>
 
