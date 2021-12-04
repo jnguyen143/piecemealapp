@@ -198,10 +198,7 @@ def search_recipes():
         DatabaseException,
         spoonacular.SpoonacularApiException,
         UndefinedApiKeyException,
-    ) as error:
-        import traceback
-
-        print("kill me now", error, traceback.format_exc())
+    ):
         return error_response(0, response_error_messages[0])
 
 

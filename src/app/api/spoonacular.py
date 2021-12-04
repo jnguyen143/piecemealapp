@@ -354,6 +354,9 @@ def parse_recipe_search_filter(filters, key):
     return result
 
 
+# pylint disable=R0914
+# too many locals,
+# all these vars are needed
 def search_recipes(
     query: str,
     filters: dict = None,
