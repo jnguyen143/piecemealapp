@@ -337,7 +337,7 @@ input[type=submit] {
 
 /*Add button styling*/
 
-.add-button {
+.add-recipe-button {
   margin: 5px auto;
   padding: 5px;
   background: #ffe6d3f1;
@@ -348,7 +348,7 @@ input[type=submit] {
   border-radius: 4px;
 }
 
-.add-button:hover {
+.add-recipe-button:hover {
   color: white;
   background: #FB8C00;
 }

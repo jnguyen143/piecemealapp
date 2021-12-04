@@ -11,12 +11,6 @@ async function startLogin(data) {
   });
 }
 
-// Function to hide the Spinner
-function hideSpinner() {
-  document.getElementById('spinner')
-    .style.display = 'none';
-}
-
 document.getElementById('default-login-form').onsubmit = () => {
   // Encrypt the data, then send it to the server
   encryptData(JSON.stringify({
@@ -26,7 +20,6 @@ document.getElementById('default-login-form').onsubmit = () => {
   })).then((data) => {
     startLogin(data).then((response) => response.json()).then((response) => {
       if (response.success) {
-        hideSpinner();
         window.location.href = '/';
       } else {
         showToast('Failed to log in - Invalid credentials');
@@ -42,7 +35,9 @@ document.getElementById('default-login-form').onsubmit = () => {
 document.getElementById('google-login-form').onsubmit = () => {
   encryptData(JSON.stringify({ authentication: 1 })).then((data) => {
     startLogin(data).then((response) => response.json()).then((response) => {
-      if (response.success) { window.location.replace(response.redirect_url); } else {
+      if (response.success) {
+        window.location.replace(response.redirect_url);
+      } else {
         showToast('Failed to log in - Invalid credentials');
       }
     });
