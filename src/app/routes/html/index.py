@@ -51,6 +51,14 @@ def init(app: Flask, database: Database):
 
 
 @blueprint.route("/")
+def landing_page():
+    """
+    Returns the landing page.
+    """
+    return render_template("landing_page.html")
+
+
+@blueprint.route("/home")
 def index():
     """
     Returns the index page.
@@ -133,6 +141,7 @@ def general_index_page():
 # as it does not affect the code functionality
 def search_recipes():
     data = get_json_data(request, "POST")
+    print(data)
     return render_template(
         "search/search_recipes.html", recipes=data["recipes"], keyword=data["input"]
     )

@@ -88,4 +88,4 @@ def logout():
     Logs out and returns to the index page.
     """
     logout_user()
-    return redirect("/")
+    return redirect("/home")

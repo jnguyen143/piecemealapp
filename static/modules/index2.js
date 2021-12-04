@@ -92,6 +92,14 @@ document.getElementById('secretbutton').addEventListener('click', (secretevent) 
       addRecipe(id, name, image, summary, fullSummary);
     });
   }
+  for (const btn of document.getElementsByClassName('recipe-link')) {
+    btn.addEventListener('click', (event) => {
+      // console.log("hihi")
+      const url = event.target.getAttribute("recipe-card-url");
+      cardModal(url);
+      return false;
+    });
+  }
 });
 document.getElementById('secretbutton').click();
 // eslint-disable-next-line no-restricted-syntax

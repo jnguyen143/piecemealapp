@@ -192,7 +192,7 @@ def search_recipes():
 
         # Cache the results for future use
         DATABASE.add_recipe_infos(results[0], ignore_duplicates=True)
-
+        print(results[1])
         return success_response({"recipes": results[0], "total_results": results[1]})
     except (
         DatabaseException,

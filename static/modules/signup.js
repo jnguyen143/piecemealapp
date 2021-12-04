@@ -22,7 +22,7 @@ document.getElementById('default-signup-form').onsubmit = () => {
     password: document.getElementById('password').value,
   })).then((data) => {
     startSignup(data).then((response) => response.json()).then((response) => {
-      if (response.success) { window.location.href = '/'; } else {
+      if (response.success) { window.location.href = '/home'; } else {
         showToast('Failed to sign up - Invalid credentials');
       }
     });
