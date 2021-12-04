@@ -295,7 +295,7 @@ def clean_summary(summary):
     Returns a string clean of html prefixes
     """
     clean_string = re.compile("<.*?>")
-    summary = re.sub(clean_string, "", summary)
+    summary = re.sub(clean_string, "", str(summary))
     return summary
 
 
