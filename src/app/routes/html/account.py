@@ -3,10 +3,7 @@ This file contains user-facing endpoints relating to account pages.
 """
 from flask import Flask, Blueprint, render_template, abort
 from flask_login import login_required
-from ...database.database import (
-    Database,
-    DatabaseException,
-)
+from ...database.database import Database, DatabaseException, ProfileVisibility
 from ... import util
 from ..routing_util import (
     get_current_user,
@@ -63,6 +60,7 @@ def account():
     try:
         current_user = get_current_user()
         userdata = current_user.to_json()
+
         userdata["friends"] = [
             x.to_json(shallow=True)
             for x in DATABASE.get_relationships_for_user(current_user.id)[0]
@@ -71,4 +69,8 @@ def account():
         abort(500)
     except NoCurrentUserException:
         abort(500)
-    return render_template("account.html", userdata=userdata)
+    return render_template(
+        "settings.html",
+        current_userdata=userdata,
+        permissions=ProfileVisibility.to_json(current_user.profile_visibility),
+    )

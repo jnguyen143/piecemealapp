@@ -35,7 +35,9 @@ document.getElementById('default-login-form').onsubmit = () => {
 document.getElementById('google-login-form').onsubmit = () => {
   encryptData(JSON.stringify({ authentication: 1 })).then((data) => {
     startLogin(data).then((response) => response.json()).then((response) => {
-      if (response.success) { window.location.replace(response.redirect_url); } else {
+      if (response.success) {
+        window.location.replace(response.redirect_url);
+      } else {
         showToast('Failed to log in - Invalid credentials');
       }
     });

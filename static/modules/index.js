@@ -46,8 +46,6 @@ function addIngredientButtonEvents() {
 
 document.getElementById('secretbutton').click();
 
-
-
 // function searchRecipes() {
 //   // eslint-disable-next-line no-restricted-syntax
 //   for (const btn of document.getElementsByClassName('search')) {
