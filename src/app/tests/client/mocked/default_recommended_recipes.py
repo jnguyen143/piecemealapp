@@ -4,7 +4,7 @@ recommended recipes being rendered to the homepage.
 
 Given a set of dummy default recommended recipes,
 this file ensures that the recipes are being
-rendered to the generated HTML page returned by the '/' endpoint.
+rendered to the generated HTML page returned by the '/home' endpoint.
 """
 
 import unittest

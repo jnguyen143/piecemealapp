@@ -51,6 +51,14 @@ def init(app: Flask, database: Database):
 
 
 @blueprint.route("/")
+def landing_page():
+    """
+    Returns the landing page.
+    """
+    return render_template("landing_page.html")
+
+
+@blueprint.route("/home")
 def index():
     """
     Returns the index page.

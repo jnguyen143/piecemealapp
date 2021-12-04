@@ -20,7 +20,7 @@ document.getElementById('default-login-form').onsubmit = () => {
   })).then((data) => {
     startLogin(data).then((response) => response.json()).then((response) => {
       if (response.success) {
-        window.location.href = '/';
+        window.location.href = '/home';
       } else {
         showToast('Failed to log in - Invalid credentials');
       }

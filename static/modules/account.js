@@ -191,7 +191,7 @@ function loadProfileEvents() {
     fetch('/api/delete-user', {
       method: 'POST',
     }).then((response) => response.json()).then((response) => {
-      if (response.result === 0) { window.location.href = '/'; } else { showToast('Failed to delete account'); }
+      if (response.result === 0) { window.location.href = '/home'; } else { showToast('Failed to delete account'); }
     }).catch(() => showToast('Failed to delete account'));
   };
 
