@@ -11,7 +11,7 @@ The app is a food-based service that takes in a user's input based on desired in
 The following APIs were utilized in the creation of the pieceMeal app:
 * Spoonacular: the main API utilized for pieceMeal, this app provides for numerous functions such as retrieving recipes and filtering them based off certain parameters for the user.
 * Google Oauth2: The main provider of authentication, this API utilizes OpenID functionality to connect a Google account to the app and pull information that can be used to create an app profile for it.
-* Google Gmail: This API controls automated emailing to all the accounts as a way of notifying users when they join Spponacular
+* Google Gmail: This API controls automated emailing to all the accounts as a way of notifying users when they join pieceMeal
 ## Note
 The credentials for the Google and Spoonacular API must be stored in a .env file, which cannot be pushed to Github by creating a .gitignore file and adding ".env" to it for privacy reasons.
 
