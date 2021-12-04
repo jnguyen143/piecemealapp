@@ -136,8 +136,8 @@
         <div class="recipe">
           <div class="image">
             <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
-            <button type="submit" class="add-button" recipe-id="{{recipe['id']}}" recipe-name="{{recipe['name']}}"
-              recipe-image="{{recipe['image']}}" recipe-summary="{{recipe['summary']}}"
+            <button type="submit" class="add-recipe-button" recipe-id="{{recipe['id']}}"
+              recipe-name="{{recipe['name']}}" recipe-image="{{recipe['image']}}" recipe-summary="{{recipe['summary']}}"
               recipe-full-summary="{{recipe['full-summary']}}">ADD</button>
           </div>
           <div class="description">
@@ -161,7 +161,7 @@
         <div class="recipe">
           <div class="image">
             <img src='{{ingredient["image"]}}' alt="ingredient_image" width="100" height="100">
-            <button type="submit" class="add-button" ingredient-id="{{ingredient['id']}}"
+            <button type="submit" class="add-recipe-button" ingredient-id="{{ingredient['id']}}"
               ingredient-name="{{ingredient['name']}}" ingredient-image="{{ingredient['image']}}">ADD</button>
           </div>
           <div class="description">
@@ -221,6 +221,7 @@
   <script src="../static/modules/logout.js"></script>
   <script>
     document.getElementById('secretbutton').click();
+
 
     function searchRecipes() {
       let input = document.getElementById('recipe-input').value;

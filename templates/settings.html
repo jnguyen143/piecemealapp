@@ -34,7 +34,7 @@
             <div class="navbar-header flex-fill" style="float:none;">
               <div class="navbar-brand" style="display: block; text-align: center; float: none;">
                 <div class="h1 pm-font-major-3">
-                  My Profile
+                  My Account Settings
                 </div>
               </div>
             </div>
@@ -168,28 +168,22 @@
             <li class="nav-item" role="presentation">
               <button class="nav-link active" id="recipes-tab" data-bs-toggle="tab" data-bs-target="#recipes"
                 type="button" role="tab" aria-controls="recipes" aria-selected="true">
-                Saved Recipes
+                Update Account
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="ingredients-tab" data-bs-toggle="tab" data-bs-target="#ingredients"
                 type="button" role="tab" aria-controls="ingredients" aria-selected="false">
-                Saved Ingredients
+                Update Password
               </button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="intolerances-tab" data-bs-toggle="tab" data-bs-target="#intolerances"
                 type="button" role="tab" aria-controls="intolerances" aria-selected="false">
-                Intolerances
+                Delete Account
               </button>
             </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends" type="button"
-                role="tab" aria-controls="friends" aria-selected="false">
-                Friends
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
+            <!-- <li class="nav-item" role="presentation">
               <button class="nav-link" id="friend-requests-tab" data-bs-toggle="tab" data-bs-target="#friend-requests"
                 type="button" role="tab" aria-controls="friend-requests" aria-selected="false">
                 Friend Requests
@@ -203,10 +197,10 @@
                 </span>
                 {% endif %}
               </button>
-            </li>
+            </li> -->
           </ul>
 
-          <div class="tab-content px-4" id="profile-tabs-content">
+          <!-- <div class="tab-content px-4" id="profile-tabs-content">
             <div class="tab-pane fade" id="intolerances" role="tabpanel" aria-labelledby="intolerances-tab">
               {% if current_userdata["intolerances"] | length == 0 %}
               <div class="text-center p-5 h5">
@@ -310,7 +304,7 @@
               {% endwith %}
               {% endif %}
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

@@ -353,6 +353,24 @@ input[type=submit] {
   background: #FB8C00;
 }
 
+/*Add button styling*/
+
+.add-button {
+  margin: 5px auto;
+  padding: 5px;
+  background: #ffe6d3f1;
+  font-size: 14px;
+  color: #c46d04;
+  border: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.add-button:hover {
+  color: white;
+  background: #FB8C00;
+}
+
 /*Delete button styling*/
 
 .delete-button {
