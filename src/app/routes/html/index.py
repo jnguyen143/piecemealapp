@@ -133,6 +133,7 @@ def general_index_page():
 # as it does not affect the code functionality
 def search_recipes():
     data = get_json_data(request, "POST")
+    print(data)
     return render_template(
         "search/search_recipes.html", recipes=data["recipes"], keyword=data["input"]
     )

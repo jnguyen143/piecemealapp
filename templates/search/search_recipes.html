@@ -13,12 +13,15 @@
         <div class="recipe">
             <div class="image">
                 <img src='{{recipe["image"]}}' alt="recipe_image" width="100" height="100">
+
                 <button type="submit" class="add-button add-recipe-button" recipe-id="{{recipe['id']}}"
                     recipe-name="{{recipe['name']}}" recipe-image="{{recipe['image']}}"
                     recipe-summary="{{recipe['summary']}}" recipe-full-summary="{{recipe['full-summary']}}">ADD</button>
             </div>
             <div class="description">
-                <h2>{{recipe["name"]}}</h2>
+                <h2><a href="#" class="recipe-link" recipe-card-url="{{recipe['recipe_card']}}"
+                        style="font-size: 20px;">{{recipe["name"]}}</a>
+                </h2>
                 <p>{{recipe["summary"]}}</p>
             </div>
         </div>
