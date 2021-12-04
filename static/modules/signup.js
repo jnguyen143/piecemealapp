@@ -22,7 +22,9 @@ document.getElementById('default-signup-form').onsubmit = () => {
     password: document.getElementById('password').value,
   })).then((data) => {
     startSignup(data).then((response) => response.json()).then((response) => {
-      if (response.success) { window.location.href = '/home'; } else {
+      if (response.success) { window.location.href = '/home'; } else if (response.error_code === 4) {
+        showToast('The username or email is already taken!');
+      } else {
         showToast('Failed to sign up - Invalid credentials');
       }
     });
@@ -38,7 +40,11 @@ document.getElementById('google-signup-form').onsubmit = () => {
     authentication: 1,
   })).then((data) => {
     startSignup(data).then((response) => response.json()).then((response) => {
-      if (response.success) { window.location.replace(response.redirect_url); } else {
+      if (response.success) {
+        window.location.replace(response.redirect_url);
+      } else if (response.error_code === 4) {
+        showToast('The username or email is already taken!');
+      } else {
         showToast('Failed to sign up - Invalid credentials');
       }
     });
